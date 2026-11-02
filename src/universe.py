@@ -7,19 +7,31 @@ import requests
 
 from .config import ROOT
 
-JPX_URL = ("https://www.jpx.co.jp/markets/statistics-equities/misc/"
-           "tvdivq0000001vg2-att/data_j.xls")
+# JPXは公開ファイルの形式を変えることがあるため、新しい順に試す
+_BASE = "https://www.jpx.co.jp/markets/statistics-equities/misc/tvdivq0000001vg2-att/"
+JPX_URLS = [_BASE + "data_j.xlsx", _BASE + "data_j.xls"]
 CACHE = ROOT / "data" / "universe.csv"
 CACHE_MAX_AGE_DAYS = 7
 
 
 def _download():
-    r = requests.get(JPX_URL, timeout=60, headers={"User-Agent": "Mozilla/5.0"})
-    r.raise_for_status()
-    return pd.read_excel(io.BytesIO(r.content))  # .xls の読み込みに xlrd が必要
+    last_err = None
+    for url in JPX_URLS:
+        try:
+            r = requests.get(url, timeout=60, headers={"User-Agent": "Mozilla/5.0"})
+            r.raise_for_status()
+            return pd.read_excel(io.BytesIO(r.content))   # .xlsx は openpyxl、.xls は xlrd が必要
+        except Exception as e:  # noqa: BLE001
+            print(f"[warn] {url} -> {e}")
+            last_err = e
+    raise RuntimeError(f"JPXの銘柄一覧を取得できませんでした: {last_err}")
 
 
 def _clean(raw, markets):
+    need = ["コード", "銘柄名", "市場・商品区分", "33業種区分"]
+    missing = [c for c in need if c not in raw.columns]
+    if missing:
+        raise RuntimeError(f"JPXの表の列名が変わりました（見つからない列: {missing} / 実際の列: {list(raw.columns)}）")
     df = raw.copy()
     df = df[df["市場・商品区分"].astype(str).str.contains("内国株式", na=False)]
     df["market"] = df["市場・商品区分"].astype(str).str.extract(r"(プライム|スタンダード|グロース)")[0]
