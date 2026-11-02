@@ -27,7 +27,7 @@ def _extract(raw):
 
 
 def download_prices(tickers, period="2y", chunk_size=150, sleep=1.5,
-                    min_success_ratio=0.5, retries=3):
+                    min_success_ratio=0.5, retries=3, start=None):
     import yfinance as yf
 
     parts = {f: [] for f in FIELDS}
@@ -36,8 +36,9 @@ def download_prices(tickers, period="2y", chunk_size=150, sleep=1.5,
         frames = {}
         for attempt in range(retries):
             try:
-                raw = yf.download(chunk, period=period, interval="1d", auto_adjust=True,
-                                  group_by="ticker", threads=True, progress=False)
+                span = {"start": start} if start else {"period": period}
+                raw = yf.download(chunk, interval="1d", auto_adjust=True,
+                                  group_by="ticker", threads=True, progress=False, **span)
                 frames = _extract(raw)
                 if frames:
                     break
@@ -66,14 +67,15 @@ def download_prices(tickers, period="2y", chunk_size=150, sleep=1.5,
     return {k: v[ok] for k, v in panel.items()}
 
 
-def download_benchmarks(period="3y"):
+def download_benchmarks(period="3y", start=None):
     """TOPIX連動ETF(1306)と日経平均。"""
     import yfinance as yf
 
     out = {}
     for key, tk in (("topix", "1306.T"), ("n225", "^N225")):
         try:
-            raw = yf.download(tk, period=period, interval="1d", auto_adjust=True, progress=False)
+            span = {"start": start} if start else {"period": period}
+            raw = yf.download(tk, interval="1d", auto_adjust=True, progress=False, **span)
             if isinstance(raw.columns, pd.MultiIndex):
                 raw.columns = raw.columns.get_level_values(0)
             raw = _naive_index(raw).dropna(subset=["Close"])
