@@ -1,7 +1,7 @@
 """バックテスト。
 
 2種類あります。
-  1. 過去再現（replay）  … 毎週「その日のトップ10」を過去2年ぶん作り直し、買っていたらどうなったかを計算（週1回・自動）
+  1. 過去再現（replay）  … 毎週「その日のトップ10」を過去N年ぶん（config.ymlのreplay_years）作り直し、買っていたらどうなったかを計算（週1回・自動）
   2. 実運用記録（forward）… このサイトが実際に毎朝出したトップ10を data/history に保存し、後日の騰落率を計算（毎朝・自動）
 
 買い方の想定：ランキングが出た翌営業日の始値で買い、N営業日後の終値で売る。往復コストを差し引く。
@@ -9,7 +9,7 @@
 """
 import argparse
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -219,9 +219,12 @@ def main():
     else:
         uni = load_universe(cfg)
         d = cfg["data"]
-        panel = download_prices(list(uni["ticker"]), period="3y", chunk_size=d["chunk_size"],
-                                sleep=d["sleep_between_chunks"], min_success_ratio=d["min_success_ratio"])
-        bench = download_benchmarks("3y")
+        # 検証期間 + 約半年ぶん（75日線などの助走期間）をさかのぼって取得
+        start = (datetime.now(JST) - timedelta(days=int(cfg["backtest"]["replay_years"] * 365 + 200))).strftime("%Y-%m-%d")
+        print(f"株価を{start}以降で取得します（時間がかかります）")
+        panel = download_prices(list(uni["ticker"]), chunk_size=d["chunk_size"], sleep=d["sleep_between_chunks"],
+                                min_success_ratio=d["min_success_ratio"], start=start)
+        bench = download_benchmarks(start=start)
 
     summary = run_replay(panel, bench["topix"], cfg)
     summary_path.write_text(json.dumps(summary, ensure_ascii=False, indent=1), encoding="utf-8")
