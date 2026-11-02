@@ -1,0 +1,920 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0f1a2b">
+<meta name="robots" content="noindex">
+<title>本日の注目銘柄ランキング｜10/30（金）</title>
+<link rel="stylesheet" href="style.css">
+<script>
+(function(){try{var t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+</script>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-row">
+      <h1>📈 本日の注目銘柄ランキング</h1>
+      <button id="themeBtn" class="icon-btn" type="button" aria-label="ライト／ダーク表示を切り替え">🌓</button>
+    </div>
+    <p class="meta">
+      <span>更新：2026年11月02日 17:13</span>
+      <span>データ基準日：10/30（金） 終値</span>
+    </p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  
+  <div class="banner warn">⚠️ <b>デモ表示です。</b>架空のデータで、実在の銘柄・株価ではありません。</div>
+  
+  <div id="staleBanner" class="banner danger" hidden>
+    ⚠️ <b>自動更新が止まっている可能性があります。</b>表示中の内容は古いので、売買の判断に使わないでください（GitHubのActions画面を確認）。
+  </div>
+
+  <!-- 市場状況 -->
+  <section class="card market regime-bad">
+    <div class="market-head">
+      <h2>🌏 市場の状況</h2>
+      <span class="pill bear">逆風</span>
+    </div>
+    <p>日経平均は24,082円（前営業日比-0.2%）。TOPIXは75日線を下回り、下落基調です。売買代金の条件を満たす銘柄のうち39%が25日線の上にあり、60日高値を更新した銘柄は12社です。順張りは負けやすい局面です。新規の購入は少額・慎重に。</p>
+  </section>
+
+  <!-- ランキング -->
+  <h2 class="section-title">🏆 本日の注目銘柄 トップ10</h2>
+  <p class="lead">高値更新・出来高増加・業績改善が重なっている「順張り」候補です。
+    スコア（100点満点）が高いほど条件がそろっています。<a href="#guide">点数の見方</a></p>
+
+  
+  <article class="card stock top top1">
+    <header class="stock-head">
+      <div class="rank r1">1</div>
+      <div class="ident">
+        <h3>デモ銘柄099</h3>
+        <p class="sub">4927 ・ グロース ・ 機械</p>
+      </div>
+      <span class="pill mild" title="過熱気味のため格下げ">やや強気</span>
+    </header>
+
+    <div class="kpis">
+      <div class="kpi">
+        <span class="k">前営業日の終値</span>
+        <span class="v">¥4,388</span>
+        <span class="chg up">前日比 +5.5%</span>
+      </div>
+      <div class="kpi score-kpi">
+        <span class="k">総合スコア</span>
+        <span class="v big">83<small>/100</small></span>
+        <span class="bar"><i class="mild" style="width: 82.6%"></i></span>
+      </div>
+    </div>
+    <p class="note">※ 過熱気味のため格下げ</p>
+
+    <ul class="chips" aria-label="点数の内訳">
+      
+      <li class="full">高値更新 30<small>/30</small></li>
+      
+      <li class="full">出来高 30<small>/30</small></li>
+      
+      <li class="zero">トレンド 0<small>/20</small></li>
+      
+      <li class="full">業績 25<small>/25</small></li>
+      
+      <li class="full">規模 10<small>/10</small></li>
+      
+    </ul>
+
+    <section class="block why">
+      <h4>なぜ選ばれた？</h4>
+      <ul class="reasons">
+        <li>🏆 52週高値を更新（この1年で最も高い株価）</li><li>✅ 60日高値更新（約3か月ぶりの高値）</li><li>✅ 出来高3.8倍（直近20日の平均と比べて）</li><li>✅ 営業利益 +97%（直近四半期・前年同期比）</li><li>✅ 時価総額 5,492億円（規模は十分）</li>
+      </ul>
+      <p class="indicators">RSI 84：かなり過熱　／　MACD：上昇の勢いが強い</p>
+    </section>
+
+    <section class="block easy">
+      <h4>💡 初心者向け解説</h4>
+      <p>株価がこの1年で最も高い水準を更新しました。出来高も普段の3.8倍に増え、買いが集まっています。営業利益も前年より97%増えています。</p>
+    </section>
+
+    <section class="block risk">
+      <h4>⚠️ リスク</h4>
+      <ul>
+        <li>RSIが84と過熱圏。利益確定売りによる反落に注意</li><li>グロース市場の銘柄は値動きが大きい傾向</li><li>市場全体が下落基調で、順張りは勝ちにくい局面</li>
+      </ul>
+      
+      <p class="stop">撤退ラインの目安：25日線 <b>¥3,754</b>（現在値から -14.5%）を終値で割ったら見直す</p>
+      
+    </section>
+
+    <div class="chart">
+      <svg viewBox="0 0 320 150" class="candle" role="img" aria-label="直近60日のローソク足と25日・75日移動平均線"><line class="dn" x1="8.6" x2="8.6" y1="52.9" y2="57.9"/><rect class="dn" x="7.0" y="54.3" width="3.2" height="3.5"/><rect class="vol dn" x="7.0" y="136.9" width="3.2" height="7.1"/><line class="up" x1="13.7" x2="13.7" y1="55.1" y2="58.5"/><rect class="up" x="12.1" y="57.7" width="3.2" height="0.8"/><rect class="vol up" x="12.1" y="134.8" width="3.2" height="9.2"/><line class="up" x1="18.8" x2="18.8" y1="55.7" y2="60.0"/><rect class="up" x="17.2" y="59.5" width="3.2" height="0.8"/><rect class="vol up" x="17.2" y="138.8" width="3.2" height="5.2"/><line class="dn" x1="24.0" x2="24.0" y1="56.0" y2="69.3"/><rect class="dn" x="22.4" y="60.6" width="3.2" height="7.7"/><rect class="vol dn" x="22.4" y="139.7" width="3.2" height="4.3"/><line class="up" x1="29.1" x2="29.1" y1="62.4" y2="66.8"/><rect class="up" x="27.5" y="63.4" width="3.2" height="2.5"/><rect class="vol up" x="27.5" y="139.5" width="3.2" height="4.5"/><line class="up" x1="34.2" x2="34.2" y1="52.6" y2="63.3"/><rect class="up" x="32.6" y="55.8" width="3.2" height="7.3"/><rect class="vol up" x="32.6" y="136.2" width="3.2" height="7.8"/><line class="up" x1="39.4" x2="39.4" y1="44.3" y2="58.9"/><rect class="up" x="37.8" y="49.1" width="3.2" height="9.6"/><rect class="vol up" x="37.8" y="138.3" width="3.2" height="5.7"/><line class="up" x1="44.5" x2="44.5" y1="42.3" y2="51.4"/><rect class="up" x="42.9" y="45.2" width="3.2" height="5.1"/><rect class="vol up" x="42.9" y="140.0" width="3.2" height="4.0"/><line class="dn" x1="49.6" x2="49.6" y1="46.1" y2="47.9"/><rect class="dn" x="48.0" y="46.9" width="3.2" height="0.8"/><rect class="vol dn" x="48.0" y="139.4" width="3.2" height="4.6"/><line class="dn" x1="54.8" x2="54.8" y1="41.6" y2="57.9"/><rect class="dn" x="53.2" y="44.6" width="3.2" height="8.9"/><rect class="vol dn" x="53.2" y="132.3" width="3.2" height="11.7"/><line class="dn" x1="59.9" x2="59.9" y1="48.6" y2="54.7"/><rect class="dn" x="58.3" y="51.3" width="3.2" height="2.5"/><rect class="vol dn" x="58.3" y="136.0" width="3.2" height="8.0"/><line class="dn" x1="65.0" x2="65.0" y1="50.0" y2="60.1"/><rect class="dn" x="63.4" y="52.4" width="3.2" height="7.7"/><rect class="vol dn" x="63.4" y="139.7" width="3.2" height="4.3"/><line class="up" x1="70.2" x2="70.2" y1="55.6" y2="62.9"/><rect class="up" x="68.6" y="55.8" width="3.2" height="6.0"/><rect class="vol up" x="68.6" y="138.0" width="3.2" height="6.0"/><line class="dn" x1="75.3" x2="75.3" y1="59.3" y2="68.3"/><rect class="dn" x="73.7" y="61.8" width="3.2" height="3.9"/><rect class="vol dn" x="73.7" y="137.1" width="3.2" height="6.9"/><line class="dn" x1="80.4" x2="80.4" y1="63.2" y2="74.4"/><rect class="dn" x="78.8" y="67.5" width="3.2" height="5.5"/><rect class="vol dn" x="78.8" y="139.0" width="3.2" height="5.0"/><line class="dn" x1="85.6" x2="85.6" y1="73.3" y2="76.3"/><rect class="dn" x="84.0" y="74.1" width="3.2" height="0.8"/><rect class="vol dn" x="84.0" y="136.1" width="3.2" height="7.9"/><line class="up" x1="90.7" x2="90.7" y1="71.0" y2="78.3"/><rect class="up" x="89.1" y="73.4" width="3.2" height="0.8"/><rect class="vol up" x="89.1" y="136.1" width="3.2" height="7.9"/><line class="up" x1="95.8" x2="95.8" y1="69.4" y2="77.2"/><rect class="up" x="94.2" y="69.4" width="3.2" height="3.2"/><rect class="vol up" x="94.2" y="138.3" width="3.2" height="5.7"/><line class="up" x1="101.0" x2="101.0" y1="60.4" y2="70.9"/><rect class="up" x="99.4" y="63.6" width="3.2" height="7.1"/><rect class="vol up" x="99.4" y="139.3" width="3.2" height="4.7"/><line class="dn" x1="106.1" x2="106.1" y1="64.0" y2="73.6"/><rect class="dn" x="104.5" y="64.8" width="3.2" height="7.4"/><rect class="vol dn" x="104.5" y="139.9" width="3.2" height="4.1"/><line class="up" x1="111.2" x2="111.2" y1="69.0" y2="74.0"/><rect class="up" x="109.6" y="70.6" width="3.2" height="2.7"/><rect class="vol up" x="109.6" y="136.8" width="3.2" height="7.2"/><line class="up" x1="116.4" x2="116.4" y1="67.0" y2="73.6"/><rect class="up" x="114.8" y="67.6" width="3.2" height="5.1"/><rect class="vol up" x="114.8" y="133.8" width="3.2" height="10.2"/><line class="dn" x1="121.5" x2="121.5" y1="63.5" y2="71.3"/><rect class="dn" x="119.9" y="64.5" width="3.2" height="5.5"/><rect class="vol dn" x="119.9" y="134.4" width="3.2" height="9.6"/><line class="dn" x1="126.6" x2="126.6" y1="65.5" y2="72.6"/><rect class="dn" x="125.0" y="67.9" width="3.2" height="2.3"/><rect class="vol dn" x="125.0" y="137.9" width="3.2" height="6.1"/><line class="dn" x1="131.8" x2="131.8" y1="67.1" y2="79.7"/><rect class="dn" x="130.2" y="68.5" width="3.2" height="10.6"/><rect class="vol dn" x="130.2" y="136.4" width="3.2" height="7.6"/><line class="dn" x1="136.9" x2="136.9" y1="80.8" y2="83.1"/><rect class="dn" x="135.3" y="81.2" width="3.2" height="1.8"/><rect class="vol dn" x="135.3" y="138.4" width="3.2" height="5.6"/><line class="dn" x1="142.0" x2="142.0" y1="82.6" y2="88.1"/><rect class="dn" x="140.4" y="85.0" width="3.2" height="1.4"/><rect class="vol dn" x="140.4" y="131.8" width="3.2" height="12.2"/><line class="dn" x1="147.2" x2="147.2" y1="87.7" y2="99.1"/><rect class="dn" x="145.6" y="88.0" width="3.2" height="8.7"/><rect class="vol dn" x="145.6" y="136.8" width="3.2" height="7.2"/><line class="dn" x1="152.3" x2="152.3" y1="97.0" y2="108.1"/><rect class="dn" x="150.7" y="97.7" width="3.2" height="5.5"/><rect class="vol dn" x="150.7" y="134.5" width="3.2" height="9.5"/><line class="dn" x1="157.4" x2="157.4" y1="100.6" y2="104.0"/><rect class="dn" x="155.8" y="102.1" width="3.2" height="0.8"/><rect class="vol dn" x="155.8" y="129.6" width="3.2" height="14.4"/><line class="dn" x1="162.6" x2="162.6" y1="103.1" y2="106.2"/><rect class="dn" x="161.0" y="103.2" width="3.2" height="1.6"/><rect class="vol dn" x="161.0" y="138.7" width="3.2" height="5.3"/><line class="up" x1="167.7" x2="167.7" y1="94.9" y2="109.0"/><rect class="up" x="166.1" y="97.2" width="3.2" height="10.0"/><rect class="vol up" x="166.1" y="138.7" width="3.2" height="5.3"/><line class="dn" x1="172.8" x2="172.8" y1="96.4" y2="101.1"/><rect class="dn" x="171.2" y="96.9" width="3.2" height="3.9"/><rect class="vol dn" x="171.2" y="141.4" width="3.2" height="2.6"/><line class="dn" x1="178.0" x2="178.0" y1="101.9" y2="107.1"/><rect class="dn" x="176.4" y="102.1" width="3.2" height="3.5"/><rect class="vol dn" x="176.4" y="136.3" width="3.2" height="7.7"/><line class="dn" x1="183.1" x2="183.1" y1="106.4" y2="114.0"/><rect class="dn" x="181.5" y="107.4" width="3.2" height="2.6"/><rect class="vol dn" x="181.5" y="140.0" width="3.2" height="4.0"/><line class="up" x1="188.2" x2="188.2" y1="102.3" y2="110.8"/><rect class="up" x="186.6" y="105.5" width="3.2" height="3.6"/><rect class="vol up" x="186.6" y="135.2" width="3.2" height="8.8"/><line class="dn" x1="193.4" x2="193.4" y1="104.1" y2="108.5"/><rect class="dn" x="191.8" y="104.8" width="3.2" height="2.7"/><rect class="vol dn" x="191.8" y="138.1" width="3.2" height="5.9"/><line class="up" x1="198.5" x2="198.5" y1="100.1" y2="109.6"/><rect class="up" x="196.9" y="100.6" width="3.2" height="6.6"/><rect class="vol up" x="196.9" y="140.4" width="3.2" height="3.6"/><line class="up" x1="203.6" x2="203.6" y1="99.7" y2="102.5"/><rect class="up" x="202.0" y="100.3" width="3.2" height="1.6"/><rect class="vol up" x="202.0" y="137.3" width="3.2" height="6.7"/><line class="dn" x1="208.8" x2="208.8" y1="96.1" y2="106.9"/><rect class="dn" x="207.2" y="98.8" width="3.2" height="7.8"/><rect class="vol dn" x="207.2" y="136.9" width="3.2" height="7.1"/><line class="up" x1="213.9" x2="213.9" y1="102.6" y2="110.9"/><rect class="up" x="212.3" y="103.6" width="3.2" height="4.0"/><rect class="vol up" x="212.3" y="138.6" width="3.2" height="5.4"/><line class="up" x1="219.0" x2="219.0" y1="97.8" y2="107.2"/><rect class="up" x="217.4" y="101.7" width="3.2" height="3.5"/><rect class="vol up" x="217.4" y="134.5" width="3.2" height="9.5"/><line class="up" x1="224.2" x2="224.2" y1="95.1" y2="101.6"/><rect class="up" x="222.6" y="98.1" width="3.2" height="1.3"/><rect class="vol up" x="222.6" y="138.2" width="3.2" height="5.8"/><line class="dn" x1="229.3" x2="229.3" y1="96.1" y2="102.3"/><rect class="dn" x="227.7" y="98.9" width="3.2" height="1.9"/><rect class="vol dn" x="227.7" y="134.7" width="3.2" height="9.3"/><line class="up" x1="234.4" x2="234.4" y1="87.0" y2="100.6"/><rect class="up" x="232.8" y="88.9" width="3.2" height="10.6"/><rect class="vol up" x="232.8" y="137.1" width="3.2" height="6.9"/><line class="dn" x1="239.6" x2="239.6" y1="82.4" y2="91.0"/><rect class="dn" x="238.0" y="86.3" width="3.2" height="2.6"/><rect class="vol dn" x="238.0" y="137.3" width="3.2" height="6.7"/><line class="up" x1="244.7" x2="244.7" y1="75.7" y2="89.9"/><rect class="up" x="243.1" y="79.2" width="3.2" height="10.2"/><rect class="vol up" x="243.1" y="139.1" width="3.2" height="4.9"/><line class="up" x1="249.8" x2="249.8" y1="71.2" y2="82.5"/><rect class="up" x="248.2" y="73.0" width="3.2" height="6.2"/><rect class="vol up" x="248.2" y="134.2" width="3.2" height="9.8"/><line class="up" x1="255.0" x2="255.0" y1="70.6" y2="75.3"/><rect class="up" x="253.4" y="72.4" width="3.2" height="1.7"/><rect class="vol up" x="253.4" y="137.9" width="3.2" height="6.1"/><line class="up" x1="260.1" x2="260.1" y1="68.3" y2="77.5"/><rect class="up" x="258.5" y="68.4" width="3.2" height="7.3"/><rect class="vol up" x="258.5" y="126.4" width="3.2" height="17.6"/><line class="dn" x1="265.2" x2="265.2" y1="64.7" y2="75.8"/><rect class="dn" x="263.6" y="65.1" width="3.2" height="5.6"/><rect class="vol dn" x="263.6" y="137.4" width="3.2" height="6.6"/><line class="up" x1="270.4" x2="270.4" y1="67.2" y2="74.2"/><rect class="up" x="268.8" y="67.8" width="3.2" height="5.2"/><rect class="vol up" x="268.8" y="140.0" width="3.2" height="4.0"/><line class="up" x1="275.5" x2="275.5" y1="59.6" y2="68.3"/><rect class="up" x="273.9" y="60.4" width="3.2" height="7.5"/><rect class="vol up" x="273.9" y="140.4" width="3.2" height="3.6"/><line class="up" x1="280.6" x2="280.6" y1="54.8" y2="62.2"/><rect class="up" x="279.0" y="55.7" width="3.2" height="1.5"/><rect class="vol up" x="279.0" y="138.2" width="3.2" height="5.8"/><line class="dn" x1="285.8" x2="285.8" y1="56.1" y2="58.3"/><rect class="dn" x="284.2" y="56.5" width="3.2" height="1.7"/><rect class="vol dn" x="284.2" y="138.6" width="3.2" height="5.4"/><line class="up" x1="290.9" x2="290.9" y1="37.7" y2="58.1"/><rect class="up" x="289.3" y="40.6" width="3.2" height="16.7"/><rect class="vol up" x="289.3" y="139.4" width="3.2" height="4.6"/><line class="up" x1="296.0" x2="296.0" y1="32.5" y2="40.9"/><rect class="up" x="294.4" y="33.8" width="3.2" height="6.0"/><rect class="vol up" x="294.4" y="140.7" width="3.2" height="3.3"/><line class="dn" x1="301.2" x2="301.2" y1="31.9" y2="36.3"/><rect class="dn" x="299.6" y="33.4" width="3.2" height="2.6"/><rect class="vol dn" x="299.6" y="133.8" width="3.2" height="10.2"/><line class="up" x1="306.3" x2="306.3" y1="27.9" y2="37.6"/><rect class="up" x="304.7" y="30.8" width="3.2" height="4.5"/><rect class="vol up" x="304.7" y="140.3" width="3.2" height="3.7"/><line class="up" x1="311.4" x2="311.4" y1="6.0" y2="33.9"/><rect class="up" x="309.8" y="6.3" width="3.2" height="25.6"/><rect class="vol up" x="309.8" y="118.0" width="3.2" height="26.0"/><polyline class="ma25" points="8.6,51.4 13.7,51.2 18.8,51.0 24.0,50.9 29.1,50.9 34.2,50.5 39.4,49.8 44.5,48.8 49.6,48.0 54.8,48.2 59.9,48.8 65.0,50.0 70.2,51.1 75.3,52.3 80.4,53.8 85.6,55.2 90.7,56.5 95.8,57.6 101.0,58.3 106.1,59.5 111.2,60.7 116.4,61.3 121.5,61.6 126.6,62.1 131.8,63.1 136.9,64.1 142.0,65.2 147.2,66.7 152.3,68.1 157.4,69.7 162.6,71.6 167.7,73.6 172.8,75.8 178.0,78.1 183.1,80.4 188.2,82.4 193.4,84.3 198.5,86.1 203.6,87.5 208.8,88.8 213.9,90.0 219.0,91.1 224.2,92.3 229.3,93.8 234.4,94.4 239.6,95.2 244.7,95.6 249.8,95.8 255.0,95.8 260.1,95.4 265.2,94.9 270.4,94.2 275.5,92.7 280.6,90.8 285.8,89.1 290.9,86.5 296.0,84.0 301.2,81.4 306.3,78.4 311.4,74.2"/><polyline class="ma75" points="8.6,47.0 13.7,46.7 18.8,46.2 24.0,46.0 29.1,45.8 34.2,45.6 39.4,45.4 44.5,45.1 49.6,44.8 54.8,44.6 59.9,44.5 65.0,44.6 70.2,44.6 75.3,44.8 80.4,45.2 85.6,45.6 90.7,45.9 95.8,46.2 101.0,46.4 106.1,46.8 111.2,47.1 116.4,47.5 121.5,47.9 126.6,48.4 131.8,49.1 136.9,49.9 142.0,50.8 147.2,51.8 152.3,53.1 157.4,54.2 162.6,55.5 167.7,56.6 172.8,57.8 178.0,59.1 183.1,60.3 188.2,61.3 193.4,62.3 198.5,63.0 203.6,63.8 208.8,64.6 213.9,65.5 219.0,66.4 224.2,67.2 229.3,68.0 234.4,68.5 239.6,69.0 244.7,69.4 249.8,69.7 255.0,70.0 260.1,70.1 265.2,70.1 270.4,70.2 275.5,70.1 280.6,70.0 285.8,69.9 290.9,69.6 296.0,69.1 301.2,68.6 306.3,68.2 311.4,67.6"/></svg>
+      <p class="legend"><span class="l-up">陽線</span><span class="l-dn">陰線</span><span class="l-ma25">25日線</span><span class="l-ma75">75日線</span>／ 下の棒は出来高（直近60日）</p>
+      <button class="btn" type="button" data-code="4927" onclick="toggleTV(this)">📈 TradingViewで詳しく見る</button>
+      <div class="tv" id="tv-4927" hidden>
+        <div id="tvc-4927" class="tv-box"></div>
+        <a class="tv-link" href="https://jp.tradingview.com/chart/?symbol=TSE%3A4927" target="_blank" rel="noopener">TradingViewで開く ↗</a>
+      </div>
+    </div>
+
+    
+  </article>
+  
+  <article class="card stock top top2">
+    <header class="stock-head">
+      <div class="rank r2">2</div>
+      <div class="ident">
+        <h3>デモ銘柄050</h3>
+        <p class="sub">3114 ・ プライム ・ 情報・通信業</p>
+      </div>
+      <span class="pill mild" title="市場全体が弱いため格下げ">やや強気</span>
+    </header>
+
+    <div class="kpis">
+      <div class="kpi">
+        <span class="k">前営業日の終値</span>
+        <span class="v">¥3,041</span>
+        <span class="chg up">前日比 +5.6%</span>
+      </div>
+      <div class="kpi score-kpi">
+        <span class="k">総合スコア</span>
+        <span class="v big">83<small>/100</small></span>
+        <span class="bar"><i class="mild" style="width: 82.6%"></i></span>
+      </div>
+    </div>
+    <p class="note">※ 市場全体が弱いため格下げ</p>
+
+    <ul class="chips" aria-label="点数の内訳">
+      
+      <li class="full">高値更新 30<small>/30</small></li>
+      
+      <li class="part">出来高 20<small>/30</small></li>
+      
+      <li class="full">トレンド 20<small>/20</small></li>
+      
+      <li class="part">業績 15<small>/25</small></li>
+      
+      <li class="full">規模 10<small>/10</small></li>
+      
+    </ul>
+
+    <section class="block why">
+      <h4>なぜ選ばれた？</h4>
+      <ul class="reasons">
+        <li>🏆 52週高値を更新（この1年で最も高い株価）</li><li>✅ 60日高値更新（約3か月ぶりの高値）</li><li>✅ 出来高2.4倍（直近20日の平均と比べて）</li><li>✅ 上昇トレンド継続（株価 ＞ 25日線 ＞ 75日線）</li><li>✅ 営業利益 +45%（直近四半期・前年同期比）</li><li>✅ 時価総額 1,068億円（規模は十分）</li>
+      </ul>
+      <p class="indicators">RSI 78：やや過熱　／　MACD：上昇の勢いが強い</p>
+    </section>
+
+    <section class="block easy">
+      <h4>💡 初心者向け解説</h4>
+      <p>株価がこの1年で最も高い水準を更新しました。出来高も普段の2.4倍に増え、買いが集まっています。営業利益も前年より45%増えています。移動平均線も上向きで、流れは良好です。</p>
+    </section>
+
+    <section class="block risk">
+      <h4>⚠️ リスク</h4>
+      <ul>
+        <li>RSIが78と過熱圏。利益確定売りによる反落に注意</li><li>市場全体が下落基調で、順張りは勝ちにくい局面</li>
+      </ul>
+      
+      <p class="stop">撤退ラインの目安：25日線 <b>¥2,729</b>（現在値から -10.2%）を終値で割ったら見直す</p>
+      
+    </section>
+
+    <div class="chart">
+      <svg viewBox="0 0 320 150" class="candle" role="img" aria-label="直近60日のローソク足と25日・75日移動平均線"><line class="dn" x1="8.6" x2="8.6" y1="77.6" y2="89.7"/><rect class="dn" x="7.0" y="81.5" width="3.2" height="4.2"/><rect class="vol dn" x="7.0" y="138.3" width="3.2" height="5.7"/><line class="dn" x1="13.7" x2="13.7" y1="82.1" y2="88.7"/><rect class="dn" x="12.1" y="82.8" width="3.2" height="1.0"/><rect class="vol dn" x="12.1" y="135.1" width="3.2" height="8.9"/><line class="up" x1="18.8" x2="18.8" y1="75.9" y2="87.8"/><rect class="up" x="17.2" y="77.0" width="3.2" height="4.9"/><rect class="vol up" x="17.2" y="131.2" width="3.2" height="12.8"/><line class="dn" x1="24.0" x2="24.0" y1="77.1" y2="89.2"/><rect class="dn" x="22.4" y="78.2" width="3.2" height="8.5"/><rect class="vol dn" x="22.4" y="131.5" width="3.2" height="12.5"/><line class="up" x1="29.1" x2="29.1" y1="84.1" y2="89.3"/><rect class="up" x="27.5" y="85.9" width="3.2" height="3.3"/><rect class="vol up" x="27.5" y="136.9" width="3.2" height="7.1"/><line class="up" x1="34.2" x2="34.2" y1="70.8" y2="93.0"/><rect class="up" x="32.6" y="75.2" width="3.2" height="11.8"/><rect class="vol up" x="32.6" y="134.9" width="3.2" height="9.1"/><line class="dn" x1="39.4" x2="39.4" y1="72.0" y2="82.9"/><rect class="dn" x="37.8" y="78.4" width="3.2" height="1.0"/><rect class="vol dn" x="37.8" y="131.2" width="3.2" height="12.8"/><line class="up" x1="44.5" x2="44.5" y1="72.1" y2="83.2"/><rect class="up" x="42.9" y="80.1" width="3.2" height="2.9"/><rect class="vol up" x="42.9" y="136.0" width="3.2" height="8.0"/><line class="up" x1="49.6" x2="49.6" y1="75.9" y2="78.5"/><rect class="up" x="48.0" y="77.4" width="3.2" height="0.8"/><rect class="vol up" x="48.0" y="131.8" width="3.2" height="12.2"/><line class="dn" x1="54.8" x2="54.8" y1="76.8" y2="86.3"/><rect class="dn" x="53.2" y="76.8" width="3.2" height="8.5"/><rect class="vol dn" x="53.2" y="132.8" width="3.2" height="11.2"/><line class="up" x1="59.9" x2="59.9" y1="79.3" y2="84.2"/><rect class="up" x="58.3" y="82.4" width="3.2" height="1.3"/><rect class="vol up" x="58.3" y="132.0" width="3.2" height="12.0"/><line class="up" x1="65.0" x2="65.0" y1="77.2" y2="84.5"/><rect class="up" x="63.4" y="80.2" width="3.2" height="0.8"/><rect class="vol up" x="63.4" y="127.8" width="3.2" height="16.2"/><line class="up" x1="70.2" x2="70.2" y1="71.6" y2="83.4"/><rect class="up" x="68.6" y="73.0" width="3.2" height="6.7"/><rect class="vol up" x="68.6" y="132.6" width="3.2" height="11.4"/><line class="dn" x1="75.3" x2="75.3" y1="73.1" y2="90.5"/><rect class="dn" x="73.7" y="74.3" width="3.2" height="9.8"/><rect class="vol dn" x="73.7" y="131.6" width="3.2" height="12.4"/><line class="dn" x1="80.4" x2="80.4" y1="85.6" y2="95.6"/><rect class="dn" x="78.8" y="87.3" width="3.2" height="4.4"/><rect class="vol dn" x="78.8" y="129.9" width="3.2" height="14.1"/><line class="dn" x1="85.6" x2="85.6" y1="89.3" y2="95.5"/><rect class="dn" x="84.0" y="90.9" width="3.2" height="2.6"/><rect class="vol dn" x="84.0" y="122.1" width="3.2" height="21.9"/><line class="up" x1="90.7" x2="90.7" y1="93.4" y2="96.1"/><rect class="up" x="89.1" y="94.5" width="3.2" height="1.1"/><rect class="vol up" x="89.1" y="132.2" width="3.2" height="11.8"/><line class="up" x1="95.8" x2="95.8" y1="92.4" y2="96.0"/><rect class="up" x="94.2" y="92.9" width="3.2" height="1.6"/><rect class="vol up" x="94.2" y="128.2" width="3.2" height="15.8"/><line class="up" x1="101.0" x2="101.0" y1="82.0" y2="95.9"/><rect class="up" x="99.4" y="82.6" width="3.2" height="12.8"/><rect class="vol up" x="99.4" y="137.8" width="3.2" height="6.2"/><line class="dn" x1="106.1" x2="106.1" y1="80.5" y2="92.0"/><rect class="dn" x="104.5" y="82.6" width="3.2" height="6.0"/><rect class="vol dn" x="104.5" y="135.2" width="3.2" height="8.8"/><line class="up" x1="111.2" x2="111.2" y1="86.2" y2="94.0"/><rect class="up" x="109.6" y="89.1" width="3.2" height="0.8"/><rect class="vol up" x="109.6" y="132.2" width="3.2" height="11.8"/><line class="up" x1="116.4" x2="116.4" y1="77.6" y2="93.2"/><rect class="up" x="114.8" y="82.5" width="3.2" height="5.4"/><rect class="vol up" x="114.8" y="123.7" width="3.2" height="20.3"/><line class="dn" x1="121.5" x2="121.5" y1="80.1" y2="86.8"/><rect class="dn" x="119.9" y="84.6" width="3.2" height="0.8"/><rect class="vol dn" x="119.9" y="128.6" width="3.2" height="15.4"/><line class="up" x1="126.6" x2="126.6" y1="72.7" y2="90.8"/><rect class="up" x="125.0" y="76.8" width="3.2" height="9.5"/><rect class="vol up" x="125.0" y="134.8" width="3.2" height="9.2"/><line class="dn" x1="131.8" x2="131.8" y1="74.4" y2="81.3"/><rect class="dn" x="130.2" y="76.8" width="3.2" height="2.6"/><rect class="vol dn" x="130.2" y="135.3" width="3.2" height="8.7"/><line class="dn" x1="136.9" x2="136.9" y1="78.7" y2="93.5"/><rect class="dn" x="135.3" y="78.9" width="3.2" height="13.4"/><rect class="vol dn" x="135.3" y="134.4" width="3.2" height="9.6"/><line class="dn" x1="142.0" x2="142.0" y1="91.5" y2="96.3"/><rect class="dn" x="140.4" y="93.7" width="3.2" height="2.6"/><rect class="vol dn" x="140.4" y="132.1" width="3.2" height="11.9"/><line class="dn" x1="147.2" x2="147.2" y1="93.1" y2="103.1"/><rect class="dn" x="145.6" y="97.5" width="3.2" height="4.6"/><rect class="vol dn" x="145.6" y="139.5" width="3.2" height="4.5"/><line class="up" x1="152.3" x2="152.3" y1="96.1" y2="102.6"/><rect class="up" x="150.7" y="96.7" width="3.2" height="5.5"/><rect class="vol up" x="150.7" y="135.4" width="3.2" height="8.6"/><line class="up" x1="157.4" x2="157.4" y1="85.5" y2="95.0"/><rect class="up" x="155.8" y="89.1" width="3.2" height="5.5"/><rect class="vol up" x="155.8" y="137.5" width="3.2" height="6.5"/><line class="dn" x1="162.6" x2="162.6" y1="88.6" y2="96.3"/><rect class="dn" x="161.0" y="90.6" width="3.2" height="1.9"/><rect class="vol dn" x="161.0" y="134.7" width="3.2" height="9.3"/><line class="up" x1="167.7" x2="167.7" y1="88.6" y2="92.7"/><rect class="up" x="166.1" y="91.0" width="3.2" height="1.0"/><rect class="vol up" x="166.1" y="136.4" width="3.2" height="7.6"/><line class="dn" x1="172.8" x2="172.8" y1="90.1" y2="102.8"/><rect class="dn" x="171.2" y="91.7" width="3.2" height="5.0"/><rect class="vol dn" x="171.2" y="133.8" width="3.2" height="10.2"/><line class="dn" x1="178.0" x2="178.0" y1="90.8" y2="107.2"/><rect class="dn" x="176.4" y="94.5" width="3.2" height="8.8"/><rect class="vol dn" x="176.4" y="136.0" width="3.2" height="8.0"/><line class="dn" x1="183.1" x2="183.1" y1="99.1" y2="112.7"/><rect class="dn" x="181.5" y="99.9" width="3.2" height="10.4"/><rect class="vol dn" x="181.5" y="132.4" width="3.2" height="11.6"/><line class="up" x1="188.2" x2="188.2" y1="105.1" y2="114.0"/><rect class="up" x="186.6" y="109.4" width="3.2" height="0.8"/><rect class="vol up" x="186.6" y="134.1" width="3.2" height="9.9"/><line class="up" x1="193.4" x2="193.4" y1="99.9" y2="110.6"/><rect class="up" x="191.8" y="105.8" width="3.2" height="2.4"/><rect class="vol up" x="191.8" y="135.4" width="3.2" height="8.6"/><line class="up" x1="198.5" x2="198.5" y1="95.1" y2="109.5"/><rect class="up" x="196.9" y="97.4" width="3.2" height="10.0"/><rect class="vol up" x="196.9" y="131.3" width="3.2" height="12.7"/><line class="dn" x1="203.6" x2="203.6" y1="90.1" y2="103.0"/><rect class="dn" x="202.0" y="93.4" width="3.2" height="9.5"/><rect class="vol dn" x="202.0" y="137.8" width="3.2" height="6.2"/><line class="dn" x1="208.8" x2="208.8" y1="103.0" y2="105.9"/><rect class="dn" x="207.2" y="104.1" width="3.2" height="1.5"/><rect class="vol dn" x="207.2" y="134.0" width="3.2" height="10.0"/><line class="up" x1="213.9" x2="213.9" y1="92.1" y2="108.4"/><rect class="up" x="212.3" y="95.2" width="3.2" height="12.7"/><rect class="vol up" x="212.3" y="122.7" width="3.2" height="21.3"/><line class="up" x1="219.0" x2="219.0" y1="85.9" y2="96.3"/><rect class="up" x="217.4" y="87.0" width="3.2" height="8.5"/><rect class="vol up" x="217.4" y="124.4" width="3.2" height="19.6"/><line class="up" x1="224.2" x2="224.2" y1="82.7" y2="94.9"/><rect class="up" x="222.6" y="84.0" width="3.2" height="6.2"/><rect class="vol up" x="222.6" y="135.1" width="3.2" height="8.9"/><line class="up" x1="229.3" x2="229.3" y1="82.2" y2="90.4"/><rect class="up" x="227.7" y="83.6" width="3.2" height="4.8"/><rect class="vol up" x="227.7" y="136.6" width="3.2" height="7.4"/><line class="dn" x1="234.4" x2="234.4" y1="80.6" y2="82.5"/><rect class="dn" x="232.8" y="81.0" width="3.2" height="0.8"/><rect class="vol dn" x="232.8" y="138.9" width="3.2" height="5.1"/><line class="up" x1="239.6" x2="239.6" y1="67.6" y2="79.2"/><rect class="up" x="238.0" y="71.6" width="3.2" height="5.1"/><rect class="vol up" x="238.0" y="139.0" width="3.2" height="5.0"/><line class="up" x1="244.7" x2="244.7" y1="63.6" y2="71.7"/><rect class="up" x="243.1" y="65.9" width="3.2" height="4.9"/><rect class="vol up" x="243.1" y="135.8" width="3.2" height="8.2"/><line class="up" x1="249.8" x2="249.8" y1="60.5" y2="65.4"/><rect class="up" x="248.2" y="63.0" width="3.2" height="2.2"/><rect class="vol up" x="248.2" y="124.6" width="3.2" height="19.4"/><line class="up" x1="255.0" x2="255.0" y1="53.5" y2="67.1"/><rect class="up" x="253.4" y="55.5" width="3.2" height="8.2"/><rect class="vol up" x="253.4" y="126.9" width="3.2" height="17.1"/><line class="up" x1="260.1" x2="260.1" y1="41.4" y2="57.0"/><rect class="up" x="258.5" y="46.0" width="3.2" height="10.0"/><rect class="vol up" x="258.5" y="128.0" width="3.2" height="16.0"/><line class="dn" x1="265.2" x2="265.2" y1="42.6" y2="55.4"/><rect class="dn" x="263.6" y="46.1" width="3.2" height="3.8"/><rect class="vol dn" x="263.6" y="131.1" width="3.2" height="12.9"/><line class="up" x1="270.4" x2="270.4" y1="43.8" y2="51.1"/><rect class="up" x="268.8" y="46.3" width="3.2" height="3.4"/><rect class="vol up" x="268.8" y="140.1" width="3.2" height="3.9"/><line class="up" x1="275.5" x2="275.5" y1="43.1" y2="48.4"/><rect class="up" x="273.9" y="44.9" width="3.2" height="0.8"/><rect class="vol up" x="273.9" y="133.8" width="3.2" height="10.2"/><line class="up" x1="280.6" x2="280.6" y1="38.0" y2="45.2"/><rect class="up" x="279.0" y="39.0" width="3.2" height="6.1"/><rect class="vol up" x="279.0" y="137.4" width="3.2" height="6.6"/><line class="up" x1="285.8" x2="285.8" y1="35.1" y2="44.0"/><rect class="up" x="284.2" y="40.9" width="3.2" height="1.1"/><rect class="vol up" x="284.2" y="133.3" width="3.2" height="10.7"/><line class="up" x1="290.9" x2="290.9" y1="29.7" y2="46.0"/><rect class="up" x="289.3" y="30.8" width="3.2" height="12.0"/><rect class="vol up" x="289.3" y="138.5" width="3.2" height="5.5"/><line class="dn" x1="296.0" x2="296.0" y1="23.6" y2="33.3"/><rect class="dn" x="294.4" y="27.3" width="3.2" height="3.2"/><rect class="vol dn" x="294.4" y="130.7" width="3.2" height="13.3"/><line class="dn" x1="301.2" x2="301.2" y1="31.0" y2="43.4"/><rect class="dn" x="299.6" y="32.8" width="3.2" height="6.6"/><rect class="vol dn" x="299.6" y="137.6" width="3.2" height="6.4"/><line class="up" x1="306.3" x2="306.3" y1="35.9" y2="50.8"/><rect class="up" x="304.7" y="38.0" width="3.2" height="7.4"/><rect class="vol up" x="304.7" y="133.6" width="3.2" height="10.4"/><line class="up" x1="311.4" x2="311.4" y1="6.0" y2="40.1"/><rect class="up" x="309.8" y="8.8" width="3.2" height="29.8"/><rect class="vol up" x="309.8" y="118.0" width="3.2" height="26.0"/><polyline class="ma25" points="8.6,89.2 13.7,89.5 18.8,89.5 24.0,89.5 29.1,89.3 34.2,88.5 39.4,87.9 44.5,87.2 49.6,86.2 54.8,85.6 59.9,85.6 65.0,85.5 70.2,85.0 75.3,84.8 80.4,85.2 85.6,85.6 90.7,85.7 95.8,85.5 101.0,84.9 106.1,84.8 111.2,85.0 116.4,84.6 121.5,84.0 126.6,83.8 131.8,83.7 136.9,84.0 142.0,84.5 147.2,85.5 152.3,85.9 157.4,86.0 162.6,86.7 167.7,87.1 172.8,87.8 178.0,88.8 183.1,89.8 188.2,90.9 193.4,92.0 198.5,92.9 203.6,93.7 208.8,94.2 213.9,94.3 219.0,94.0 224.2,93.6 229.3,93.7 234.4,93.4 239.6,92.7 244.7,92.0 249.8,91.2 255.0,90.3 260.1,89.0 265.2,87.3 270.4,85.3 275.5,83.0 280.6,80.7 285.8,78.8 290.9,76.3 296.0,73.9 301.2,71.6 306.3,69.0 311.4,64.9"/><polyline class="ma75" points="8.6,86.8 13.7,86.5 18.8,86.2 24.0,85.8 29.1,85.5 34.2,85.0 39.4,84.6 44.5,84.2 49.6,83.7 54.8,83.2 59.9,82.8 65.0,82.4 70.2,82.1 75.3,81.9 80.4,82.1 85.6,82.2 90.7,82.2 95.8,82.4 101.0,82.4 106.1,82.6 111.2,82.7 116.4,82.6 121.5,82.7 126.6,82.8 131.8,83.0 136.9,83.1 142.0,83.4 147.2,83.7 152.3,84.0 157.4,84.4 162.6,84.8 167.7,85.0 172.8,85.3 178.0,85.7 183.1,86.1 188.2,86.5 193.4,86.8 198.5,86.8 203.6,87.0 208.8,87.2 213.9,87.4 219.0,87.7 224.2,88.1 229.3,88.3 234.4,88.5 239.6,88.4 244.7,88.2 249.8,88.0 255.0,87.6 260.1,87.2 265.2,86.8 270.4,86.4 275.5,86.0 280.6,85.4 285.8,84.7 290.9,83.8 296.0,83.0 301.2,82.2 306.3,81.3 311.4,80.1"/></svg>
+      <p class="legend"><span class="l-up">陽線</span><span class="l-dn">陰線</span><span class="l-ma25">25日線</span><span class="l-ma75">75日線</span>／ 下の棒は出来高（直近60日）</p>
+      <button class="btn" type="button" data-code="3114" onclick="toggleTV(this)">📈 TradingViewで詳しく見る</button>
+      <div class="tv" id="tv-3114" hidden>
+        <div id="tvc-3114" class="tv-box"></div>
+        <a class="tv-link" href="https://jp.tradingview.com/chart/?symbol=TSE%3A3114" target="_blank" rel="noopener">TradingViewで開く ↗</a>
+      </div>
+    </div>
+
+    
+  </article>
+  
+  <article class="card stock top top3">
+    <header class="stock-head">
+      <div class="rank r3">3</div>
+      <div class="ident">
+        <h3>デモ銘柄043</h3>
+        <p class="sub">2855 ・ スタンダード ・ 卸売業</p>
+      </div>
+      <span class="pill mild" title="市場全体が弱いため格下げ">やや強気</span>
+    </header>
+
+    <div class="kpis">
+      <div class="kpi">
+        <span class="k">前営業日の終値</span>
+        <span class="v">¥6,544</span>
+        <span class="chg up">前日比 +4.6%</span>
+      </div>
+      <div class="kpi score-kpi">
+        <span class="k">総合スコア</span>
+        <span class="v big">78<small>/100</small></span>
+        <span class="bar"><i class="mild" style="width: 78.3%"></i></span>
+      </div>
+    </div>
+    <p class="note">※ 市場全体が弱いため格下げ</p>
+
+    <ul class="chips" aria-label="点数の内訳">
+      
+      <li class="full">高値更新 30<small>/30</small></li>
+      
+      <li class="full">出来高 30<small>/30</small></li>
+      
+      <li class="full">トレンド 20<small>/20</small></li>
+      
+      <li class="zero">業績 0<small>/25</small></li>
+      
+      <li class="full">規模 10<small>/10</small></li>
+      
+    </ul>
+
+    <section class="block why">
+      <h4>なぜ選ばれた？</h4>
+      <ul class="reasons">
+        <li>🏆 52週高値を更新（この1年で最も高い株価）</li><li>✅ 60日高値更新（約3か月ぶりの高値）</li><li>✅ 出来高4.2倍（直近20日の平均と比べて）</li><li>✅ 上昇トレンド継続（株価 ＞ 25日線 ＞ 75日線）</li><li>✅ 時価総額 1.2兆円（規模は十分）</li>
+      </ul>
+      <p class="indicators">RSI 74：やや過熱　／　MACD：上昇の勢いが強い</p>
+    </section>
+
+    <section class="block easy">
+      <h4>💡 初心者向け解説</h4>
+      <p>株価がこの1年で最も高い水準を更新しました。出来高も普段の4.2倍に増え、買いが集まっています。移動平均線も上向きで、流れは良好です。</p>
+    </section>
+
+    <section class="block risk">
+      <h4>⚠️ リスク</h4>
+      <ul>
+        <li>市場全体が下落基調で、順張りは勝ちにくい局面</li>
+      </ul>
+      
+      <p class="stop">撤退ラインの目安：25日線 <b>¥5,735</b>（現在値から -12.4%）を終値で割ったら見直す</p>
+      
+    </section>
+
+    <div class="chart">
+      <svg viewBox="0 0 320 150" class="candle" role="img" aria-label="直近60日のローソク足と25日・75日移動平均線"><line class="up" x1="8.6" x2="8.6" y1="94.0" y2="110.9"/><rect class="up" x="7.0" y="95.5" width="3.2" height="12.2"/><rect class="vol up" x="7.0" y="138.1" width="3.2" height="5.9"/><line class="up" x1="13.7" x2="13.7" y1="84.3" y2="99.4"/><rect class="up" x="12.1" y="87.7" width="3.2" height="8.6"/><rect class="vol up" x="12.1" y="138.6" width="3.2" height="5.4"/><line class="dn" x1="18.8" x2="18.8" y1="84.8" y2="99.2"/><rect class="dn" x="17.2" y="86.9" width="3.2" height="10.3"/><rect class="vol dn" x="17.2" y="140.1" width="3.2" height="3.9"/><line class="dn" x1="24.0" x2="24.0" y1="98.9" y2="106.9"/><rect class="dn" x="22.4" y="99.0" width="3.2" height="6.2"/><rect class="vol dn" x="22.4" y="140.6" width="3.2" height="3.4"/><line class="up" x1="29.1" x2="29.1" y1="91.2" y2="109.6"/><rect class="up" x="27.5" y="94.9" width="3.2" height="8.7"/><rect class="vol up" x="27.5" y="140.2" width="3.2" height="3.8"/><line class="dn" x1="34.2" x2="34.2" y1="95.5" y2="114.0"/><rect class="dn" x="32.6" y="96.1" width="3.2" height="14.5"/><rect class="vol dn" x="32.6" y="140.9" width="3.2" height="3.1"/><line class="up" x1="39.4" x2="39.4" y1="100.6" y2="112.7"/><rect class="up" x="37.8" y="103.5" width="3.2" height="8.1"/><rect class="vol up" x="37.8" y="138.4" width="3.2" height="5.6"/><line class="up" x1="44.5" x2="44.5" y1="89.3" y2="106.7"/><rect class="up" x="42.9" y="89.5" width="3.2" height="16.3"/><rect class="vol up" x="42.9" y="139.1" width="3.2" height="4.9"/><line class="up" x1="49.6" x2="49.6" y1="85.4" y2="89.9"/><rect class="up" x="48.0" y="87.2" width="3.2" height="2.1"/><rect class="vol up" x="48.0" y="140.7" width="3.2" height="3.3"/><line class="dn" x1="54.8" x2="54.8" y1="81.8" y2="94.4"/><rect class="dn" x="53.2" y="85.5" width="3.2" height="8.0"/><rect class="vol dn" x="53.2" y="139.1" width="3.2" height="4.9"/><line class="up" x1="59.9" x2="59.9" y1="88.0" y2="96.1"/><rect class="up" x="58.3" y="89.0" width="3.2" height="2.4"/><rect class="vol up" x="58.3" y="139.6" width="3.2" height="4.4"/><line class="up" x1="65.0" x2="65.0" y1="78.9" y2="91.1"/><rect class="up" x="63.4" y="81.8" width="3.2" height="6.3"/><rect class="vol up" x="63.4" y="137.3" width="3.2" height="6.7"/><line class="up" x1="70.2" x2="70.2" y1="76.8" y2="86.0"/><rect class="up" x="68.6" y="78.2" width="3.2" height="4.8"/><rect class="vol up" x="68.6" y="138.8" width="3.2" height="5.2"/><line class="up" x1="75.3" x2="75.3" y1="70.7" y2="82.1"/><rect class="up" x="73.7" y="71.5" width="3.2" height="7.3"/><rect class="vol up" x="73.7" y="137.6" width="3.2" height="6.4"/><line class="up" x1="80.4" x2="80.4" y1="69.4" y2="72.9"/><rect class="up" x="78.8" y="71.7" width="3.2" height="0.8"/><rect class="vol up" x="78.8" y="140.5" width="3.2" height="3.5"/><line class="dn" x1="85.6" x2="85.6" y1="70.9" y2="76.1"/><rect class="dn" x="84.0" y="71.0" width="3.2" height="4.7"/><rect class="vol dn" x="84.0" y="140.7" width="3.2" height="3.3"/><line class="dn" x1="90.7" x2="90.7" y1="73.3" y2="89.6"/><rect class="dn" x="89.1" y="77.0" width="3.2" height="10.5"/><rect class="vol dn" x="89.1" y="137.8" width="3.2" height="6.2"/><line class="up" x1="95.8" x2="95.8" y1="88.5" y2="89.7"/><rect class="up" x="94.2" y="88.9" width="3.2" height="0.8"/><rect class="vol up" x="94.2" y="140.8" width="3.2" height="3.2"/><line class="dn" x1="101.0" x2="101.0" y1="82.3" y2="96.0"/><rect class="dn" x="99.4" y="86.6" width="3.2" height="6.1"/><rect class="vol dn" x="99.4" y="139.2" width="3.2" height="4.8"/><line class="up" x1="106.1" x2="106.1" y1="88.6" y2="97.5"/><rect class="up" x="104.5" y="90.0" width="3.2" height="2.9"/><rect class="vol up" x="104.5" y="140.7" width="3.2" height="3.3"/><line class="up" x1="111.2" x2="111.2" y1="81.6" y2="87.9"/><rect class="up" x="109.6" y="84.3" width="3.2" height="1.6"/><rect class="vol up" x="109.6" y="141.2" width="3.2" height="2.8"/><line class="dn" x1="116.4" x2="116.4" y1="81.0" y2="88.0"/><rect class="dn" x="114.8" y="82.8" width="3.2" height="4.6"/><rect class="vol dn" x="114.8" y="140.3" width="3.2" height="3.7"/><line class="dn" x1="121.5" x2="121.5" y1="85.8" y2="89.3"/><rect class="dn" x="119.9" y="87.2" width="3.2" height="0.8"/><rect class="vol dn" x="119.9" y="140.4" width="3.2" height="3.6"/><line class="dn" x1="126.6" x2="126.6" y1="80.8" y2="96.9"/><rect class="dn" x="125.0" y="85.8" width="3.2" height="9.3"/><rect class="vol dn" x="125.0" y="139.9" width="3.2" height="4.1"/><line class="dn" x1="131.8" x2="131.8" y1="90.9" y2="95.1"/><rect class="dn" x="130.2" y="94.0" width="3.2" height="0.8"/><rect class="vol dn" x="130.2" y="139.5" width="3.2" height="4.5"/><line class="up" x1="136.9" x2="136.9" y1="79.3" y2="96.3"/><rect class="up" x="135.3" y="80.0" width="3.2" height="14.1"/><rect class="vol up" x="135.3" y="141.7" width="3.2" height="2.3"/><line class="up" x1="142.0" x2="142.0" y1="74.2" y2="79.5"/><rect class="up" x="140.4" y="76.1" width="3.2" height="2.2"/><rect class="vol up" x="140.4" y="137.7" width="3.2" height="6.3"/><line class="up" x1="147.2" x2="147.2" y1="68.7" y2="78.9"/><rect class="up" x="145.6" y="71.4" width="3.2" height="3.2"/><rect class="vol up" x="145.6" y="135.0" width="3.2" height="9.0"/><line class="dn" x1="152.3" x2="152.3" y1="73.9" y2="84.9"/><rect class="dn" x="150.7" y="74.5" width="3.2" height="8.5"/><rect class="vol dn" x="150.7" y="139.4" width="3.2" height="4.6"/><line class="dn" x1="157.4" x2="157.4" y1="81.6" y2="85.0"/><rect class="dn" x="155.8" y="82.9" width="3.2" height="0.8"/><rect class="vol dn" x="155.8" y="138.6" width="3.2" height="5.4"/><line class="dn" x1="162.6" x2="162.6" y1="74.6" y2="85.6"/><rect class="dn" x="161.0" y="80.3" width="3.2" height="1.6"/><rect class="vol dn" x="161.0" y="138.6" width="3.2" height="5.4"/><line class="up" x1="167.7" x2="167.7" y1="77.1" y2="81.5"/><rect class="up" x="166.1" y="77.3" width="3.2" height="1.6"/><rect class="vol up" x="166.1" y="139.7" width="3.2" height="4.3"/><line class="up" x1="172.8" x2="172.8" y1="73.1" y2="80.9"/><rect class="up" x="171.2" y="74.9" width="3.2" height="3.3"/><rect class="vol up" x="171.2" y="140.5" width="3.2" height="3.5"/><line class="up" x1="178.0" x2="178.0" y1="75.6" y2="79.8"/><rect class="up" x="176.4" y="76.4" width="3.2" height="0.8"/><rect class="vol up" x="176.4" y="137.3" width="3.2" height="6.7"/><line class="dn" x1="183.1" x2="183.1" y1="75.1" y2="97.4"/><rect class="dn" x="181.5" y="76.9" width="3.2" height="15.7"/><rect class="vol dn" x="181.5" y="139.3" width="3.2" height="4.7"/><line class="dn" x1="188.2" x2="188.2" y1="93.6" y2="94.7"/><rect class="dn" x="186.6" y="93.7" width="3.2" height="0.8"/><rect class="vol dn" x="186.6" y="141.2" width="3.2" height="2.8"/><line class="up" x1="193.4" x2="193.4" y1="84.2" y2="99.3"/><rect class="up" x="191.8" y="86.1" width="3.2" height="9.8"/><rect class="vol up" x="191.8" y="140.0" width="3.2" height="4.0"/><line class="dn" x1="198.5" x2="198.5" y1="85.3" y2="92.6"/><rect class="dn" x="196.9" y="86.2" width="3.2" height="3.5"/><rect class="vol dn" x="196.9" y="141.3" width="3.2" height="2.7"/><line class="up" x1="203.6" x2="203.6" y1="77.9" y2="89.2"/><rect class="up" x="202.0" y="81.6" width="3.2" height="6.7"/><rect class="vol up" x="202.0" y="139.0" width="3.2" height="5.0"/><line class="dn" x1="208.8" x2="208.8" y1="82.5" y2="96.6"/><rect class="dn" x="207.2" y="84.6" width="3.2" height="4.2"/><rect class="vol dn" x="207.2" y="124.1" width="3.2" height="19.9"/><line class="up" x1="213.9" x2="213.9" y1="86.9" y2="91.0"/><rect class="up" x="212.3" y="87.1" width="3.2" height="0.8"/><rect class="vol up" x="212.3" y="140.3" width="3.2" height="3.7"/><line class="up" x1="219.0" x2="219.0" y1="85.5" y2="90.6"/><rect class="up" x="217.4" y="86.1" width="3.2" height="0.8"/><rect class="vol up" x="217.4" y="139.6" width="3.2" height="4.4"/><line class="up" x1="224.2" x2="224.2" y1="79.0" y2="86.6"/><rect class="up" x="222.6" y="79.5" width="3.2" height="6.1"/><rect class="vol up" x="222.6" y="138.5" width="3.2" height="5.5"/><line class="up" x1="229.3" x2="229.3" y1="73.4" y2="79.4"/><rect class="up" x="227.7" y="76.2" width="3.2" height="3.1"/><rect class="vol up" x="227.7" y="135.7" width="3.2" height="8.3"/><line class="dn" x1="234.4" x2="234.4" y1="72.5" y2="80.9"/><rect class="dn" x="232.8" y="73.6" width="3.2" height="6.3"/><rect class="vol dn" x="232.8" y="138.8" width="3.2" height="5.2"/><line class="dn" x1="239.6" x2="239.6" y1="84.1" y2="95.8"/><rect class="dn" x="238.0" y="85.9" width="3.2" height="7.0"/><rect class="vol dn" x="238.0" y="139.4" width="3.2" height="4.6"/><line class="up" x1="244.7" x2="244.7" y1="71.5" y2="97.3"/><rect class="up" x="243.1" y="74.9" width="3.2" height="19.8"/><rect class="vol up" x="243.1" y="137.9" width="3.2" height="6.1"/><line class="dn" x1="249.8" x2="249.8" y1="72.4" y2="74.7"/><rect class="dn" x="248.2" y="72.9" width="3.2" height="1.6"/><rect class="vol dn" x="248.2" y="138.5" width="3.2" height="5.5"/><line class="dn" x1="255.0" x2="255.0" y1="72.2" y2="83.9"/><rect class="dn" x="253.4" y="74.7" width="3.2" height="8.2"/><rect class="vol dn" x="253.4" y="136.6" width="3.2" height="7.4"/><line class="dn" x1="260.1" x2="260.1" y1="79.8" y2="96.3"/><rect class="dn" x="258.5" y="83.9" width="3.2" height="12.0"/><rect class="vol dn" x="258.5" y="140.6" width="3.2" height="3.4"/><line class="up" x1="265.2" x2="265.2" y1="81.0" y2="92.4"/><rect class="up" x="263.6" y="83.1" width="3.2" height="8.8"/><rect class="vol up" x="263.6" y="138.5" width="3.2" height="5.5"/><line class="up" x1="270.4" x2="270.4" y1="68.8" y2="83.0"/><rect class="up" x="268.8" y="73.1" width="3.2" height="7.7"/><rect class="vol up" x="268.8" y="139.3" width="3.2" height="4.7"/><line class="up" x1="275.5" x2="275.5" y1="65.9" y2="71.3"/><rect class="up" x="273.9" y="67.1" width="3.2" height="2.5"/><rect class="vol up" x="273.9" y="138.0" width="3.2" height="6.0"/><line class="dn" x1="280.6" x2="280.6" y1="61.3" y2="69.2"/><rect class="dn" x="279.0" y="64.0" width="3.2" height="4.4"/><rect class="vol dn" x="279.0" y="140.2" width="3.2" height="3.8"/><line class="dn" x1="285.8" x2="285.8" y1="66.3" y2="71.6"/><rect class="dn" x="284.2" y="67.4" width="3.2" height="3.7"/><rect class="vol dn" x="284.2" y="137.6" width="3.2" height="6.4"/><line class="up" x1="290.9" x2="290.9" y1="50.4" y2="74.7"/><rect class="up" x="289.3" y="52.2" width="3.2" height="20.4"/><rect class="vol up" x="289.3" y="139.2" width="3.2" height="4.8"/><line class="dn" x1="296.0" x2="296.0" y1="47.7" y2="67.8"/><rect class="dn" x="294.4" y="49.5" width="3.2" height="13.7"/><rect class="vol dn" x="294.4" y="138.5" width="3.2" height="5.5"/><line class="up" x1="301.2" x2="301.2" y1="49.5" y2="65.1"/><rect class="up" x="299.6" y="49.5" width="3.2" height="14.6"/><rect class="vol up" x="299.6" y="135.5" width="3.2" height="8.5"/><line class="up" x1="306.3" x2="306.3" y1="28.4" y2="52.3"/><rect class="up" x="304.7" y="29.8" width="3.2" height="21.2"/><rect class="vol up" x="304.7" y="140.2" width="3.2" height="3.8"/><line class="up" x1="311.4" x2="311.4" y1="6.0" y2="31.7"/><rect class="up" x="309.8" y="6.1" width="3.2" height="25.5"/><rect class="vol up" x="309.8" y="118.0" width="3.2" height="26.0"/><polyline class="ma25" points="8.6,83.7 13.7,85.0 18.8,86.6 24.0,88.2 29.1,89.8 34.2,91.3 39.4,92.3 44.5,92.9 49.6,92.9 54.8,93.4 59.9,94.4 65.0,95.1 70.2,94.8 75.3,93.8 80.4,92.7 85.6,92.5 90.7,92.8 95.8,92.8 101.0,93.1 106.1,92.8 111.2,91.9 116.4,91.1 121.5,90.5 126.6,90.2 131.8,89.6 136.9,89.0 142.0,88.5 147.2,87.5 152.3,86.6 157.4,86.2 162.6,85.0 167.7,84.0 172.8,83.4 178.0,82.9 183.1,82.9 188.2,83.1 193.4,83.3 198.5,83.8 203.6,84.2 208.8,84.8 213.9,85.3 219.0,85.2 224.2,84.9 229.3,84.2 234.4,83.8 239.6,84.2 244.7,83.7 249.8,83.1 255.0,82.6 260.1,82.7 265.2,82.8 270.4,82.7 275.5,82.5 280.6,81.9 285.8,81.5 290.9,80.3 296.0,79.7 301.2,78.7 306.3,76.8 311.4,73.4"/><polyline class="ma75" points="8.6,55.3 13.7,55.6 18.8,56.0 24.0,56.7 29.1,57.2 34.2,58.1 39.4,58.9 44.5,59.5 49.6,60.0 54.8,60.6 59.9,61.5 65.0,62.1 70.2,62.5 75.3,62.9 80.4,63.4 85.6,64.0 90.7,64.8 95.8,65.8 101.0,66.7 106.1,67.5 111.2,68.3 116.4,69.1 121.5,69.9 126.6,70.8 131.8,71.6 136.9,72.0 142.0,72.4 147.2,72.8 152.3,73.6 157.4,74.3 162.6,74.8 167.7,75.3 172.8,75.6 178.0,76.1 183.1,77.0 188.2,77.9 193.4,78.5 198.5,78.8 203.6,79.1 208.8,79.3 213.9,79.6 219.0,80.1 224.2,80.4 229.3,80.8 234.4,81.3 239.6,82.0 244.7,82.6 249.8,83.2 255.0,83.8 260.1,84.5 265.2,85.2 270.4,85.4 275.5,85.6 280.6,85.6 285.8,85.8 290.9,85.5 296.0,85.3 301.2,85.0 306.3,84.2 311.4,83.2"/></svg>
+      <p class="legend"><span class="l-up">陽線</span><span class="l-dn">陰線</span><span class="l-ma25">25日線</span><span class="l-ma75">75日線</span>／ 下の棒は出来高（直近60日）</p>
+      <button class="btn" type="button" data-code="2855" onclick="toggleTV(this)">📈 TradingViewで詳しく見る</button>
+      <div class="tv" id="tv-2855" hidden>
+        <div id="tvc-2855" class="tv-box"></div>
+        <a class="tv-link" href="https://jp.tradingview.com/chart/?symbol=TSE%3A2855" target="_blank" rel="noopener">TradingViewで開く ↗</a>
+      </div>
+    </div>
+
+    
+  </article>
+  
+  <article class="card stock ">
+    <header class="stock-head">
+      <div class="rank r4">4</div>
+      <div class="ident">
+        <h3>デモ銘柄036</h3>
+        <p class="sub">2596 ・ グロース ・ 精密機器</p>
+      </div>
+      <span class="pill mild" title="市場全体が弱いため格下げ">やや強気</span>
+    </header>
+
+    <div class="kpis">
+      <div class="kpi">
+        <span class="k">前営業日の終値</span>
+        <span class="v">¥10,042</span>
+        <span class="chg up">前日比 +4.0%</span>
+      </div>
+      <div class="kpi score-kpi">
+        <span class="k">総合スコア</span>
+        <span class="v big">78<small>/100</small></span>
+        <span class="bar"><i class="mild" style="width: 78.3%"></i></span>
+      </div>
+    </div>
+    <p class="note">※ 市場全体が弱いため格下げ</p>
+
+    <ul class="chips" aria-label="点数の内訳">
+      
+      <li class="full">高値更新 30<small>/30</small></li>
+      
+      <li class="part">出来高 20<small>/30</small></li>
+      
+      <li class="full">トレンド 20<small>/20</small></li>
+      
+      <li class="part">業績 15<small>/25</small></li>
+      
+      <li class="part">規模 5<small>/10</small></li>
+      
+    </ul>
+
+    <section class="block why">
+      <h4>なぜ選ばれた？</h4>
+      <ul class="reasons">
+        <li>🏆 52週高値を更新（この1年で最も高い株価）</li><li>✅ 60日高値更新（約3か月ぶりの高値）</li><li>✅ 出来高2.9倍（直近20日の平均と比べて）</li><li>✅ 上昇トレンド継続（株価 ＞ 25日線 ＞ 75日線）</li><li>✅ 営業利益 +34%（直近四半期・前年同期比）</li><li>✅ 時価総額 113億円（規模は十分）</li>
+      </ul>
+      <p class="indicators">RSI 62：勢いあり（適温）　／　MACD：上昇の勢いが強い</p>
+    </section>
+
+    <section class="block easy">
+      <h4>💡 初心者向け解説</h4>
+      <p>株価がこの1年で最も高い水準を更新しました。出来高も普段の2.9倍に増え、買いが集まっています。営業利益も前年より34%増えています。移動平均線も上向きで、流れは良好です。</p>
+    </section>
+
+    <section class="block risk">
+      <h4>⚠️ リスク</h4>
+      <ul>
+        <li>時価総額が小さく、値動きが荒くなりやすい</li><li>グロース市場の銘柄は値動きが大きい傾向</li><li>市場全体が下落基調で、順張りは勝ちにくい局面</li>
+      </ul>
+      
+      <p class="stop">撤退ラインの目安：25日線 <b>¥9,532</b>（現在値から -5.1%）を終値で割ったら見直す</p>
+      
+    </section>
+
+    <div class="chart">
+      <svg viewBox="0 0 320 150" class="candle" role="img" aria-label="直近60日のローソク足と25日・75日移動平均線"><line class="up" x1="8.6" x2="8.6" y1="78.4" y2="80.7"/><rect class="up" x="7.0" y="78.6" width="3.2" height="1.2"/><rect class="vol up" x="7.0" y="137.0" width="3.2" height="7.0"/><line class="up" x1="13.7" x2="13.7" y1="59.3" y2="79.9"/><rect class="up" x="12.1" y="60.7" width="3.2" height="18.7"/><rect class="vol up" x="12.1" y="133.9" width="3.2" height="10.1"/><line class="up" x1="18.8" x2="18.8" y1="52.6" y2="65.4"/><rect class="up" x="17.2" y="55.7" width="3.2" height="8.8"/><rect class="vol up" x="17.2" y="138.1" width="3.2" height="5.9"/><line class="dn" x1="24.0" x2="24.0" y1="57.4" y2="63.6"/><rect class="dn" x="22.4" y="59.5" width="3.2" height="3.3"/><rect class="vol dn" x="22.4" y="139.9" width="3.2" height="4.1"/><line class="up" x1="29.1" x2="29.1" y1="57.7" y2="70.5"/><rect class="up" x="27.5" y="58.2" width="3.2" height="3.1"/><rect class="vol up" x="27.5" y="140.6" width="3.2" height="3.4"/><line class="up" x1="34.2" x2="34.2" y1="56.9" y2="66.3"/><rect class="up" x="32.6" y="59.3" width="3.2" height="4.3"/><rect class="vol up" x="32.6" y="140.9" width="3.2" height="3.1"/><line class="up" x1="39.4" x2="39.4" y1="45.9" y2="58.8"/><rect class="up" x="37.8" y="46.4" width="3.2" height="11.6"/><rect class="vol up" x="37.8" y="136.1" width="3.2" height="7.9"/><line class="up" x1="44.5" x2="44.5" y1="46.4" y2="50.2"/><rect class="up" x="42.9" y="49.2" width="3.2" height="0.8"/><rect class="vol up" x="42.9" y="138.9" width="3.2" height="5.1"/><line class="up" x1="49.6" x2="49.6" y1="43.6" y2="56.4"/><rect class="up" x="48.0" y="44.5" width="3.2" height="9.5"/><rect class="vol up" x="48.0" y="139.8" width="3.2" height="4.2"/><line class="dn" x1="54.8" x2="54.8" y1="41.7" y2="53.8"/><rect class="dn" x="53.2" y="46.6" width="3.2" height="3.9"/><rect class="vol dn" x="53.2" y="136.8" width="3.2" height="7.2"/><line class="up" x1="59.9" x2="59.9" y1="36.9" y2="62.8"/><rect class="up" x="58.3" y="38.3" width="3.2" height="17.3"/><rect class="vol up" x="58.3" y="139.4" width="3.2" height="4.6"/><line class="dn" x1="65.0" x2="65.0" y1="29.2" y2="50.9"/><rect class="dn" x="63.4" y="34.4" width="3.2" height="6.9"/><rect class="vol dn" x="63.4" y="141.4" width="3.2" height="2.6"/><line class="up" x1="70.2" x2="70.2" y1="31.3" y2="42.1"/><rect class="up" x="68.6" y="33.8" width="3.2" height="7.1"/><rect class="vol up" x="68.6" y="138.1" width="3.2" height="5.9"/><line class="dn" x1="75.3" x2="75.3" y1="26.6" y2="43.0"/><rect class="dn" x="73.7" y="35.4" width="3.2" height="4.0"/><rect class="vol dn" x="73.7" y="140.3" width="3.2" height="3.7"/><line class="dn" x1="80.4" x2="80.4" y1="40.9" y2="46.2"/><rect class="dn" x="78.8" y="42.4" width="3.2" height="3.6"/><rect class="vol dn" x="78.8" y="140.3" width="3.2" height="3.7"/><line class="up" x1="85.6" x2="85.6" y1="41.1" y2="47.2"/><rect class="up" x="84.0" y="43.6" width="3.2" height="2.2"/><rect class="vol up" x="84.0" y="139.2" width="3.2" height="4.8"/><line class="dn" x1="90.7" x2="90.7" y1="39.0" y2="45.3"/><rect class="dn" x="89.1" y="40.6" width="3.2" height="2.6"/><rect class="vol dn" x="89.1" y="133.9" width="3.2" height="10.1"/><line class="up" x1="95.8" x2="95.8" y1="40.7" y2="42.9"/><rect class="up" x="94.2" y="41.2" width="3.2" height="0.8"/><rect class="vol up" x="94.2" y="138.4" width="3.2" height="5.6"/><line class="up" x1="101.0" x2="101.0" y1="32.4" y2="40.6"/><rect class="up" x="99.4" y="34.0" width="3.2" height="5.3"/><rect class="vol up" x="99.4" y="139.4" width="3.2" height="4.6"/><line class="dn" x1="106.1" x2="106.1" y1="36.7" y2="45.0"/><rect class="dn" x="104.5" y="37.3" width="3.2" height="6.6"/><rect class="vol dn" x="104.5" y="139.8" width="3.2" height="4.2"/><line class="dn" x1="111.2" x2="111.2" y1="43.4" y2="50.5"/><rect class="dn" x="109.6" y="45.3" width="3.2" height="1.1"/><rect class="vol dn" x="109.6" y="139.3" width="3.2" height="4.7"/><line class="dn" x1="116.4" x2="116.4" y1="33.2" y2="47.9"/><rect class="dn" x="114.8" y="44.7" width="3.2" height="0.8"/><rect class="vol dn" x="114.8" y="135.9" width="3.2" height="8.1"/><line class="up" x1="121.5" x2="121.5" y1="37.5" y2="52.9"/><rect class="up" x="119.9" y="40.8" width="3.2" height="7.2"/><rect class="vol up" x="119.9" y="140.2" width="3.2" height="3.8"/><line class="dn" x1="126.6" x2="126.6" y1="32.2" y2="37.4"/><rect class="dn" x="125.0" y="35.6" width="3.2" height="0.8"/><rect class="vol dn" x="125.0" y="138.1" width="3.2" height="5.9"/><line class="dn" x1="131.8" x2="131.8" y1="36.3" y2="45.0"/><rect class="dn" x="130.2" y="40.0" width="3.2" height="4.8"/><rect class="vol dn" x="130.2" y="137.7" width="3.2" height="6.3"/><line class="dn" x1="136.9" x2="136.9" y1="40.8" y2="54.4"/><rect class="dn" x="135.3" y="46.7" width="3.2" height="6.3"/><rect class="vol dn" x="135.3" y="118.0" width="3.2" height="26.0"/><line class="dn" x1="142.0" x2="142.0" y1="54.2" y2="63.3"/><rect class="dn" x="140.4" y="55.9" width="3.2" height="5.4"/><rect class="vol dn" x="140.4" y="138.1" width="3.2" height="5.9"/><line class="dn" x1="147.2" x2="147.2" y1="60.8" y2="72.8"/><rect class="dn" x="145.6" y="63.4" width="3.2" height="5.4"/><rect class="vol dn" x="145.6" y="139.6" width="3.2" height="4.4"/><line class="up" x1="152.3" x2="152.3" y1="55.9" y2="67.9"/><rect class="up" x="150.7" y="62.8" width="3.2" height="4.4"/><rect class="vol up" x="150.7" y="140.5" width="3.2" height="3.5"/><line class="up" x1="157.4" x2="157.4" y1="57.6" y2="62.9"/><rect class="up" x="155.8" y="58.2" width="3.2" height="3.8"/><rect class="vol up" x="155.8" y="138.7" width="3.2" height="5.3"/><line class="up" x1="162.6" x2="162.6" y1="55.5" y2="62.7"/><rect class="up" x="161.0" y="58.2" width="3.2" height="0.8"/><rect class="vol up" x="161.0" y="140.9" width="3.2" height="3.1"/><line class="up" x1="167.7" x2="167.7" y1="40.4" y2="57.1"/><rect class="up" x="166.1" y="41.3" width="3.2" height="13.5"/><rect class="vol up" x="166.1" y="140.7" width="3.2" height="3.3"/><line class="dn" x1="172.8" x2="172.8" y1="32.5" y2="53.0"/><rect class="dn" x="171.2" y="32.8" width="3.2" height="19.3"/><rect class="vol dn" x="171.2" y="142.4" width="3.2" height="1.6"/><line class="dn" x1="178.0" x2="178.0" y1="48.8" y2="68.9"/><rect class="dn" x="176.4" y="51.2" width="3.2" height="14.9"/><rect class="vol dn" x="176.4" y="137.3" width="3.2" height="6.7"/><line class="dn" x1="183.1" x2="183.1" y1="64.3" y2="75.8"/><rect class="dn" x="181.5" y="64.6" width="3.2" height="4.7"/><rect class="vol dn" x="181.5" y="139.9" width="3.2" height="4.1"/><line class="up" x1="188.2" x2="188.2" y1="50.7" y2="69.3"/><rect class="up" x="186.6" y="50.9" width="3.2" height="18.0"/><rect class="vol up" x="186.6" y="139.3" width="3.2" height="4.7"/><line class="dn" x1="193.4" x2="193.4" y1="45.4" y2="64.5"/><rect class="dn" x="191.8" y="48.0" width="3.2" height="11.3"/><rect class="vol dn" x="191.8" y="140.2" width="3.2" height="3.8"/><line class="up" x1="198.5" x2="198.5" y1="44.6" y2="67.6"/><rect class="up" x="196.9" y="47.3" width="3.2" height="15.8"/><rect class="vol up" x="196.9" y="141.1" width="3.2" height="2.9"/><line class="dn" x1="203.6" x2="203.6" y1="45.1" y2="60.1"/><rect class="dn" x="202.0" y="48.1" width="3.2" height="10.8"/><rect class="vol dn" x="202.0" y="141.0" width="3.2" height="3.0"/><line class="dn" x1="208.8" x2="208.8" y1="53.4" y2="71.7"/><rect class="dn" x="207.2" y="58.7" width="3.2" height="10.8"/><rect class="vol dn" x="207.2" y="141.9" width="3.2" height="2.1"/><line class="dn" x1="213.9" x2="213.9" y1="55.2" y2="68.1"/><rect class="dn" x="212.3" y="63.5" width="3.2" height="1.9"/><rect class="vol dn" x="212.3" y="142.1" width="3.2" height="1.9"/><line class="dn" x1="219.0" x2="219.0" y1="53.9" y2="68.5"/><rect class="dn" x="217.4" y="61.2" width="3.2" height="3.2"/><rect class="vol dn" x="217.4" y="138.3" width="3.2" height="5.7"/><line class="up" x1="224.2" x2="224.2" y1="58.5" y2="73.7"/><rect class="up" x="222.6" y="62.2" width="3.2" height="8.0"/><rect class="vol up" x="222.6" y="140.5" width="3.2" height="3.5"/><line class="dn" x1="229.3" x2="229.3" y1="64.5" y2="82.6"/><rect class="dn" x="227.7" y="67.2" width="3.2" height="13.7"/><rect class="vol dn" x="227.7" y="138.4" width="3.2" height="5.6"/><line class="up" x1="234.4" x2="234.4" y1="59.6" y2="79.8"/><rect class="up" x="232.8" y="64.7" width="3.2" height="14.8"/><rect class="vol up" x="232.8" y="139.6" width="3.2" height="4.4"/><line class="dn" x1="239.6" x2="239.6" y1="55.7" y2="74.8"/><rect class="dn" x="238.0" y="61.6" width="3.2" height="9.9"/><rect class="vol dn" x="238.0" y="139.0" width="3.2" height="5.0"/><line class="up" x1="244.7" x2="244.7" y1="44.0" y2="75.5"/><rect class="up" x="243.1" y="50.7" width="3.2" height="21.3"/><rect class="vol up" x="243.1" y="138.6" width="3.2" height="5.4"/><line class="dn" x1="249.8" x2="249.8" y1="48.6" y2="61.1"/><rect class="dn" x="248.2" y="54.5" width="3.2" height="1.4"/><rect class="vol dn" x="248.2" y="135.0" width="3.2" height="9.0"/><line class="up" x1="255.0" x2="255.0" y1="46.2" y2="60.1"/><rect class="up" x="253.4" y="46.6" width="3.2" height="11.4"/><rect class="vol up" x="253.4" y="140.8" width="3.2" height="3.2"/><line class="up" x1="260.1" x2="260.1" y1="33.6" y2="57.0"/><rect class="up" x="258.5" y="41.1" width="3.2" height="9.3"/><rect class="vol up" x="258.5" y="140.0" width="3.2" height="4.0"/><line class="dn" x1="265.2" x2="265.2" y1="33.4" y2="51.2"/><rect class="dn" x="263.6" y="41.5" width="3.2" height="7.4"/><rect class="vol dn" x="263.6" y="139.1" width="3.2" height="4.9"/><line class="up" x1="270.4" x2="270.4" y1="35.9" y2="48.4"/><rect class="up" x="268.8" y="40.5" width="3.2" height="7.9"/><rect class="vol up" x="268.8" y="138.8" width="3.2" height="5.2"/><line class="up" x1="275.5" x2="275.5" y1="35.0" y2="43.8"/><rect class="up" x="273.9" y="38.2" width="3.2" height="2.6"/><rect class="vol up" x="273.9" y="141.4" width="3.2" height="2.6"/><line class="up" x1="280.6" x2="280.6" y1="18.4" y2="41.2"/><rect class="up" x="279.0" y="23.7" width="3.2" height="15.9"/><rect class="vol up" x="279.0" y="139.5" width="3.2" height="4.5"/><line class="dn" x1="285.8" x2="285.8" y1="25.5" y2="36.3"/><rect class="dn" x="284.2" y="26.2" width="3.2" height="7.3"/><rect class="vol dn" x="284.2" y="141.1" width="3.2" height="2.9"/><line class="up" x1="290.9" x2="290.9" y1="32.9" y2="34.4"/><rect class="up" x="289.3" y="33.3" width="3.2" height="0.8"/><rect class="vol up" x="289.3" y="140.8" width="3.2" height="3.2"/><line class="up" x1="296.0" x2="296.0" y1="13.0" y2="31.6"/><rect class="up" x="294.4" y="17.7" width="3.2" height="13.3"/><rect class="vol up" x="294.4" y="136.7" width="3.2" height="7.3"/><line class="dn" x1="301.2" x2="301.2" y1="19.2" y2="24.2"/><rect class="dn" x="299.6" y="20.2" width="3.2" height="3.9"/><rect class="vol dn" x="299.6" y="139.6" width="3.2" height="4.4"/><line class="dn" x1="306.3" x2="306.3" y1="23.3" y2="42.1"/><rect class="dn" x="304.7" y="27.2" width="3.2" height="11.3"/><rect class="vol dn" x="304.7" y="138.8" width="3.2" height="5.2"/><line class="up" x1="311.4" x2="311.4" y1="6.0" y2="45.5"/><rect class="up" x="309.8" y="10.1" width="3.2" height="32.4"/><rect class="vol up" x="309.8" y="131.2" width="3.2" height="12.8"/><polyline class="ma25" points="8.6,99.1 13.7,98.0 18.8,96.5 24.0,94.8 29.1,93.2 34.2,91.7 39.4,89.1 44.5,86.1 49.6,82.5 54.8,79.8 59.9,76.8 65.0,74.3 70.2,71.7 75.3,69.4 80.4,67.6 85.6,65.9 90.7,64.6 95.8,62.0 101.0,59.2 106.1,56.9 111.2,55.0 116.4,52.9 121.5,50.8 126.6,48.7 131.8,47.3 136.9,46.3 142.0,46.3 147.2,46.9 152.3,46.9 157.4,46.9 162.6,46.8 167.7,46.6 172.8,46.7 178.0,47.6 183.1,48.3 188.2,48.8 193.4,49.6 198.5,50.1 203.6,50.9 208.8,51.8 213.9,52.7 219.0,53.5 224.2,54.4 229.3,56.3 234.4,57.1 239.6,58.1 244.7,58.3 249.8,58.9 255.0,59.4 260.1,59.2 265.2,59.0 270.4,58.2 275.5,57.0 280.6,55.4 285.8,54.4 290.9,53.4 296.0,52.5 301.2,51.4 306.3,50.3 311.4,47.9"/><polyline class="ma75" points="8.6,114.0 13.7,113.2 18.8,112.2 24.0,111.3 29.1,110.1 34.2,108.9 39.4,107.6 44.5,106.0 49.6,104.1 54.8,102.2 59.9,100.3 65.0,98.6 70.2,96.7 75.3,95.0 80.4,93.6 85.6,92.2 90.7,90.8 95.8,89.4 101.0,87.9 106.1,86.7 111.2,85.6 116.4,84.7 121.5,83.9 126.6,83.2 131.8,82.4 136.9,81.5 142.0,80.8 147.2,80.1 152.3,79.5 157.4,79.0 162.6,78.5 167.7,77.7 172.8,77.2 178.0,76.7 183.1,76.3 188.2,75.6 193.4,74.9 198.5,73.7 203.6,72.9 208.8,72.3 213.9,71.9 219.0,71.6 224.2,71.5 229.3,71.5 234.4,71.3 239.6,71.1 244.7,70.5 249.8,69.9 255.0,69.2 260.1,68.7 265.2,68.2 270.4,67.5 275.5,66.8 280.6,65.7 285.8,64.8 290.9,64.0 296.0,62.7 301.2,61.4 306.3,60.1 311.4,58.7"/></svg>
+      <p class="legend"><span class="l-up">陽線</span><span class="l-dn">陰線</span><span class="l-ma25">25日線</span><span class="l-ma75">75日線</span>／ 下の棒は出来高（直近60日）</p>
+      <button class="btn" type="button" data-code="2596" onclick="toggleTV(this)">📈 TradingViewで詳しく見る</button>
+      <div class="tv" id="tv-2596" hidden>
+        <div id="tvc-2596" class="tv-box"></div>
+        <a class="tv-link" href="https://jp.tradingview.com/chart/?symbol=TSE%3A2596" target="_blank" rel="noopener">TradingViewで開く ↗</a>
+      </div>
+    </div>
+
+    
+  </article>
+  
+  <article class="card stock ">
+    <header class="stock-head">
+      <div class="rank r5">5</div>
+      <div class="ident">
+        <h3>デモ銘柄148</h3>
+        <p class="sub">6740 ・ プライム ・ 銀行業</p>
+      </div>
+      <span class="pill mild" title="市場全体が弱いため格下げ">やや強気</span>
+    </header>
+
+    <div class="kpis">
+      <div class="kpi">
+        <span class="k">前営業日の終値</span>
+        <span class="v">¥1,687</span>
+        <span class="chg up">前日比 +3.6%</span>
+      </div>
+      <div class="kpi score-kpi">
+        <span class="k">総合スコア</span>
+        <span class="v big">74<small>/100</small></span>
+        <span class="bar"><i class="mild" style="width: 73.9%"></i></span>
+      </div>
+    </div>
+    <p class="note">※ 市場全体が弱いため格下げ</p>
+
+    <ul class="chips" aria-label="点数の内訳">
+      
+      <li class="zero">高値更新 0<small>/30</small></li>
+      
+      <li class="full">出来高 30<small>/30</small></li>
+      
+      <li class="full">トレンド 20<small>/20</small></li>
+      
+      <li class="full">業績 25<small>/25</small></li>
+      
+      <li class="full">規模 10<small>/10</small></li>
+      
+    </ul>
+
+    <section class="block why">
+      <h4>なぜ選ばれた？</h4>
+      <ul class="reasons">
+        <li>✅ 出来高5.9倍（直近20日の平均と比べて）</li><li>✅ 上昇トレンド継続（株価 ＞ 25日線 ＞ 75日線）</li><li>✅ 営業利益 +59%（直近四半期・前年同期比）</li><li>✅ 時価総額 9,005億円（規模は十分）</li>
+      </ul>
+      <p class="indicators">RSI 58：勢いあり（適温）　／　MACD：上昇の勢いが強い</p>
+    </section>
+
+    <section class="block easy">
+      <h4>💡 初心者向け解説</h4>
+      <p>株価が上昇の流れを保っています。出来高も普段の5.9倍に増え、買いが集まっています。営業利益も前年より59%増えています。移動平均線も上向きで、流れは良好です。</p>
+    </section>
+
+    <section class="block risk">
+      <h4>⚠️ リスク</h4>
+      <ul>
+        <li>出来高が急増しすぎており、一時的な材料で終わる可能性</li><li>市場全体が下落基調で、順張りは勝ちにくい局面</li>
+      </ul>
+      
+      <p class="stop">撤退ラインの目安：25日線 <b>¥1,632</b>（現在値から -3.3%）を終値で割ったら見直す</p>
+      
+    </section>
+
+    <div class="chart">
+      <svg viewBox="0 0 320 150" class="candle" role="img" aria-label="直近60日のローソク足と25日・75日移動平均線"><line class="dn" x1="8.6" x2="8.6" y1="44.1" y2="54.6"/><rect class="dn" x="7.0" y="50.6" width="3.2" height="1.9"/><rect class="vol dn" x="7.0" y="136.8" width="3.2" height="7.2"/><line class="up" x1="13.7" x2="13.7" y1="41.3" y2="56.1"/><rect class="up" x="12.1" y="45.3" width="3.2" height="7.7"/><rect class="vol up" x="12.1" y="140.1" width="3.2" height="3.9"/><line class="up" x1="18.8" x2="18.8" y1="37.4" y2="44.6"/><rect class="up" x="17.2" y="38.2" width="3.2" height="3.2"/><rect class="vol up" x="17.2" y="141.6" width="3.2" height="2.4"/><line class="dn" x1="24.0" x2="24.0" y1="24.7" y2="51.8"/><rect class="dn" x="22.4" y="31.4" width="3.2" height="14.4"/><rect class="vol dn" x="22.4" y="141.4" width="3.2" height="2.6"/><line class="dn" x1="29.1" x2="29.1" y1="44.2" y2="54.5"/><rect class="dn" x="27.5" y="46.5" width="3.2" height="3.7"/><rect class="vol dn" x="27.5" y="141.5" width="3.2" height="2.5"/><line class="up" x1="34.2" x2="34.2" y1="13.1" y2="47.9"/><rect class="up" x="32.6" y="17.2" width="3.2" height="29.3"/><rect class="vol up" x="32.6" y="139.5" width="3.2" height="4.5"/><line class="up" x1="39.4" x2="39.4" y1="14.7" y2="26.4"/><rect class="up" x="37.8" y="17.0" width="3.2" height="2.8"/><rect class="vol up" x="37.8" y="139.6" width="3.2" height="4.4"/><line class="dn" x1="44.5" x2="44.5" y1="13.2" y2="31.6"/><rect class="dn" x="42.9" y="14.4" width="3.2" height="14.6"/><rect class="vol dn" x="42.9" y="142.2" width="3.2" height="1.8"/><line class="dn" x1="49.6" x2="49.6" y1="23.0" y2="35.8"/><rect class="dn" x="48.0" y="25.9" width="3.2" height="1.3"/><rect class="vol dn" x="48.0" y="140.8" width="3.2" height="3.2"/><line class="up" x1="54.8" x2="54.8" y1="22.6" y2="30.2"/><rect class="up" x="53.2" y="24.9" width="3.2" height="1.1"/><rect class="vol up" x="53.2" y="138.1" width="3.2" height="5.9"/><line class="up" x1="59.9" x2="59.9" y1="21.6" y2="36.9"/><rect class="up" x="58.3" y="21.9" width="3.2" height="9.7"/><rect class="vol up" x="58.3" y="138.3" width="3.2" height="5.7"/><line class="up" x1="65.0" x2="65.0" y1="15.8" y2="25.3"/><rect class="up" x="63.4" y="17.5" width="3.2" height="5.9"/><rect class="vol up" x="63.4" y="135.9" width="3.2" height="8.1"/><line class="up" x1="70.2" x2="70.2" y1="10.6" y2="20.9"/><rect class="up" x="68.6" y="11.4" width="3.2" height="2.5"/><rect class="vol up" x="68.6" y="139.8" width="3.2" height="4.2"/><line class="dn" x1="75.3" x2="75.3" y1="6.0" y2="41.7"/><rect class="dn" x="73.7" y="9.7" width="3.2" height="25.7"/><rect class="vol dn" x="73.7" y="139.8" width="3.2" height="4.2"/><line class="dn" x1="80.4" x2="80.4" y1="18.5" y2="50.0"/><rect class="dn" x="78.8" y="34.4" width="3.2" height="15.4"/><rect class="vol dn" x="78.8" y="141.2" width="3.2" height="2.8"/><line class="dn" x1="85.6" x2="85.6" y1="49.7" y2="55.8"/><rect class="dn" x="84.0" y="50.6" width="3.2" height="4.6"/><rect class="vol dn" x="84.0" y="139.8" width="3.2" height="4.2"/><line class="dn" x1="90.7" x2="90.7" y1="54.5" y2="73.8"/><rect class="dn" x="89.1" y="54.6" width="3.2" height="12.9"/><rect class="vol dn" x="89.1" y="141.3" width="3.2" height="2.7"/><line class="up" x1="95.8" x2="95.8" y1="47.5" y2="67.8"/><rect class="up" x="94.2" y="57.8" width="3.2" height="6.7"/><rect class="vol up" x="94.2" y="141.6" width="3.2" height="2.4"/><line class="up" x1="101.0" x2="101.0" y1="37.0" y2="57.6"/><rect class="up" x="99.4" y="42.8" width="3.2" height="13.3"/><rect class="vol up" x="99.4" y="141.4" width="3.2" height="2.6"/><line class="dn" x1="106.1" x2="106.1" y1="37.0" y2="67.1"/><rect class="dn" x="104.5" y="41.8" width="3.2" height="20.4"/><rect class="vol dn" x="104.5" y="139.0" width="3.2" height="5.0"/><line class="dn" x1="111.2" x2="111.2" y1="60.9" y2="65.5"/><rect class="dn" x="109.6" y="64.4" width="3.2" height="0.8"/><rect class="vol dn" x="109.6" y="142.1" width="3.2" height="1.9"/><line class="dn" x1="116.4" x2="116.4" y1="59.1" y2="74.2"/><rect class="dn" x="114.8" y="66.3" width="3.2" height="3.2"/><rect class="vol dn" x="114.8" y="137.2" width="3.2" height="6.8"/><line class="dn" x1="121.5" x2="121.5" y1="72.6" y2="83.2"/><rect class="dn" x="119.9" y="74.7" width="3.2" height="6.3"/><rect class="vol dn" x="119.9" y="129.9" width="3.2" height="14.1"/><line class="up" x1="126.6" x2="126.6" y1="68.1" y2="78.8"/><rect class="up" x="125.0" y="69.5" width="3.2" height="6.9"/><rect class="vol up" x="125.0" y="139.2" width="3.2" height="4.8"/><line class="dn" x1="131.8" x2="131.8" y1="70.8" y2="89.0"/><rect class="dn" x="130.2" y="75.0" width="3.2" height="13.6"/><rect class="vol dn" x="130.2" y="140.5" width="3.2" height="3.5"/><line class="dn" x1="136.9" x2="136.9" y1="82.2" y2="97.7"/><rect class="dn" x="135.3" y="87.3" width="3.2" height="5.9"/><rect class="vol dn" x="135.3" y="141.2" width="3.2" height="2.8"/><line class="up" x1="142.0" x2="142.0" y1="87.4" y2="97.3"/><rect class="up" x="140.4" y="88.9" width="3.2" height="6.6"/><rect class="vol up" x="140.4" y="139.1" width="3.2" height="4.9"/><line class="dn" x1="147.2" x2="147.2" y1="83.5" y2="98.4"/><rect class="dn" x="145.6" y="88.9" width="3.2" height="6.6"/><rect class="vol dn" x="145.6" y="138.7" width="3.2" height="5.3"/><line class="up" x1="152.3" x2="152.3" y1="79.8" y2="98.6"/><rect class="up" x="150.7" y="89.7" width="3.2" height="7.0"/><rect class="vol up" x="150.7" y="139.6" width="3.2" height="4.4"/><line class="up" x1="157.4" x2="157.4" y1="77.8" y2="96.3"/><rect class="up" x="155.8" y="83.7" width="3.2" height="9.0"/><rect class="vol up" x="155.8" y="142.0" width="3.2" height="2.0"/><line class="dn" x1="162.6" x2="162.6" y1="79.0" y2="91.7"/><rect class="dn" x="161.0" y="81.4" width="3.2" height="2.7"/><rect class="vol dn" x="161.0" y="138.8" width="3.2" height="5.2"/><line class="up" x1="167.7" x2="167.7" y1="61.9" y2="93.0"/><rect class="up" x="166.1" y="64.3" width="3.2" height="24.6"/><rect class="vol up" x="166.1" y="140.5" width="3.2" height="3.5"/><line class="dn" x1="172.8" x2="172.8" y1="65.6" y2="71.6"/><rect class="dn" x="171.2" y="65.8" width="3.2" height="3.0"/><rect class="vol dn" x="171.2" y="142.3" width="3.2" height="1.7"/><line class="dn" x1="178.0" x2="178.0" y1="64.9" y2="79.7"/><rect class="dn" x="176.4" y="71.3" width="3.2" height="2.3"/><rect class="vol dn" x="176.4" y="136.6" width="3.2" height="7.4"/><line class="up" x1="183.1" x2="183.1" y1="64.3" y2="71.0"/><rect class="up" x="181.5" y="68.5" width="3.2" height="1.6"/><rect class="vol up" x="181.5" y="137.9" width="3.2" height="6.1"/><line class="dn" x1="188.2" x2="188.2" y1="64.0" y2="83.8"/><rect class="dn" x="186.6" y="68.0" width="3.2" height="10.2"/><rect class="vol dn" x="186.6" y="142.2" width="3.2" height="1.8"/><line class="up" x1="193.4" x2="193.4" y1="78.2" y2="86.1"/><rect class="up" x="191.8" y="81.8" width="3.2" height="2.0"/><rect class="vol up" x="191.8" y="140.6" width="3.2" height="3.4"/><line class="up" x1="198.5" x2="198.5" y1="73.9" y2="82.8"/><rect class="up" x="196.9" y="77.5" width="3.2" height="3.9"/><rect class="vol up" x="196.9" y="141.3" width="3.2" height="2.7"/><line class="dn" x1="203.6" x2="203.6" y1="67.2" y2="76.9"/><rect class="dn" x="202.0" y="74.4" width="3.2" height="1.9"/><rect class="vol dn" x="202.0" y="136.5" width="3.2" height="7.5"/><line class="dn" x1="208.8" x2="208.8" y1="69.4" y2="91.9"/><rect class="dn" x="207.2" y="75.8" width="3.2" height="14.8"/><rect class="vol dn" x="207.2" y="141.5" width="3.2" height="2.5"/><line class="up" x1="213.9" x2="213.9" y1="69.9" y2="95.6"/><rect class="up" x="212.3" y="74.0" width="3.2" height="15.3"/><rect class="vol up" x="212.3" y="141.9" width="3.2" height="2.1"/><line class="dn" x1="219.0" x2="219.0" y1="72.8" y2="88.5"/><rect class="dn" x="217.4" y="74.1" width="3.2" height="11.6"/><rect class="vol dn" x="217.4" y="140.7" width="3.2" height="3.3"/><line class="up" x1="224.2" x2="224.2" y1="74.5" y2="92.1"/><rect class="up" x="222.6" y="75.9" width="3.2" height="12.3"/><rect class="vol up" x="222.6" y="140.8" width="3.2" height="3.2"/><line class="dn" x1="229.3" x2="229.3" y1="67.1" y2="79.9"/><rect class="dn" x="227.7" y="70.9" width="3.2" height="1.2"/><rect class="vol dn" x="227.7" y="140.5" width="3.2" height="3.5"/><line class="up" x1="234.4" x2="234.4" y1="74.9" y2="78.5"/><rect class="up" x="232.8" y="75.1" width="3.2" height="0.8"/><rect class="vol up" x="232.8" y="139.0" width="3.2" height="5.0"/><line class="dn" x1="239.6" x2="239.6" y1="67.3" y2="73.7"/><rect class="dn" x="238.0" y="71.1" width="3.2" height="0.8"/><rect class="vol dn" x="238.0" y="140.6" width="3.2" height="3.4"/><line class="up" x1="244.7" x2="244.7" y1="58.2" y2="79.5"/><rect class="up" x="243.1" y="59.0" width="3.2" height="16.6"/><rect class="vol up" x="243.1" y="141.4" width="3.2" height="2.6"/><line class="up" x1="249.8" x2="249.8" y1="54.9" y2="70.7"/><rect class="up" x="248.2" y="56.4" width="3.2" height="6.0"/><rect class="vol up" x="248.2" y="139.5" width="3.2" height="4.5"/><line class="up" x1="255.0" x2="255.0" y1="41.8" y2="59.6"/><rect class="up" x="253.4" y="42.5" width="3.2" height="17.0"/><rect class="vol up" x="253.4" y="139.8" width="3.2" height="4.2"/><line class="up" x1="260.1" x2="260.1" y1="34.3" y2="43.5"/><rect class="up" x="258.5" y="34.4" width="3.2" height="9.0"/><rect class="vol up" x="258.5" y="125.8" width="3.2" height="18.2"/><line class="dn" x1="265.2" x2="265.2" y1="31.9" y2="48.3"/><rect class="dn" x="263.6" y="32.7" width="3.2" height="11.0"/><rect class="vol dn" x="263.6" y="139.6" width="3.2" height="4.4"/><line class="up" x1="270.4" x2="270.4" y1="38.5" y2="43.5"/><rect class="up" x="268.8" y="42.1" width="3.2" height="1.1"/><rect class="vol up" x="268.8" y="141.2" width="3.2" height="2.8"/><line class="up" x1="275.5" x2="275.5" y1="36.0" y2="44.2"/><rect class="up" x="273.9" y="37.9" width="3.2" height="5.0"/><rect class="vol up" x="273.9" y="140.6" width="3.2" height="3.4"/><line class="up" x1="280.6" x2="280.6" y1="27.6" y2="41.4"/><rect class="up" x="279.0" y="28.2" width="3.2" height="10.9"/><rect class="vol up" x="279.0" y="140.4" width="3.2" height="3.6"/><line class="dn" x1="285.8" x2="285.8" y1="18.2" y2="41.2"/><rect class="dn" x="284.2" y="26.4" width="3.2" height="12.4"/><rect class="vol dn" x="284.2" y="140.4" width="3.2" height="3.6"/><line class="up" x1="290.9" x2="290.9" y1="30.8" y2="46.3"/><rect class="up" x="289.3" y="33.2" width="3.2" height="5.7"/><rect class="vol up" x="289.3" y="140.8" width="3.2" height="3.2"/><line class="dn" x1="296.0" x2="296.0" y1="31.4" y2="33.9"/><rect class="dn" x="294.4" y="33.7" width="3.2" height="0.8"/><rect class="vol dn" x="294.4" y="138.5" width="3.2" height="5.5"/><line class="dn" x1="301.2" x2="301.2" y1="34.8" y2="46.2"/><rect class="dn" x="299.6" y="35.0" width="3.2" height="6.1"/><rect class="vol dn" x="299.6" y="141.0" width="3.2" height="3.0"/><line class="dn" x1="306.3" x2="306.3" y1="39.1" y2="62.4"/><rect class="dn" x="304.7" y="39.6" width="3.2" height="19.4"/><rect class="vol dn" x="304.7" y="138.2" width="3.2" height="5.8"/><line class="up" x1="311.4" x2="311.4" y1="19.3" y2="57.8"/><rect class="up" x="309.8" y="32.4" width="3.2" height="22.6"/><rect class="vol up" x="309.8" y="118.0" width="3.2" height="26.0"/><polyline class="ma25" points="8.6,89.8 13.7,86.3 18.8,82.4 24.0,78.9 29.1,75.9 34.2,71.2 39.4,67.2 44.5,63.0 49.6,58.7 54.8,54.9 59.9,51.4 65.0,48.3 70.2,45.5 75.3,44.2 80.4,43.9 85.6,43.6 90.7,43.9 95.8,43.8 101.0,43.4 106.1,44.0 111.2,43.8 116.4,43.8 121.5,43.8 126.6,44.3 131.8,45.7 136.9,47.3 142.0,49.1 147.2,51.3 152.3,53.1 157.4,54.4 162.6,57.1 167.7,59.0 172.8,60.6 178.0,62.5 183.1,64.2 188.2,66.5 193.4,69.0 198.5,71.7 203.6,73.3 208.8,74.9 213.9,75.7 219.0,76.4 224.2,77.1 229.3,78.3 234.4,78.8 239.6,79.1 244.7,78.7 249.8,77.7 255.0,76.6 260.1,74.4 265.2,72.5 270.4,70.6 275.5,68.3 280.6,65.8 285.8,64.0 290.9,62.0 296.0,60.8 301.2,59.7 306.3,59.1 311.4,57.6"/><polyline class="ma75" points="8.6,114.0 13.7,112.0 18.8,109.8 24.0,107.8 29.1,105.9 34.2,103.5 39.4,101.2 44.5,98.8 49.6,96.4 54.8,94.0 59.9,91.8 65.0,89.5 70.2,87.4 75.3,85.6 80.4,84.4 85.6,83.5 90.7,82.5 95.8,81.5 101.0,80.5 106.1,79.7 111.2,79.1 116.4,78.8 121.5,78.7 126.6,78.5 131.8,78.7 136.9,78.8 142.0,79.0 147.2,79.3 152.3,79.7 157.4,79.8 162.6,79.9 167.7,79.4 172.8,79.1 178.0,78.9 183.1,78.7 188.2,78.7 193.4,78.5 198.5,78.0 203.6,77.6 208.8,77.3 213.9,76.9 219.0,76.8 224.2,76.4 229.3,75.9 234.4,75.4 239.6,74.9 244.7,74.3 249.8,73.4 255.0,72.3 260.1,71.0 265.2,69.8 270.4,68.7 275.5,67.4 280.6,65.9 285.8,64.8 290.9,63.5 296.0,62.3 301.2,61.1 306.3,60.1 311.4,58.9"/></svg>
+      <p class="legend"><span class="l-up">陽線</span><span class="l-dn">陰線</span><span class="l-ma25">25日線</span><span class="l-ma75">75日線</span>／ 下の棒は出来高（直近60日）</p>
+      <button class="btn" type="button" data-code="6740" onclick="toggleTV(this)">📈 TradingViewで詳しく見る</button>
+      <div class="tv" id="tv-6740" hidden>
+        <div id="tvc-6740" class="tv-box"></div>
+        <a class="tv-link" href="https://jp.tradingview.com/chart/?symbol=TSE%3A6740" target="_blank" rel="noopener">TradingViewで開く ↗</a>
+      </div>
+    </div>
+
+    
+  </article>
+  
+  <article class="card stock ">
+    <header class="stock-head">
+      <div class="rank r6">6</div>
+      <div class="ident">
+        <h3>デモ銘柄106</h3>
+        <p class="sub">5186 ・ スタンダード ・ 小売業</p>
+      </div>
+      <span class="pill mild" title="">やや強気</span>
+    </header>
+
+    <div class="kpis">
+      <div class="kpi">
+        <span class="k">前営業日の終値</span>
+        <span class="v">¥5,807</span>
+        <span class="chg up">前日比 +3.4%</span>
+      </div>
+      <div class="kpi score-kpi">
+        <span class="k">総合スコア</span>
+        <span class="v big">70<small>/100</small></span>
+        <span class="bar"><i class="mild" style="width: 69.6%"></i></span>
+      </div>
+    </div>
+    
+
+    <ul class="chips" aria-label="点数の内訳">
+      
+      <li class="full">高値更新 30<small>/30</small></li>
+      
+      <li class="full">出来高 30<small>/30</small></li>
+      
+      <li class="full">トレンド 20<small>/20</small></li>
+      
+      <li class="zero">業績 0<small>/25</small></li>
+      
+      <li class="zero">規模 0<small>/10</small></li>
+      
+    </ul>
+
+    <section class="block why">
+      <h4>なぜ選ばれた？</h4>
+      <ul class="reasons">
+        <li>🏆 52週高値を更新（この1年で最も高い株価）</li><li>✅ 60日高値更新（約3か月ぶりの高値）</li><li>✅ 出来高3.3倍（直近20日の平均と比べて）</li><li>✅ 上昇トレンド継続（株価 ＞ 25日線 ＞ 75日線）</li>
+      </ul>
+      <p class="indicators">RSI 73：やや過熱　／　MACD：上昇の勢いが強い</p>
+    </section>
+
+    <section class="block easy">
+      <h4>💡 初心者向け解説</h4>
+      <p>株価がこの1年で最も高い水準を更新しました。出来高も普段の3.3倍に増え、買いが集まっています。移動平均線も上向きで、流れは良好です。</p>
+    </section>
+
+    <section class="block risk">
+      <h4>⚠️ リスク</h4>
+      <ul>
+        <li>営業利益データを取得できず、業績面は未確認</li><li>市場全体が下落基調で、順張りは勝ちにくい局面</li>
+      </ul>
+      
+      <p class="stop">撤退ラインの目安：25日線 <b>¥5,255</b>（現在値から -9.5%）を終値で割ったら見直す</p>
+      
+    </section>
+
+    <div class="chart">
+      <svg viewBox="0 0 320 150" class="candle" role="img" aria-label="直近60日のローソク足と25日・75日移動平均線"><line class="up" x1="8.6" x2="8.6" y1="89.9" y2="100.1"/><rect class="up" x="7.0" y="91.3" width="3.2" height="7.5"/><rect class="vol up" x="7.0" y="132.2" width="3.2" height="11.8"/><line class="up" x1="13.7" x2="13.7" y1="85.9" y2="96.4"/><rect class="up" x="12.1" y="88.5" width="3.2" height="4.7"/><rect class="vol up" x="12.1" y="136.6" width="3.2" height="7.4"/><line class="dn" x1="18.8" x2="18.8" y1="82.5" y2="96.6"/><rect class="dn" x="17.2" y="86.7" width="3.2" height="2.4"/><rect class="vol dn" x="17.2" y="133.5" width="3.2" height="10.5"/><line class="dn" x1="24.0" x2="24.0" y1="90.9" y2="103.8"/><rect class="dn" x="22.4" y="93.1" width="3.2" height="10.3"/><rect class="vol dn" x="22.4" y="139.0" width="3.2" height="5.0"/><line class="up" x1="29.1" x2="29.1" y1="95.0" y2="103.6"/><rect class="up" x="27.5" y="95.7" width="3.2" height="7.7"/><rect class="vol up" x="27.5" y="136.9" width="3.2" height="7.1"/><line class="up" x1="34.2" x2="34.2" y1="88.7" y2="98.7"/><rect class="up" x="32.6" y="90.3" width="3.2" height="4.7"/><rect class="vol up" x="32.6" y="136.7" width="3.2" height="7.3"/><line class="dn" x1="39.4" x2="39.4" y1="88.7" y2="96.6"/><rect class="dn" x="37.8" y="92.7" width="3.2" height="1.4"/><rect class="vol dn" x="37.8" y="137.6" width="3.2" height="6.4"/><line class="dn" x1="44.5" x2="44.5" y1="95.1" y2="101.4"/><rect class="dn" x="42.9" y="95.3" width="3.2" height="4.6"/><rect class="vol dn" x="42.9" y="140.0" width="3.2" height="4.0"/><line class="up" x1="49.6" x2="49.6" y1="94.2" y2="103.6"/><rect class="up" x="48.0" y="95.3" width="3.2" height="6.5"/><rect class="vol up" x="48.0" y="137.0" width="3.2" height="7.0"/><line class="dn" x1="54.8" x2="54.8" y1="91.0" y2="100.7"/><rect class="dn" x="53.2" y="94.8" width="3.2" height="4.5"/><rect class="vol dn" x="53.2" y="139.1" width="3.2" height="4.9"/><line class="dn" x1="59.9" x2="59.9" y1="94.5" y2="104.2"/><rect class="dn" x="58.3" y="96.8" width="3.2" height="5.0"/><rect class="vol dn" x="58.3" y="137.0" width="3.2" height="7.0"/><line class="dn" x1="65.0" x2="65.0" y1="100.3" y2="104.4"/><rect class="dn" x="63.4" y="101.5" width="3.2" height="1.7"/><rect class="vol dn" x="63.4" y="137.6" width="3.2" height="6.4"/><line class="up" x1="70.2" x2="70.2" y1="95.4" y2="104.3"/><rect class="up" x="68.6" y="97.0" width="3.2" height="5.2"/><rect class="vol up" x="68.6" y="135.8" width="3.2" height="8.2"/><line class="dn" x1="75.3" x2="75.3" y1="95.4" y2="106.2"/><rect class="dn" x="73.7" y="97.7" width="3.2" height="5.7"/><rect class="vol dn" x="73.7" y="139.0" width="3.2" height="5.0"/><line class="up" x1="80.4" x2="80.4" y1="97.2" y2="111.3"/><rect class="up" x="78.8" y="99.5" width="3.2" height="8.2"/><rect class="vol up" x="78.8" y="137.8" width="3.2" height="6.2"/><line class="up" x1="85.6" x2="85.6" y1="97.9" y2="104.5"/><rect class="up" x="84.0" y="100.9" width="3.2" height="1.4"/><rect class="vol up" x="84.0" y="138.3" width="3.2" height="5.7"/><line class="up" x1="90.7" x2="90.7" y1="85.9" y2="104.7"/><rect class="up" x="89.1" y="89.4" width="3.2" height="13.7"/><rect class="vol up" x="89.1" y="137.1" width="3.2" height="6.9"/><line class="up" x1="95.8" x2="95.8" y1="73.0" y2="95.5"/><rect class="up" x="94.2" y="78.0" width="3.2" height="15.4"/><rect class="vol up" x="94.2" y="139.3" width="3.2" height="4.7"/><line class="up" x1="101.0" x2="101.0" y1="60.5" y2="78.1"/><rect class="up" x="99.4" y="61.1" width="3.2" height="16.8"/><rect class="vol up" x="99.4" y="138.8" width="3.2" height="5.2"/><line class="dn" x1="106.1" x2="106.1" y1="59.3" y2="63.6"/><rect class="dn" x="104.5" y="62.0" width="3.2" height="0.8"/><rect class="vol dn" x="104.5" y="133.4" width="3.2" height="10.6"/><line class="up" x1="111.2" x2="111.2" y1="53.0" y2="66.9"/><rect class="up" x="109.6" y="53.2" width="3.2" height="6.3"/><rect class="vol up" x="109.6" y="137.4" width="3.2" height="6.6"/><line class="up" x1="116.4" x2="116.4" y1="46.3" y2="53.8"/><rect class="up" x="114.8" y="48.5" width="3.2" height="5.0"/><rect class="vol up" x="114.8" y="136.5" width="3.2" height="7.5"/><line class="dn" x1="121.5" x2="121.5" y1="46.3" y2="48.5"/><rect class="dn" x="119.9" y="47.9" width="3.2" height="0.8"/><rect class="vol dn" x="119.9" y="137.4" width="3.2" height="6.6"/><line class="up" x1="126.6" x2="126.6" y1="43.6" y2="51.8"/><rect class="up" x="125.0" y="44.8" width="3.2" height="3.8"/><rect class="vol up" x="125.0" y="137.4" width="3.2" height="6.6"/><line class="dn" x1="131.8" x2="131.8" y1="39.6" y2="68.8"/><rect class="dn" x="130.2" y="42.9" width="3.2" height="19.2"/><rect class="vol dn" x="130.2" y="129.7" width="3.2" height="14.3"/><line class="dn" x1="136.9" x2="136.9" y1="62.6" y2="73.9"/><rect class="dn" x="135.3" y="63.5" width="3.2" height="8.6"/><rect class="vol dn" x="135.3" y="139.1" width="3.2" height="4.9"/><line class="up" x1="142.0" x2="142.0" y1="66.3" y2="79.3"/><rect class="up" x="140.4" y="67.8" width="3.2" height="6.5"/><rect class="vol up" x="140.4" y="136.1" width="3.2" height="7.9"/><line class="dn" x1="147.2" x2="147.2" y1="65.9" y2="80.9"/><rect class="dn" x="145.6" y="68.6" width="3.2" height="8.3"/><rect class="vol dn" x="145.6" y="140.1" width="3.2" height="3.9"/><line class="dn" x1="152.3" x2="152.3" y1="73.7" y2="82.0"/><rect class="dn" x="150.7" y="74.5" width="3.2" height="5.5"/><rect class="vol dn" x="150.7" y="138.9" width="3.2" height="5.1"/><line class="up" x1="157.4" x2="157.4" y1="77.9" y2="83.5"/><rect class="up" x="155.8" y="79.2" width="3.2" height="2.5"/><rect class="vol up" x="155.8" y="132.2" width="3.2" height="11.8"/><line class="dn" x1="162.6" x2="162.6" y1="76.1" y2="82.6"/><rect class="dn" x="161.0" y="78.2" width="3.2" height="1.2"/><rect class="vol dn" x="161.0" y="139.5" width="3.2" height="4.5"/><line class="up" x1="167.7" x2="167.7" y1="69.2" y2="81.8"/><rect class="up" x="166.1" y="70.3" width="3.2" height="11.4"/><rect class="vol up" x="166.1" y="135.3" width="3.2" height="8.7"/><line class="up" x1="172.8" x2="172.8" y1="70.4" y2="72.0"/><rect class="up" x="171.2" y="71.3" width="3.2" height="0.8"/><rect class="vol up" x="171.2" y="135.9" width="3.2" height="8.1"/><line class="dn" x1="178.0" x2="178.0" y1="69.7" y2="80.4"/><rect class="dn" x="176.4" y="72.0" width="3.2" height="7.4"/><rect class="vol dn" x="176.4" y="139.3" width="3.2" height="4.7"/><line class="up" x1="183.1" x2="183.1" y1="76.7" y2="79.0"/><rect class="up" x="181.5" y="78.1" width="3.2" height="0.8"/><rect class="vol up" x="181.5" y="134.1" width="3.2" height="9.9"/><line class="dn" x1="188.2" x2="188.2" y1="72.9" y2="83.3"/><rect class="dn" x="186.6" y="75.7" width="3.2" height="5.5"/><rect class="vol dn" x="186.6" y="138.2" width="3.2" height="5.8"/><line class="dn" x1="193.4" x2="193.4" y1="75.2" y2="85.7"/><rect class="dn" x="191.8" y="79.5" width="3.2" height="1.8"/><rect class="vol dn" x="191.8" y="125.2" width="3.2" height="18.8"/><line class="up" x1="198.5" x2="198.5" y1="77.1" y2="80.9"/><rect class="up" x="196.9" y="80.0" width="3.2" height="0.8"/><rect class="vol up" x="196.9" y="140.1" width="3.2" height="3.9"/><line class="dn" x1="203.6" x2="203.6" y1="80.1" y2="89.5"/><rect class="dn" x="202.0" y="81.9" width="3.2" height="7.1"/><rect class="vol dn" x="202.0" y="139.0" width="3.2" height="5.0"/><line class="dn" x1="208.8" x2="208.8" y1="83.5" y2="95.7"/><rect class="dn" x="207.2" y="85.8" width="3.2" height="6.4"/><rect class="vol dn" x="207.2" y="139.1" width="3.2" height="4.9"/><line class="up" x1="213.9" x2="213.9" y1="87.6" y2="96.1"/><rect class="up" x="212.3" y="89.0" width="3.2" height="4.3"/><rect class="vol up" x="212.3" y="136.9" width="3.2" height="7.1"/><line class="dn" x1="219.0" x2="219.0" y1="87.4" y2="94.7"/><rect class="dn" x="217.4" y="87.9" width="3.2" height="3.4"/><rect class="vol dn" x="217.4" y="138.2" width="3.2" height="5.8"/><line class="up" x1="224.2" x2="224.2" y1="79.9" y2="97.2"/><rect class="up" x="222.6" y="83.9" width="3.2" height="9.5"/><rect class="vol up" x="222.6" y="140.6" width="3.2" height="3.4"/><line class="up" x1="229.3" x2="229.3" y1="78.3" y2="88.3"/><rect class="up" x="227.7" y="79.4" width="3.2" height="6.4"/><rect class="vol up" x="227.7" y="118.0" width="3.2" height="26.0"/><line class="up" x1="234.4" x2="234.4" y1="75.3" y2="79.8"/><rect class="up" x="232.8" y="75.8" width="3.2" height="0.8"/><rect class="vol up" x="232.8" y="139.1" width="3.2" height="4.9"/><line class="up" x1="239.6" x2="239.6" y1="65.2" y2="75.7"/><rect class="up" x="238.0" y="67.1" width="3.2" height="7.9"/><rect class="vol up" x="238.0" y="133.6" width="3.2" height="10.4"/><line class="up" x1="244.7" x2="244.7" y1="55.9" y2="67.0"/><rect class="up" x="243.1" y="59.2" width="3.2" height="6.8"/><rect class="vol up" x="243.1" y="135.9" width="3.2" height="8.1"/><line class="up" x1="249.8" x2="249.8" y1="47.2" y2="60.1"/><rect class="up" x="248.2" y="49.5" width="3.2" height="9.5"/><rect class="vol up" x="248.2" y="140.2" width="3.2" height="3.8"/><line class="up" x1="255.0" x2="255.0" y1="38.0" y2="52.1"/><rect class="up" x="253.4" y="39.8" width="3.2" height="11.5"/><rect class="vol up" x="253.4" y="136.7" width="3.2" height="7.3"/><line class="up" x1="260.1" x2="260.1" y1="33.6" y2="41.4"/><rect class="up" x="258.5" y="34.1" width="3.2" height="7.0"/><rect class="vol up" x="258.5" y="138.4" width="3.2" height="5.6"/><line class="dn" x1="265.2" x2="265.2" y1="34.9" y2="37.3"/><rect class="dn" x="263.6" y="35.6" width="3.2" height="0.8"/><rect class="vol dn" x="263.6" y="128.2" width="3.2" height="15.8"/><line class="dn" x1="270.4" x2="270.4" y1="33.8" y2="41.6"/><rect class="dn" x="268.8" y="36.4" width="3.2" height="2.8"/><rect class="vol dn" x="268.8" y="137.8" width="3.2" height="6.2"/><line class="up" x1="275.5" x2="275.5" y1="32.4" y2="45.8"/><rect class="up" x="273.9" y="33.7" width="3.2" height="9.2"/><rect class="vol up" x="273.9" y="138.9" width="3.2" height="5.1"/><line class="dn" x1="280.6" x2="280.6" y1="27.2" y2="37.8"/><rect class="dn" x="279.0" y="34.3" width="3.2" height="0.9"/><rect class="vol dn" x="279.0" y="138.7" width="3.2" height="5.3"/><line class="dn" x1="285.8" x2="285.8" y1="31.8" y2="43.8"/><rect class="dn" x="284.2" y="34.6" width="3.2" height="7.9"/><rect class="vol dn" x="284.2" y="140.1" width="3.2" height="3.9"/><line class="up" x1="290.9" x2="290.9" y1="26.9" y2="44.5"/><rect class="up" x="289.3" y="29.4" width="3.2" height="14.1"/><rect class="vol up" x="289.3" y="139.9" width="3.2" height="4.1"/><line class="up" x1="296.0" x2="296.0" y1="23.9" y2="32.2"/><rect class="up" x="294.4" y="24.1" width="3.2" height="4.4"/><rect class="vol up" x="294.4" y="136.7" width="3.2" height="7.3"/><line class="dn" x1="301.2" x2="301.2" y1="22.6" y2="36.0"/><rect class="dn" x="299.6" y="24.8" width="3.2" height="9.2"/><rect class="vol dn" x="299.6" y="138.0" width="3.2" height="6.0"/><line class="up" x1="306.3" x2="306.3" y1="16.9" y2="45.1"/><rect class="up" x="304.7" y="23.4" width="3.2" height="12.4"/><rect class="vol up" x="304.7" y="140.6" width="3.2" height="3.4"/><line class="up" x1="311.4" x2="311.4" y1="6.0" y2="25.1"/><rect class="up" x="309.8" y="6.1" width="3.2" height="19.1"/><rect class="vol up" x="309.8" y="120.4" width="3.2" height="23.6"/><polyline class="ma25" points="8.6,97.8 13.7,97.8 18.8,97.7 24.0,98.2 29.1,98.2 34.2,97.8 39.4,97.1 44.5,96.3 49.6,95.1 54.8,94.6 59.9,94.6 65.0,94.8 70.2,95.2 75.3,95.7 80.4,96.2 85.6,96.6 90.7,96.5 95.8,95.9 101.0,94.7 106.1,93.3 111.2,91.5 116.4,89.4 121.5,87.2 126.6,85.4 131.8,84.0 136.9,83.2 142.0,82.4 147.2,81.9 152.3,81.0 157.4,80.3 162.6,79.9 167.7,78.9 172.8,77.8 178.0,77.2 183.1,76.3 188.2,75.5 193.4,74.6 198.5,73.9 203.6,73.4 208.8,73.1 213.9,72.6 219.0,72.7 224.2,72.9 229.3,73.6 234.4,74.2 239.6,74.7 244.7,75.2 249.8,75.2 255.0,75.0 260.1,73.9 265.2,72.5 270.4,71.3 275.5,69.6 280.6,67.8 285.8,66.3 290.9,64.3 296.0,62.5 301.2,61.0 306.3,58.8 311.4,55.9"/><polyline class="ma75" points="8.6,114.0 13.7,113.2 18.8,112.5 24.0,111.8 29.1,111.0 34.2,110.1 39.4,109.3 44.5,108.5 49.6,107.6 54.8,106.7 59.9,105.9 65.0,105.2 70.2,104.4 75.3,103.7 80.4,103.2 85.6,102.6 90.7,101.9 95.8,101.2 101.0,100.2 106.1,99.3 111.2,98.3 116.4,97.4 121.5,96.6 126.6,95.8 131.8,95.2 136.9,94.6 142.0,94.0 147.2,93.5 152.3,93.2 157.4,93.0 162.6,92.7 167.7,92.1 172.8,91.6 178.0,91.3 183.1,90.9 188.2,90.5 193.4,90.0 198.5,89.5 203.6,89.2 208.8,89.0 213.9,88.7 219.0,88.7 224.2,88.6 229.3,88.4 234.4,88.2 239.6,87.8 244.7,87.5 249.8,87.0 255.0,86.1 260.1,85.3 265.2,84.5 270.4,83.9 275.5,83.1 280.6,82.3 285.8,81.6 290.9,80.7 296.0,79.5 301.2,78.4 306.3,77.0 311.4,75.6"/></svg>
+      <p class="legend"><span class="l-up">陽線</span><span class="l-dn">陰線</span><span class="l-ma25">25日線</span><span class="l-ma75">75日線</span>／ 下の棒は出来高（直近60日）</p>
+      <button class="btn" type="button" data-code="5186" onclick="toggleTV(this)">📈 TradingViewで詳しく見る</button>
+      <div class="tv" id="tv-5186" hidden>
+        <div id="tvc-5186" class="tv-box"></div>
+        <a class="tv-link" href="https://jp.tradingview.com/chart/?symbol=TSE%3A5186" target="_blank" rel="noopener">TradingViewで開く ↗</a>
+      </div>
+    </div>
+
+    
+  </article>
+  
+  <article class="card stock ">
+    <header class="stock-head">
+      <div class="rank r7">7</div>
+      <div class="ident">
+        <h3>デモ銘柄113</h3>
+        <p class="sub">5445 ・ プライム ・ 化学</p>
+      </div>
+      <span class="pill mild" title="">やや強気</span>
+    </header>
+
+    <div class="kpis">
+      <div class="kpi">
+        <span class="k">前営業日の終値</span>
+        <span class="v">¥5,797</span>
+        <span class="chg up">前日比 +4.8%</span>
+      </div>
+      <div class="kpi score-kpi">
+        <span class="k">総合スコア</span>
+        <span class="v big">65<small>/100</small></span>
+        <span class="bar"><i class="mild" style="width: 65.2%"></i></span>
+      </div>
+    </div>
+    
+
+    <ul class="chips" aria-label="点数の内訳">
+      
+      <li class="full">高値更新 30<small>/30</small></li>
+      
+      <li class="part">出来高 20<small>/30</small></li>
+      
+      <li class="full">トレンド 20<small>/20</small></li>
+      
+      <li class="zero">業績 0<small>/25</small></li>
+      
+      <li class="part">規模 5<small>/10</small></li>
+      
+    </ul>
+
+    <section class="block why">
+      <h4>なぜ選ばれた？</h4>
+      <ul class="reasons">
+        <li>✅ 60日高値更新（約3か月ぶりの高値）</li><li>✅ 出来高2.0倍（直近20日の平均と比べて）</li><li>✅ 上昇トレンド継続（株価 ＞ 25日線 ＞ 75日線）</li><li>✅ 時価総額 414億円（規模は十分）</li>
+      </ul>
+      <p class="indicators">RSI 78：やや過熱　／　MACD：上昇の勢いが強い</p>
+    </section>
+
+    <section class="block easy">
+      <h4>💡 初心者向け解説</h4>
+      <p>株価が約3か月ぶりの高値を更新しました。出来高も普段の2.0倍に増え、買いが集まっています。移動平均線も上向きで、流れは良好です。</p>
+    </section>
+
+    <section class="block risk">
+      <h4>⚠️ リスク</h4>
+      <ul>
+        <li>RSIが78と過熱圏。利益確定売りによる反落に注意</li><li>市場全体が下落基調で、順張りは勝ちにくい局面</li>
+      </ul>
+      
+      <p class="stop">撤退ラインの目安：25日線 <b>¥5,185</b>（現在値から -10.5%）を終値で割ったら見直す</p>
+      
+    </section>
+
+    <div class="chart">
+      <svg viewBox="0 0 320 150" class="candle" role="img" aria-label="直近60日のローソク足と25日・75日移動平均線"><line class="up" x1="8.6" x2="8.6" y1="88.5" y2="98.9"/><rect class="up" x="7.0" y="90.5" width="3.2" height="4.8"/><rect class="vol up" x="7.0" y="122.8" width="3.2" height="21.2"/><line class="dn" x1="13.7" x2="13.7" y1="90.0" y2="97.1"/><rect class="dn" x="12.1" y="90.4" width="3.2" height="2.3"/><rect class="vol dn" x="12.1" y="131.6" width="3.2" height="12.4"/><line class="up" x1="18.8" x2="18.8" y1="85.9" y2="93.8"/><rect class="up" x="17.2" y="89.7" width="3.2" height="3.8"/><rect class="vol up" x="17.2" y="132.6" width="3.2" height="11.4"/><line class="up" x1="24.0" x2="24.0" y1="83.2" y2="89.9"/><rect class="up" x="22.4" y="87.1" width="3.2" height="1.5"/><rect class="vol up" x="22.4" y="137.2" width="3.2" height="6.8"/><line class="dn" x1="29.1" x2="29.1" y1="88.6" y2="91.7"/><rect class="dn" x="27.5" y="88.8" width="3.2" height="2.4"/><rect class="vol dn" x="27.5" y="131.2" width="3.2" height="12.8"/><line class="dn" x1="34.2" x2="34.2" y1="88.5" y2="94.1"/><rect class="dn" x="32.6" y="90.0" width="3.2" height="2.7"/><rect class="vol dn" x="32.6" y="132.1" width="3.2" height="11.9"/><line class="up" x1="39.4" x2="39.4" y1="86.0" y2="94.1"/><rect class="up" x="37.8" y="90.2" width="3.2" height="3.8"/><rect class="vol up" x="37.8" y="130.9" width="3.2" height="13.1"/><line class="dn" x1="44.5" x2="44.5" y1="89.6" y2="96.4"/><rect class="dn" x="42.9" y="90.6" width="3.2" height="5.5"/><rect class="vol dn" x="42.9" y="137.4" width="3.2" height="6.6"/><line class="up" x1="49.6" x2="49.6" y1="82.5" y2="96.1"/><rect class="up" x="48.0" y="82.6" width="3.2" height="12.7"/><rect class="vol up" x="48.0" y="137.7" width="3.2" height="6.3"/><line class="dn" x1="54.8" x2="54.8" y1="74.8" y2="86.4"/><rect class="dn" x="53.2" y="80.4" width="3.2" height="5.5"/><rect class="vol dn" x="53.2" y="130.6" width="3.2" height="13.4"/><line class="up" x1="59.9" x2="59.9" y1="75.7" y2="89.6"/><rect class="up" x="58.3" y="80.3" width="3.2" height="6.8"/><rect class="vol up" x="58.3" y="122.7" width="3.2" height="21.3"/><line class="dn" x1="65.0" x2="65.0" y1="78.3" y2="83.9"/><rect class="dn" x="63.4" y="80.0" width="3.2" height="3.0"/><rect class="vol dn" x="63.4" y="132.0" width="3.2" height="12.0"/><line class="dn" x1="70.2" x2="70.2" y1="79.2" y2="85.4"/><rect class="dn" x="68.6" y="82.3" width="3.2" height="0.8"/><rect class="vol dn" x="68.6" y="130.4" width="3.2" height="13.6"/><line class="dn" x1="75.3" x2="75.3" y1="80.5" y2="95.3"/><rect class="dn" x="73.7" y="82.9" width="3.2" height="11.0"/><rect class="vol dn" x="73.7" y="125.6" width="3.2" height="18.4"/><line class="dn" x1="80.4" x2="80.4" y1="89.1" y2="96.9"/><rect class="dn" x="78.8" y="91.2" width="3.2" height="5.4"/><rect class="vol dn" x="78.8" y="136.8" width="3.2" height="7.2"/><line class="dn" x1="85.6" x2="85.6" y1="97.1" y2="106.2"/><rect class="dn" x="84.0" y="98.8" width="3.2" height="3.9"/><rect class="vol dn" x="84.0" y="133.8" width="3.2" height="10.2"/><line class="dn" x1="90.7" x2="90.7" y1="102.6" y2="108.6"/><rect class="dn" x="89.1" y="105.1" width="3.2" height="3.4"/><rect class="vol dn" x="89.1" y="131.5" width="3.2" height="12.5"/><line class="up" x1="95.8" x2="95.8" y1="105.2" y2="114.0"/><rect class="up" x="94.2" y="105.5" width="3.2" height="5.1"/><rect class="vol up" x="94.2" y="131.2" width="3.2" height="12.8"/><line class="up" x1="101.0" x2="101.0" y1="100.6" y2="103.8"/><rect class="up" x="99.4" y="103.6" width="3.2" height="0.8"/><rect class="vol up" x="99.4" y="131.8" width="3.2" height="12.2"/><line class="dn" x1="106.1" x2="106.1" y1="104.0" y2="106.6"/><rect class="dn" x="104.5" y="104.2" width="3.2" height="2.4"/><rect class="vol dn" x="104.5" y="129.2" width="3.2" height="14.8"/><line class="up" x1="111.2" x2="111.2" y1="97.2" y2="110.7"/><rect class="up" x="109.6" y="97.8" width="3.2" height="9.5"/><rect class="vol up" x="109.6" y="129.4" width="3.2" height="14.6"/><line class="up" x1="116.4" x2="116.4" y1="94.8" y2="99.7"/><rect class="up" x="114.8" y="96.1" width="3.2" height="2.6"/><rect class="vol up" x="114.8" y="128.9" width="3.2" height="15.1"/><line class="dn" x1="121.5" x2="121.5" y1="91.2" y2="100.5"/><rect class="dn" x="119.9" y="94.2" width="3.2" height="5.4"/><rect class="vol dn" x="119.9" y="133.4" width="3.2" height="10.6"/><line class="up" x1="126.6" x2="126.6" y1="94.9" y2="99.0"/><rect class="up" x="125.0" y="96.2" width="3.2" height="2.0"/><rect class="vol up" x="125.0" y="127.2" width="3.2" height="16.8"/><line class="up" x1="131.8" x2="131.8" y1="90.3" y2="100.1"/><rect class="up" x="130.2" y="90.5" width="3.2" height="7.8"/><rect class="vol up" x="130.2" y="129.2" width="3.2" height="14.8"/><line class="dn" x1="136.9" x2="136.9" y1="84.4" y2="93.9"/><rect class="dn" x="135.3" y="89.0" width="3.2" height="4.9"/><rect class="vol dn" x="135.3" y="133.0" width="3.2" height="11.0"/><line class="dn" x1="142.0" x2="142.0" y1="90.8" y2="97.0"/><rect class="dn" x="140.4" y="93.0" width="3.2" height="4.0"/><rect class="vol dn" x="140.4" y="134.0" width="3.2" height="10.0"/><line class="up" x1="147.2" x2="147.2" y1="90.1" y2="96.5"/><rect class="up" x="145.6" y="90.2" width="3.2" height="5.4"/><rect class="vol up" x="145.6" y="131.9" width="3.2" height="12.1"/><line class="up" x1="152.3" x2="152.3" y1="79.7" y2="95.0"/><rect class="up" x="150.7" y="82.2" width="3.2" height="9.8"/><rect class="vol up" x="150.7" y="118.0" width="3.2" height="26.0"/><line class="dn" x1="157.4" x2="157.4" y1="79.0" y2="83.2"/><rect class="dn" x="155.8" y="80.5" width="3.2" height="2.1"/><rect class="vol dn" x="155.8" y="134.8" width="3.2" height="9.2"/><line class="dn" x1="162.6" x2="162.6" y1="80.6" y2="89.3"/><rect class="dn" x="161.0" y="82.4" width="3.2" height="5.1"/><rect class="vol dn" x="161.0" y="131.2" width="3.2" height="12.8"/><line class="up" x1="167.7" x2="167.7" y1="77.0" y2="89.1"/><rect class="up" x="166.1" y="77.7" width="3.2" height="9.9"/><rect class="vol up" x="166.1" y="126.5" width="3.2" height="17.5"/><line class="dn" x1="172.8" x2="172.8" y1="79.4" y2="82.2"/><rect class="dn" x="171.2" y="79.8" width="3.2" height="1.6"/><rect class="vol dn" x="171.2" y="131.8" width="3.2" height="12.2"/><line class="dn" x1="178.0" x2="178.0" y1="82.6" y2="93.7"/><rect class="dn" x="176.4" y="83.3" width="3.2" height="6.8"/><rect class="vol dn" x="176.4" y="130.1" width="3.2" height="13.9"/><line class="dn" x1="183.1" x2="183.1" y1="84.8" y2="89.7"/><rect class="dn" x="181.5" y="89.2" width="3.2" height="0.8"/><rect class="vol dn" x="181.5" y="127.5" width="3.2" height="16.5"/><line class="up" x1="188.2" x2="188.2" y1="80.1" y2="92.2"/><rect class="up" x="186.6" y="82.3" width="3.2" height="7.3"/><rect class="vol up" x="186.6" y="135.3" width="3.2" height="8.7"/><line class="dn" x1="193.4" x2="193.4" y1="78.9" y2="89.1"/><rect class="dn" x="191.8" y="81.9" width="3.2" height="5.6"/><rect class="vol dn" x="191.8" y="134.7" width="3.2" height="9.3"/><line class="up" x1="198.5" x2="198.5" y1="80.8" y2="90.1"/><rect class="up" x="196.9" y="84.1" width="3.2" height="3.6"/><rect class="vol up" x="196.9" y="130.3" width="3.2" height="13.7"/><line class="dn" x1="203.6" x2="203.6" y1="81.1" y2="88.3"/><rect class="dn" x="202.0" y="82.6" width="3.2" height="4.6"/><rect class="vol dn" x="202.0" y="128.1" width="3.2" height="15.9"/><line class="dn" x1="208.8" x2="208.8" y1="85.3" y2="87.8"/><rect class="dn" x="207.2" y="86.0" width="3.2" height="1.3"/><rect class="vol dn" x="207.2" y="119.3" width="3.2" height="24.7"/><line class="up" x1="213.9" x2="213.9" y1="83.9" y2="89.4"/><rect class="up" x="212.3" y="84.6" width="3.2" height="4.1"/><rect class="vol up" x="212.3" y="132.7" width="3.2" height="11.3"/><line class="up" x1="219.0" x2="219.0" y1="78.9" y2="85.4"/><rect class="up" x="217.4" y="79.3" width="3.2" height="4.8"/><rect class="vol up" x="217.4" y="134.1" width="3.2" height="9.9"/><line class="up" x1="224.2" x2="224.2" y1="70.1" y2="80.6"/><rect class="up" x="222.6" y="71.2" width="3.2" height="8.5"/><rect class="vol up" x="222.6" y="133.3" width="3.2" height="10.7"/><line class="up" x1="229.3" x2="229.3" y1="64.8" y2="71.6"/><rect class="up" x="227.7" y="69.2" width="3.2" height="0.8"/><rect class="vol up" x="227.7" y="135.2" width="3.2" height="8.8"/><line class="up" x1="234.4" x2="234.4" y1="64.9" y2="71.1"/><rect class="up" x="232.8" y="66.2" width="3.2" height="4.4"/><rect class="vol up" x="232.8" y="137.0" width="3.2" height="7.0"/><line class="dn" x1="239.6" x2="239.6" y1="66.0" y2="67.4"/><rect class="dn" x="238.0" y="66.3" width="3.2" height="0.8"/><rect class="vol dn" x="238.0" y="133.7" width="3.2" height="10.3"/><line class="up" x1="244.7" x2="244.7" y1="57.8" y2="72.3"/><rect class="up" x="243.1" y="57.9" width="3.2" height="10.0"/><rect class="vol up" x="243.1" y="132.2" width="3.2" height="11.8"/><line class="up" x1="249.8" x2="249.8" y1="45.6" y2="57.1"/><rect class="up" x="248.2" y="45.7" width="3.2" height="10.3"/><rect class="vol up" x="248.2" y="131.0" width="3.2" height="13.0"/><line class="up" x1="255.0" x2="255.0" y1="37.8" y2="49.2"/><rect class="up" x="253.4" y="37.9" width="3.2" height="9.0"/><rect class="vol up" x="253.4" y="129.2" width="3.2" height="14.8"/><line class="dn" x1="260.1" x2="260.1" y1="34.7" y2="36.2"/><rect class="dn" x="258.5" y="35.7" width="3.2" height="0.8"/><rect class="vol dn" x="258.5" y="120.9" width="3.2" height="23.1"/><line class="dn" x1="265.2" x2="265.2" y1="31.9" y2="51.3"/><rect class="dn" x="263.6" y="35.5" width="3.2" height="14.7"/><rect class="vol dn" x="263.6" y="131.8" width="3.2" height="12.2"/><line class="up" x1="270.4" x2="270.4" y1="37.0" y2="52.8"/><rect class="up" x="268.8" y="43.4" width="3.2" height="7.8"/><rect class="vol up" x="268.8" y="132.6" width="3.2" height="11.4"/><line class="dn" x1="275.5" x2="275.5" y1="43.7" y2="51.9"/><rect class="dn" x="273.9" y="45.0" width="3.2" height="4.5"/><rect class="vol dn" x="273.9" y="132.6" width="3.2" height="11.4"/><line class="dn" x1="280.6" x2="280.6" y1="45.0" y2="52.6"/><rect class="dn" x="279.0" y="45.7" width="3.2" height="3.9"/><rect class="vol dn" x="279.0" y="132.8" width="3.2" height="11.2"/><line class="up" x1="285.8" x2="285.8" y1="39.1" y2="56.2"/><rect class="up" x="284.2" y="40.6" width="3.2" height="12.6"/><rect class="vol up" x="284.2" y="132.6" width="3.2" height="11.4"/><line class="up" x1="290.9" x2="290.9" y1="34.8" y2="45.9"/><rect class="up" x="289.3" y="34.8" width="3.2" height="8.2"/><rect class="vol up" x="289.3" y="127.9" width="3.2" height="16.1"/><line class="up" x1="296.0" x2="296.0" y1="28.0" y2="37.6"/><rect class="up" x="294.4" y="28.2" width="3.2" height="4.9"/><rect class="vol up" x="294.4" y="134.7" width="3.2" height="9.3"/><line class="up" x1="301.2" x2="301.2" y1="24.5" y2="32.4"/><rect class="up" x="299.6" y="26.9" width="3.2" height="1.8"/><rect class="vol up" x="299.6" y="130.7" width="3.2" height="13.3"/><line class="dn" x1="306.3" x2="306.3" y1="23.8" y2="30.6"/><rect class="dn" x="304.7" y="27.6" width="3.2" height="1.0"/><rect class="vol dn" x="304.7" y="131.0" width="3.2" height="13.0"/><line class="up" x1="311.4" x2="311.4" y1="6.0" y2="31.8"/><rect class="up" x="309.8" y="7.2" width="3.2" height="22.9"/><rect class="vol up" x="309.8" y="118.1" width="3.2" height="25.9"/><polyline class="ma25" points="8.6,87.1 13.7,87.3 18.8,87.1 24.0,86.8 29.1,86.7 34.2,86.2 39.4,86.2 44.5,86.3 49.6,85.7 54.8,85.2 59.9,84.7 65.0,85.1 70.2,85.3 75.3,86.1 80.4,87.3 85.6,88.4 90.7,89.8 95.8,90.9 101.0,91.7 106.1,92.7 111.2,93.2 116.4,93.4 121.5,93.5 126.6,93.8 131.8,93.7 136.9,93.8 142.0,94.0 147.2,94.0 152.3,93.8 157.4,93.5 162.6,93.3 167.7,92.8 172.8,92.2 178.0,92.5 183.1,92.6 188.2,92.7 193.4,92.9 198.5,92.9 203.6,92.7 208.8,92.3 213.9,91.6 219.0,90.4 224.2,89.0 229.3,87.7 234.4,86.1 239.6,84.8 244.7,83.3 249.8,81.1 255.0,78.8 260.1,76.6 265.2,74.9 270.4,72.7 275.5,71.1 280.6,69.8 285.8,68.1 290.9,66.0 296.0,64.0 301.2,61.8 306.3,59.4 311.4,56.1"/><polyline class="ma75" points="8.6,83.3 13.7,83.5 18.8,83.8 24.0,83.9 29.1,84.0 34.2,84.1 39.4,84.1 44.5,84.1 49.6,83.8 54.8,83.6 59.9,83.4 65.0,83.3 70.2,83.2 75.3,83.3 80.4,83.5 85.6,83.8 90.7,84.2 95.8,84.5 101.0,84.8 106.1,85.1 111.2,85.4 116.4,85.5 121.5,85.9 126.6,86.4 131.8,86.7 136.9,87.0 142.0,87.3 147.2,87.4 152.3,87.5 157.4,87.5 162.6,87.5 167.7,87.3 172.8,87.2 178.0,87.2 183.1,87.2 188.2,87.2 193.4,87.2 198.5,87.1 203.6,87.2 208.8,87.2 213.9,87.3 219.0,87.3 224.2,87.3 229.3,87.2 234.4,87.1 239.6,87.0 244.7,86.8 249.8,86.5 255.0,86.1 260.1,85.6 265.2,85.3 270.4,84.7 275.5,84.1 280.6,83.5 285.8,82.7 290.9,81.8 296.0,81.0 301.2,80.1 306.3,79.2 311.4,78.0"/></svg>
+      <p class="legend"><span class="l-up">陽線</span><span class="l-dn">陰線</span><span class="l-ma25">25日線</span><span class="l-ma75">75日線</span>／ 下の棒は出来高（直近60日）</p>
+      <button class="btn" type="button" data-code="5445" onclick="toggleTV(this)">📈 TradingViewで詳しく見る</button>
+      <div class="tv" id="tv-5445" hidden>
+        <div id="tvc-5445" class="tv-box"></div>
+        <a class="tv-link" href="https://jp.tradingview.com/chart/?symbol=TSE%3A5445" target="_blank" rel="noopener">TradingViewで開く ↗</a>
+      </div>
+    </div>
+
+    
+  </article>
+  
+  <article class="card stock ">
+    <header class="stock-head">
+      <div class="rank r8">8</div>
+      <div class="ident">
+        <h3>デモ銘柄022</h3>
+        <p class="sub">2078 ・ プライム ・ 小売業</p>
+      </div>
+      <span class="pill mild" title="">やや強気</span>
+    </header>
+
+    <div class="kpis">
+      <div class="kpi">
+        <span class="k">前営業日の終値</span>
+        <span class="v">¥3,719</span>
+        <span class="chg up">前日比 +4.0%</span>
+      </div>
+      <div class="kpi score-kpi">
+        <span class="k">総合スコア</span>
+        <span class="v big">61<small>/100</small></span>
+        <span class="bar"><i class="mild" style="width: 60.9%"></i></span>
+      </div>
+    </div>
+    
+
+    <ul class="chips" aria-label="点数の内訳">
+      
+      <li class="full">高値更新 30<small>/30</small></li>
+      
+      <li class="part">出来高 20<small>/30</small></li>
+      
+      <li class="full">トレンド 20<small>/20</small></li>
+      
+      <li class="zero">業績 0<small>/25</small></li>
+      
+      <li class="zero">規模 0<small>/10</small></li>
+      
+    </ul>
+
+    <section class="block why">
+      <h4>なぜ選ばれた？</h4>
+      <ul class="reasons">
+        <li>✅ 60日高値更新（約3か月ぶりの高値）</li><li>✅ 出来高2.7倍（直近20日の平均と比べて）</li><li>✅ 上昇トレンド継続（株価 ＞ 25日線 ＞ 75日線）</li>
+      </ul>
+      <p class="indicators">RSI 71：やや過熱　／　MACD：上昇の勢いが強い</p>
+    </section>
+
+    <section class="block easy">
+      <h4>💡 初心者向け解説</h4>
+      <p>株価が約3か月ぶりの高値を更新しました。出来高も普段の2.7倍に増え、買いが集まっています。移動平均線も上向きで、流れは良好です。</p>
+    </section>
+
+    <section class="block risk">
+      <h4>⚠️ リスク</h4>
+      <ul>
+        <li>時価総額が小さく、値動きが荒くなりやすい</li><li>市場全体が下落基調で、順張りは勝ちにくい局面</li>
+      </ul>
+      
+      <p class="stop">撤退ラインの目安：25日線 <b>¥3,483</b>（現在値から -6.4%）を終値で割ったら見直す</p>
+      
+    </section>
+
+    <div class="chart">
+      <svg viewBox="0 0 320 150" class="candle" role="img" aria-label="直近60日のローソク足と25日・75日移動平均線"><line class="dn" x1="8.6" x2="8.6" y1="84.4" y2="103.0"/><rect class="dn" x="7.0" y="88.1" width="3.2" height="11.9"/><rect class="vol dn" x="7.0" y="127.7" width="3.2" height="16.3"/><line class="up" x1="13.7" x2="13.7" y1="84.1" y2="102.8"/><rect class="up" x="12.1" y="96.9" width="3.2" height="2.2"/><rect class="vol up" x="12.1" y="133.0" width="3.2" height="11.0"/><line class="up" x1="18.8" x2="18.8" y1="78.7" y2="96.1"/><rect class="up" x="17.2" y="80.6" width="3.2" height="15.5"/><rect class="vol up" x="17.2" y="131.1" width="3.2" height="12.9"/><line class="dn" x1="24.0" x2="24.0" y1="79.6" y2="90.2"/><rect class="dn" x="22.4" y="84.0" width="3.2" height="2.9"/><rect class="vol dn" x="22.4" y="137.5" width="3.2" height="6.5"/><line class="up" x1="29.1" x2="29.1" y1="74.3" y2="87.6"/><rect class="up" x="27.5" y="78.3" width="3.2" height="8.5"/><rect class="vol up" x="27.5" y="119.3" width="3.2" height="24.7"/><line class="up" x1="34.2" x2="34.2" y1="58.2" y2="84.0"/><rect class="up" x="32.6" y="64.3" width="3.2" height="13.9"/><rect class="vol up" x="32.6" y="134.2" width="3.2" height="9.8"/><line class="dn" x1="39.4" x2="39.4" y1="55.2" y2="64.1"/><rect class="dn" x="37.8" y="59.4" width="3.2" height="1.9"/><rect class="vol dn" x="37.8" y="138.9" width="3.2" height="5.1"/><line class="dn" x1="44.5" x2="44.5" y1="61.4" y2="80.8"/><rect class="dn" x="42.9" y="64.8" width="3.2" height="7.7"/><rect class="vol dn" x="42.9" y="127.9" width="3.2" height="16.1"/><line class="up" x1="49.6" x2="49.6" y1="52.9" y2="74.7"/><rect class="up" x="48.0" y="54.0" width="3.2" height="16.8"/><rect class="vol up" x="48.0" y="135.3" width="3.2" height="8.7"/><line class="dn" x1="54.8" x2="54.8" y1="42.1" y2="77.7"/><rect class="dn" x="53.2" y="52.4" width="3.2" height="7.8"/><rect class="vol dn" x="53.2" y="125.5" width="3.2" height="18.5"/><line class="dn" x1="59.9" x2="59.9" y1="50.4" y2="78.1"/><rect class="dn" x="58.3" y="56.4" width="3.2" height="12.4"/><rect class="vol dn" x="58.3" y="137.9" width="3.2" height="6.1"/><line class="up" x1="65.0" x2="65.0" y1="58.1" y2="75.9"/><rect class="up" x="63.4" y="62.6" width="3.2" height="4.8"/><rect class="vol up" x="63.4" y="132.7" width="3.2" height="11.3"/><line class="up" x1="70.2" x2="70.2" y1="40.5" y2="63.6"/><rect class="up" x="68.6" y="43.8" width="3.2" height="16.0"/><rect class="vol up" x="68.6" y="134.6" width="3.2" height="9.4"/><line class="dn" x1="75.3" x2="75.3" y1="41.2" y2="66.2"/><rect class="dn" x="73.7" y="50.1" width="3.2" height="2.8"/><rect class="vol dn" x="73.7" y="136.1" width="3.2" height="7.9"/><line class="dn" x1="80.4" x2="80.4" y1="52.8" y2="64.0"/><rect class="dn" x="78.8" y="55.5" width="3.2" height="5.8"/><rect class="vol dn" x="78.8" y="133.2" width="3.2" height="10.8"/><line class="dn" x1="85.6" x2="85.6" y1="44.3" y2="88.1"/><rect class="dn" x="84.0" y="56.1" width="3.2" height="28.0"/><rect class="vol dn" x="84.0" y="132.5" width="3.2" height="11.5"/><line class="up" x1="90.7" x2="90.7" y1="77.4" y2="91.1"/><rect class="up" x="89.1" y="78.9" width="3.2" height="5.1"/><rect class="vol up" x="89.1" y="137.4" width="3.2" height="6.6"/><line class="up" x1="95.8" x2="95.8" y1="73.9" y2="85.4"/><rect class="up" x="94.2" y="78.9" width="3.2" height="6.4"/><rect class="vol up" x="94.2" y="123.8" width="3.2" height="20.2"/><line class="up" x1="101.0" x2="101.0" y1="68.3" y2="80.1"/><rect class="up" x="99.4" y="75.2" width="3.2" height="3.9"/><rect class="vol up" x="99.4" y="129.4" width="3.2" height="14.6"/><line class="dn" x1="106.1" x2="106.1" y1="75.2" y2="87.7"/><rect class="dn" x="104.5" y="78.1" width="3.2" height="2.1"/><rect class="vol dn" x="104.5" y="136.6" width="3.2" height="7.4"/><line class="up" x1="111.2" x2="111.2" y1="59.7" y2="80.2"/><rect class="up" x="109.6" y="66.5" width="3.2" height="12.5"/><rect class="vol up" x="109.6" y="134.9" width="3.2" height="9.1"/><line class="dn" x1="116.4" x2="116.4" y1="62.8" y2="78.1"/><rect class="dn" x="114.8" y="65.5" width="3.2" height="10.6"/><rect class="vol dn" x="114.8" y="138.9" width="3.2" height="5.1"/><line class="dn" x1="121.5" x2="121.5" y1="73.3" y2="84.5"/><rect class="dn" x="119.9" y="74.5" width="3.2" height="8.8"/><rect class="vol dn" x="119.9" y="134.7" width="3.2" height="9.3"/><line class="up" x1="126.6" x2="126.6" y1="69.9" y2="85.0"/><rect class="up" x="125.0" y="70.9" width="3.2" height="13.5"/><rect class="vol up" x="125.0" y="138.9" width="3.2" height="5.1"/><line class="dn" x1="131.8" x2="131.8" y1="61.7" y2="90.4"/><rect class="dn" x="130.2" y="66.3" width="3.2" height="19.3"/><rect class="vol dn" x="130.2" y="136.2" width="3.2" height="7.8"/><line class="up" x1="136.9" x2="136.9" y1="70.9" y2="90.7"/><rect class="up" x="135.3" y="72.3" width="3.2" height="14.6"/><rect class="vol up" x="135.3" y="132.7" width="3.2" height="11.3"/><line class="dn" x1="142.0" x2="142.0" y1="67.8" y2="81.2"/><rect class="dn" x="140.4" y="70.5" width="3.2" height="9.8"/><rect class="vol dn" x="140.4" y="132.8" width="3.2" height="11.2"/><line class="dn" x1="147.2" x2="147.2" y1="80.0" y2="83.4"/><rect class="dn" x="145.6" y="81.2" width="3.2" height="1.3"/><rect class="vol dn" x="145.6" y="132.4" width="3.2" height="11.6"/><line class="dn" x1="152.3" x2="152.3" y1="76.0" y2="85.9"/><rect class="dn" x="150.7" y="76.8" width="3.2" height="7.1"/><rect class="vol dn" x="150.7" y="132.4" width="3.2" height="11.6"/><line class="up" x1="157.4" x2="157.4" y1="78.0" y2="89.2"/><rect class="up" x="155.8" y="79.3" width="3.2" height="5.0"/><rect class="vol up" x="155.8" y="136.9" width="3.2" height="7.1"/><line class="dn" x1="162.6" x2="162.6" y1="72.1" y2="84.0"/><rect class="dn" x="161.0" y="75.7" width="3.2" height="4.3"/><rect class="vol dn" x="161.0" y="133.5" width="3.2" height="10.5"/><line class="up" x1="167.7" x2="167.7" y1="73.9" y2="82.9"/><rect class="up" x="166.1" y="75.4" width="3.2" height="3.0"/><rect class="vol up" x="166.1" y="136.4" width="3.2" height="7.6"/><line class="up" x1="172.8" x2="172.8" y1="73.9" y2="82.9"/><rect class="up" x="171.2" y="74.1" width="3.2" height="5.8"/><rect class="vol up" x="171.2" y="136.1" width="3.2" height="7.9"/><line class="dn" x1="178.0" x2="178.0" y1="69.8" y2="92.8"/><rect class="dn" x="176.4" y="77.1" width="3.2" height="4.4"/><rect class="vol dn" x="176.4" y="138.6" width="3.2" height="5.4"/><line class="up" x1="183.1" x2="183.1" y1="75.4" y2="79.9"/><rect class="up" x="181.5" y="77.6" width="3.2" height="0.8"/><rect class="vol up" x="181.5" y="133.6" width="3.2" height="10.4"/><line class="dn" x1="188.2" x2="188.2" y1="72.1" y2="81.6"/><rect class="dn" x="186.6" y="74.2" width="3.2" height="5.2"/><rect class="vol dn" x="186.6" y="131.3" width="3.2" height="12.7"/><line class="dn" x1="193.4" x2="193.4" y1="80.3" y2="88.3"/><rect class="dn" x="191.8" y="82.7" width="3.2" height="2.1"/><rect class="vol dn" x="191.8" y="138.7" width="3.2" height="5.3"/><line class="up" x1="198.5" x2="198.5" y1="80.4" y2="89.0"/><rect class="up" x="196.9" y="82.6" width="3.2" height="5.9"/><rect class="vol up" x="196.9" y="134.1" width="3.2" height="9.9"/><line class="dn" x1="203.6" x2="203.6" y1="76.2" y2="86.3"/><rect class="dn" x="202.0" y="76.7" width="3.2" height="1.4"/><rect class="vol dn" x="202.0" y="131.4" width="3.2" height="12.6"/><line class="dn" x1="208.8" x2="208.8" y1="79.3" y2="95.6"/><rect class="dn" x="207.2" y="81.1" width="3.2" height="11.9"/><rect class="vol dn" x="207.2" y="133.0" width="3.2" height="11.0"/><line class="up" x1="213.9" x2="213.9" y1="76.8" y2="90.3"/><rect class="up" x="212.3" y="77.8" width="3.2" height="12.1"/><rect class="vol up" x="212.3" y="132.7" width="3.2" height="11.3"/><line class="dn" x1="219.0" x2="219.0" y1="71.8" y2="97.0"/><rect class="dn" x="217.4" y="77.9" width="3.2" height="18.1"/><rect class="vol dn" x="217.4" y="132.6" width="3.2" height="11.4"/><line class="up" x1="224.2" x2="224.2" y1="94.3" y2="104.5"/><rect class="up" x="222.6" y="101.0" width="3.2" height="0.9"/><rect class="vol up" x="222.6" y="135.8" width="3.2" height="8.2"/><line class="up" x1="229.3" x2="229.3" y1="93.2" y2="114.0"/><rect class="up" x="227.7" y="101.4" width="3.2" height="4.8"/><rect class="vol up" x="227.7" y="132.6" width="3.2" height="11.4"/><line class="up" x1="234.4" x2="234.4" y1="89.1" y2="108.7"/><rect class="up" x="232.8" y="92.0" width="3.2" height="10.4"/><rect class="vol up" x="232.8" y="135.0" width="3.2" height="9.0"/><line class="up" x1="239.6" x2="239.6" y1="83.9" y2="92.6"/><rect class="up" x="238.0" y="89.3" width="3.2" height="2.1"/><rect class="vol up" x="238.0" y="139.3" width="3.2" height="4.7"/><line class="up" x1="244.7" x2="244.7" y1="71.7" y2="86.9"/><rect class="up" x="243.1" y="78.1" width="3.2" height="7.6"/><rect class="vol up" x="243.1" y="132.3" width="3.2" height="11.7"/><line class="up" x1="249.8" x2="249.8" y1="68.0" y2="80.4"/><rect class="up" x="248.2" y="71.7" width="3.2" height="5.5"/><rect class="vol up" x="248.2" y="138.3" width="3.2" height="5.7"/><line class="up" x1="255.0" x2="255.0" y1="61.1" y2="75.3"/><rect class="up" x="253.4" y="67.1" width="3.2" height="2.2"/><rect class="vol up" x="253.4" y="137.1" width="3.2" height="6.9"/><line class="up" x1="260.1" x2="260.1" y1="61.0" y2="67.8"/><rect class="up" x="258.5" y="62.0" width="3.2" height="0.8"/><rect class="vol up" x="258.5" y="130.4" width="3.2" height="13.6"/><line class="up" x1="265.2" x2="265.2" y1="45.2" y2="61.9"/><rect class="up" x="263.6" y="52.2" width="3.2" height="8.9"/><rect class="vol up" x="263.6" y="134.5" width="3.2" height="9.5"/><line class="dn" x1="270.4" x2="270.4" y1="51.7" y2="55.9"/><rect class="dn" x="268.8" y="53.5" width="3.2" height="0.8"/><rect class="vol dn" x="268.8" y="134.5" width="3.2" height="9.5"/><line class="dn" x1="275.5" x2="275.5" y1="46.4" y2="68.4"/><rect class="dn" x="273.9" y="52.1" width="3.2" height="12.6"/><rect class="vol dn" x="273.9" y="136.3" width="3.2" height="7.7"/><line class="up" x1="280.6" x2="280.6" y1="55.2" y2="67.7"/><rect class="up" x="279.0" y="57.3" width="3.2" height="8.6"/><rect class="vol up" x="279.0" y="135.3" width="3.2" height="8.7"/><line class="up" x1="285.8" x2="285.8" y1="56.8" y2="59.2"/><rect class="up" x="284.2" y="57.4" width="3.2" height="1.2"/><rect class="vol up" x="284.2" y="137.5" width="3.2" height="6.5"/><line class="up" x1="290.9" x2="290.9" y1="34.7" y2="55.2"/><rect class="up" x="289.3" y="37.8" width="3.2" height="15.9"/><rect class="vol up" x="289.3" y="130.5" width="3.2" height="13.5"/><line class="up" x1="296.0" x2="296.0" y1="27.0" y2="42.3"/><rect class="up" x="294.4" y="30.6" width="3.2" height="6.2"/><rect class="vol up" x="294.4" y="132.9" width="3.2" height="11.1"/><line class="dn" x1="301.2" x2="301.2" y1="32.3" y2="36.5"/><rect class="dn" x="299.6" y="32.3" width="3.2" height="3.6"/><rect class="vol dn" x="299.6" y="134.2" width="3.2" height="9.8"/><line class="dn" x1="306.3" x2="306.3" y1="30.0" y2="47.8"/><rect class="dn" x="304.7" y="32.8" width="3.2" height="11.4"/><rect class="vol dn" x="304.7" y="132.8" width="3.2" height="11.2"/><line class="up" x1="311.4" x2="311.4" y1="6.0" y2="47.4"/><rect class="up" x="309.8" y="7.6" width="3.2" height="32.5"/><rect class="vol up" x="309.8" y="118.0" width="3.2" height="26.0"/><polyline class="ma25" points="8.6,106.6 13.7,106.2 18.8,105.1 24.0,104.2 29.1,103.5 34.2,101.7 39.4,99.8 44.5,97.6 49.6,94.6 54.8,92.1 59.9,90.0 65.0,87.8 70.2,85.1 75.3,82.6 80.4,80.6 85.6,80.1 90.7,78.8 95.8,77.9 101.0,77.2 106.1,76.5 111.2,75.2 116.4,73.9 121.5,73.5 126.6,73.1 131.8,73.0 136.9,71.9 142.0,71.2 147.2,71.3 152.3,71.1 157.4,71.2 162.6,71.8 167.7,72.4 172.8,72.4 178.0,73.5 183.1,74.2 188.2,74.7 193.4,75.5 198.5,77.1 203.6,78.1 208.8,79.4 213.9,79.1 219.0,79.8 224.2,80.7 229.3,81.7 234.4,82.2 239.6,83.1 244.7,83.2 249.8,82.7 255.0,82.6 260.1,81.6 265.2,80.8 270.4,79.8 275.5,79.1 280.6,78.0 285.8,77.1 290.9,75.4 296.0,73.6 301.2,72.1 306.3,70.6 311.4,67.8"/><polyline class="ma75" points="8.6,83.4 13.7,84.4 18.8,85.2 24.0,86.0 29.1,86.5 34.2,86.7 39.4,86.8 44.5,86.9 49.6,86.4 54.8,86.0 59.9,85.9 65.0,85.9 70.2,85.4 75.3,85.2 80.4,85.3 85.6,85.5 90.7,85.8 95.8,86.0 101.0,86.4 106.1,86.9 111.2,87.3 116.4,87.9 121.5,88.6 126.6,89.0 131.8,89.6 136.9,89.9 142.0,90.3 147.2,90.6 152.3,91.0 157.4,91.3 162.6,91.6 167.7,91.6 172.8,91.7 178.0,91.9 183.1,92.0 188.2,91.9 193.4,91.9 198.5,91.6 203.6,91.1 208.8,90.7 213.9,90.1 219.0,89.9 224.2,89.9 229.3,89.8 234.4,89.5 239.6,89.2 244.7,88.8 249.8,88.4 255.0,87.8 260.1,87.2 265.2,86.4 270.4,85.7 275.5,85.1 280.6,84.4 285.8,83.9 290.9,83.0 296.0,81.9 301.2,80.7 306.3,79.6 311.4,78.1"/></svg>
+      <p class="legend"><span class="l-up">陽線</span><span class="l-dn">陰線</span><span class="l-ma25">25日線</span><span class="l-ma75">75日線</span>／ 下の棒は出来高（直近60日）</p>
+      <button class="btn" type="button" data-code="2078" onclick="toggleTV(this)">📈 TradingViewで詳しく見る</button>
+      <div class="tv" id="tv-2078" hidden>
+        <div id="tvc-2078" class="tv-box"></div>
+        <a class="tv-link" href="https://jp.tradingview.com/chart/?symbol=TSE%3A2078" target="_blank" rel="noopener">TradingViewで開く ↗</a>
+      </div>
+    </div>
+
+    
+  </article>
+  
+  <article class="card stock ">
+    <header class="stock-head">
+      <div class="rank r9">9</div>
+      <div class="ident">
+        <h3>デモ銘柄134</h3>
+        <p class="sub">6222 ・ グロース ・ 情報・通信業</p>
+      </div>
+      <span class="pill mild" title="">やや強気</span>
+    </header>
+
+    <div class="kpis">
+      <div class="kpi">
+        <span class="k">前営業日の終値</span>
+        <span class="v">¥4,327</span>
+        <span class="chg up">前日比 +5.7%</span>
+      </div>
+      <div class="kpi score-kpi">
+        <span class="k">総合スコア</span>
+        <span class="v big">61<small>/100</small></span>
+        <span class="bar"><i class="mild" style="width: 60.9%"></i></span>
+      </div>
+    </div>
+    
+
+    <ul class="chips" aria-label="点数の内訳">
+      
+      <li class="part">高値更新 15<small>/30</small></li>
+      
+      <li class="part">出来高 20<small>/30</small></li>
+      
+      <li class="zero">トレンド 0<small>/20</small></li>
+      
+      <li class="full">業績 25<small>/25</small></li>
+      
+      <li class="full">規模 10<small>/10</small></li>
+      
+    </ul>
+
+    <section class="block why">
+      <h4>なぜ選ばれた？</h4>
+      <ul class="reasons">
+        <li>✅ 30日高値更新（約1.5か月ぶりの高値）</li><li>✅ 出来高2.1倍（直近20日の平均と比べて）</li><li>✅ 営業利益 +85%（直近四半期・前年同期比）</li><li>✅ 時価総額 3,315億円（規模は十分）</li>
+      </ul>
+      <p class="indicators">RSI 59：勢いあり（適温）　／　MACD：上昇の勢いが強い</p>
+    </section>
+
+    <section class="block easy">
+      <h4>💡 初心者向け解説</h4>
+      <p>株価が直近1か月半の高値をつけました。出来高も普段の2.1倍に増え、買いが集まっています。営業利益も前年より85%増えています。</p>
+    </section>
+
+    <section class="block risk">
+      <h4>⚠️ リスク</h4>
+      <ul>
+        <li>グロース市場の銘柄は値動きが大きい傾向</li><li>市場全体が下落基調で、順張りは勝ちにくい局面</li>
+      </ul>
+      
+      <p class="stop">撤退ラインの目安：25日線 <b>¥4,118</b>（現在値から -4.8%）を終値で割ったら見直す</p>
+      
+    </section>
+
+    <div class="chart">
+      <svg viewBox="0 0 320 150" class="candle" role="img" aria-label="直近60日のローソク足と25日・75日移動平均線"><line class="dn" x1="8.6" x2="8.6" y1="54.8" y2="66.9"/><rect class="dn" x="7.0" y="63.8" width="3.2" height="2.3"/><rect class="vol dn" x="7.0" y="138.8" width="3.2" height="5.2"/><line class="up" x1="13.7" x2="13.7" y1="57.7" y2="75.2"/><rect class="up" x="12.1" y="60.7" width="3.2" height="11.5"/><rect class="vol up" x="12.1" y="134.6" width="3.2" height="9.4"/><line class="up" x1="18.8" x2="18.8" y1="42.1" y2="68.6"/><rect class="up" x="17.2" y="45.3" width="3.2" height="15.2"/><rect class="vol up" x="17.2" y="135.1" width="3.2" height="8.9"/><line class="dn" x1="24.0" x2="24.0" y1="40.1" y2="59.6"/><rect class="dn" x="22.4" y="43.9" width="3.2" height="14.2"/><rect class="vol dn" x="22.4" y="132.0" width="3.2" height="12.0"/><line class="up" x1="29.1" x2="29.1" y1="49.3" y2="65.7"/><rect class="up" x="27.5" y="56.6" width="3.2" height="4.7"/><rect class="vol up" x="27.5" y="129.5" width="3.2" height="14.5"/><line class="up" x1="34.2" x2="34.2" y1="50.6" y2="59.9"/><rect class="up" x="32.6" y="54.0" width="3.2" height="5.2"/><rect class="vol up" x="32.6" y="129.6" width="3.2" height="14.4"/><line class="dn" x1="39.4" x2="39.4" y1="56.0" y2="65.7"/><rect class="dn" x="37.8" y="56.6" width="3.2" height="4.4"/><rect class="vol dn" x="37.8" y="133.7" width="3.2" height="10.3"/><line class="up" x1="44.5" x2="44.5" y1="39.7" y2="62.7"/><rect class="up" x="42.9" y="50.2" width="3.2" height="11.4"/><rect class="vol up" x="42.9" y="135.1" width="3.2" height="8.9"/><line class="up" x1="49.6" x2="49.6" y1="31.4" y2="49.0"/><rect class="up" x="48.0" y="37.0" width="3.2" height="11.6"/><rect class="vol up" x="48.0" y="131.3" width="3.2" height="12.7"/><line class="up" x1="54.8" x2="54.8" y1="32.5" y2="37.8"/><rect class="up" x="53.2" y="34.6" width="3.2" height="0.8"/><rect class="vol up" x="53.2" y="131.2" width="3.2" height="12.8"/><line class="up" x1="59.9" x2="59.9" y1="25.6" y2="39.8"/><rect class="up" x="58.3" y="26.3" width="3.2" height="12.6"/><rect class="vol up" x="58.3" y="131.5" width="3.2" height="12.5"/><line class="dn" x1="65.0" x2="65.0" y1="15.0" y2="35.7"/><rect class="dn" x="63.4" y="25.5" width="3.2" height="8.7"/><rect class="vol dn" x="63.4" y="134.1" width="3.2" height="9.9"/><line class="up" x1="70.2" x2="70.2" y1="16.1" y2="38.9"/><rect class="up" x="68.6" y="21.6" width="3.2" height="15.8"/><rect class="vol up" x="68.6" y="130.8" width="3.2" height="13.2"/><line class="dn" x1="75.3" x2="75.3" y1="28.9" y2="43.5"/><rect class="dn" x="73.7" y="30.4" width="3.2" height="10.3"/><rect class="vol dn" x="73.7" y="135.4" width="3.2" height="8.6"/><line class="dn" x1="80.4" x2="80.4" y1="27.2" y2="52.4"/><rect class="dn" x="78.8" y="39.0" width="3.2" height="10.1"/><rect class="vol dn" x="78.8" y="136.7" width="3.2" height="7.3"/><line class="dn" x1="85.6" x2="85.6" y1="48.7" y2="58.0"/><rect class="dn" x="84.0" y="52.1" width="3.2" height="4.0"/><rect class="vol dn" x="84.0" y="138.5" width="3.2" height="5.5"/><line class="up" x1="90.7" x2="90.7" y1="43.5" y2="62.9"/><rect class="up" x="89.1" y="45.3" width="3.2" height="12.5"/><rect class="vol up" x="89.1" y="136.7" width="3.2" height="7.3"/><line class="up" x1="95.8" x2="95.8" y1="37.8" y2="42.4"/><rect class="up" x="94.2" y="40.8" width="3.2" height="0.8"/><rect class="vol up" x="94.2" y="124.5" width="3.2" height="19.5"/><line class="up" x1="101.0" x2="101.0" y1="25.4" y2="39.4"/><rect class="up" x="99.4" y="34.3" width="3.2" height="4.5"/><rect class="vol up" x="99.4" y="130.7" width="3.2" height="13.3"/><line class="up" x1="106.1" x2="106.1" y1="32.6" y2="41.4"/><rect class="up" x="104.5" y="32.9" width="3.2" height="4.2"/><rect class="vol up" x="104.5" y="128.6" width="3.2" height="15.4"/><line class="up" x1="111.2" x2="111.2" y1="31.2" y2="41.2"/><rect class="up" x="109.6" y="33.6" width="3.2" height="3.0"/><rect class="vol up" x="109.6" y="136.3" width="3.2" height="7.7"/><line class="dn" x1="116.4" x2="116.4" y1="31.8" y2="40.4"/><rect class="dn" x="114.8" y="33.4" width="3.2" height="6.4"/><rect class="vol dn" x="114.8" y="136.3" width="3.2" height="7.7"/><line class="dn" x1="121.5" x2="121.5" y1="34.7" y2="61.3"/><rect class="dn" x="119.9" y="36.5" width="3.2" height="21.9"/><rect class="vol dn" x="119.9" y="133.3" width="3.2" height="10.7"/><line class="up" x1="126.6" x2="126.6" y1="41.5" y2="70.5"/><rect class="up" x="125.0" y="44.1" width="3.2" height="16.1"/><rect class="vol up" x="125.0" y="133.8" width="3.2" height="10.2"/><line class="dn" x1="131.8" x2="131.8" y1="39.7" y2="59.3"/><rect class="dn" x="130.2" y="45.2" width="3.2" height="11.8"/><rect class="vol dn" x="130.2" y="132.0" width="3.2" height="12.0"/><line class="dn" x1="136.9" x2="136.9" y1="59.3" y2="83.7"/><rect class="dn" x="135.3" y="61.8" width="3.2" height="12.1"/><rect class="vol dn" x="135.3" y="131.8" width="3.2" height="12.2"/><line class="dn" x1="142.0" x2="142.0" y1="68.6" y2="81.7"/><rect class="dn" x="140.4" y="70.5" width="3.2" height="9.0"/><rect class="vol dn" x="140.4" y="132.7" width="3.2" height="11.3"/><line class="dn" x1="147.2" x2="147.2" y1="78.8" y2="92.7"/><rect class="dn" x="145.6" y="79.7" width="3.2" height="10.6"/><rect class="vol dn" x="145.6" y="132.4" width="3.2" height="11.6"/><line class="dn" x1="152.3" x2="152.3" y1="84.3" y2="99.7"/><rect class="dn" x="150.7" y="90.7" width="3.2" height="8.7"/><rect class="vol dn" x="150.7" y="130.4" width="3.2" height="13.6"/><line class="up" x1="157.4" x2="157.4" y1="84.8" y2="105.4"/><rect class="up" x="155.8" y="88.4" width="3.2" height="12.5"/><rect class="vol up" x="155.8" y="137.6" width="3.2" height="6.4"/><line class="up" x1="162.6" x2="162.6" y1="84.8" y2="99.6"/><rect class="up" x="161.0" y="85.8" width="3.2" height="7.5"/><rect class="vol up" x="161.0" y="136.9" width="3.2" height="7.1"/><line class="up" x1="167.7" x2="167.7" y1="62.5" y2="91.8"/><rect class="up" x="166.1" y="69.0" width="3.2" height="18.8"/><rect class="vol up" x="166.1" y="137.6" width="3.2" height="6.4"/><line class="dn" x1="172.8" x2="172.8" y1="65.6" y2="76.5"/><rect class="dn" x="171.2" y="68.0" width="3.2" height="1.3"/><rect class="vol dn" x="171.2" y="136.0" width="3.2" height="8.0"/><line class="dn" x1="178.0" x2="178.0" y1="68.9" y2="87.9"/><rect class="dn" x="176.4" y="71.5" width="3.2" height="14.3"/><rect class="vol dn" x="176.4" y="131.8" width="3.2" height="12.2"/><line class="dn" x1="183.1" x2="183.1" y1="85.9" y2="99.6"/><rect class="dn" x="181.5" y="86.3" width="3.2" height="12.4"/><rect class="vol dn" x="181.5" y="134.9" width="3.2" height="9.1"/><line class="dn" x1="188.2" x2="188.2" y1="98.0" y2="110.0"/><rect class="dn" x="186.6" y="99.2" width="3.2" height="6.9"/><rect class="vol dn" x="186.6" y="133.7" width="3.2" height="10.3"/><line class="up" x1="193.4" x2="193.4" y1="102.2" y2="107.9"/><rect class="up" x="191.8" y="104.3" width="3.2" height="3.1"/><rect class="vol up" x="191.8" y="124.5" width="3.2" height="19.5"/><line class="up" x1="198.5" x2="198.5" y1="91.0" y2="98.1"/><rect class="up" x="196.9" y="96.0" width="3.2" height="1.1"/><rect class="vol up" x="196.9" y="129.5" width="3.2" height="14.5"/><line class="dn" x1="203.6" x2="203.6" y1="99.5" y2="109.9"/><rect class="dn" x="202.0" y="99.7" width="3.2" height="2.9"/><rect class="vol dn" x="202.0" y="136.1" width="3.2" height="7.9"/><line class="dn" x1="208.8" x2="208.8" y1="102.2" y2="111.0"/><rect class="dn" x="207.2" y="102.7" width="3.2" height="7.1"/><rect class="vol dn" x="207.2" y="135.9" width="3.2" height="8.1"/><line class="up" x1="213.9" x2="213.9" y1="97.2" y2="109.4"/><rect class="up" x="212.3" y="99.4" width="3.2" height="9.2"/><rect class="vol up" x="212.3" y="123.8" width="3.2" height="20.2"/><line class="dn" x1="219.0" x2="219.0" y1="92.6" y2="107.6"/><rect class="dn" x="217.4" y="96.6" width="3.2" height="8.0"/><rect class="vol dn" x="217.4" y="131.6" width="3.2" height="12.4"/><line class="dn" x1="224.2" x2="224.2" y1="105.7" y2="114.0"/><rect class="dn" x="222.6" y="108.3" width="3.2" height="0.8"/><rect class="vol dn" x="222.6" y="133.1" width="3.2" height="10.9"/><line class="up" x1="229.3" x2="229.3" y1="94.0" y2="111.9"/><rect class="up" x="227.7" y="96.4" width="3.2" height="11.5"/><rect class="vol up" x="227.7" y="133.5" width="3.2" height="10.5"/><line class="up" x1="234.4" x2="234.4" y1="83.6" y2="98.1"/><rect class="up" x="232.8" y="87.5" width="3.2" height="8.4"/><rect class="vol up" x="232.8" y="132.2" width="3.2" height="11.8"/><line class="dn" x1="239.6" x2="239.6" y1="79.2" y2="86.2"/><rect class="dn" x="238.0" y="83.2" width="3.2" height="1.8"/><rect class="vol dn" x="238.0" y="135.6" width="3.2" height="8.4"/><line class="up" x1="244.7" x2="244.7" y1="78.1" y2="92.2"/><rect class="up" x="243.1" y="80.0" width="3.2" height="5.6"/><rect class="vol up" x="243.1" y="127.2" width="3.2" height="16.8"/><line class="up" x1="249.8" x2="249.8" y1="74.0" y2="83.1"/><rect class="up" x="248.2" y="74.8" width="3.2" height="7.0"/><rect class="vol up" x="248.2" y="128.5" width="3.2" height="15.5"/><line class="up" x1="255.0" x2="255.0" y1="59.5" y2="83.4"/><rect class="up" x="253.4" y="61.6" width="3.2" height="15.3"/><rect class="vol up" x="253.4" y="133.6" width="3.2" height="10.4"/><line class="up" x1="260.1" x2="260.1" y1="50.9" y2="62.0"/><rect class="up" x="258.5" y="54.6" width="3.2" height="7.2"/><rect class="vol up" x="258.5" y="127.4" width="3.2" height="16.6"/><line class="dn" x1="265.2" x2="265.2" y1="46.7" y2="57.9"/><rect class="dn" x="263.6" y="52.4" width="3.2" height="1.8"/><rect class="vol dn" x="263.6" y="134.1" width="3.2" height="9.9"/><line class="up" x1="270.4" x2="270.4" y1="45.3" y2="61.7"/><rect class="up" x="268.8" y="53.4" width="3.2" height="2.7"/><rect class="vol up" x="268.8" y="120.9" width="3.2" height="23.1"/><line class="up" x1="275.5" x2="275.5" y1="48.9" y2="60.2"/><rect class="up" x="273.9" y="50.8" width="3.2" height="9.1"/><rect class="vol up" x="273.9" y="132.4" width="3.2" height="11.6"/><line class="up" x1="280.6" x2="280.6" y1="47.0" y2="54.7"/><rect class="up" x="279.0" y="49.0" width="3.2" height="5.3"/><rect class="vol up" x="279.0" y="134.4" width="3.2" height="9.6"/><line class="dn" x1="285.8" x2="285.8" y1="45.2" y2="72.6"/><rect class="dn" x="284.2" y="47.3" width="3.2" height="24.8"/><rect class="vol dn" x="284.2" y="134.8" width="3.2" height="9.2"/><line class="up" x1="290.9" x2="290.9" y1="41.2" y2="73.9"/><rect class="up" x="289.3" y="47.7" width="3.2" height="24.1"/><rect class="vol up" x="289.3" y="136.8" width="3.2" height="7.2"/><line class="dn" x1="296.0" x2="296.0" y1="37.3" y2="48.7"/><rect class="dn" x="294.4" y="40.6" width="3.2" height="6.3"/><rect class="vol dn" x="294.4" y="134.8" width="3.2" height="9.2"/><line class="dn" x1="301.2" x2="301.2" y1="45.8" y2="71.9"/><rect class="dn" x="299.6" y="47.3" width="3.2" height="20.8"/><rect class="vol dn" x="299.6" y="128.6" width="3.2" height="15.4"/><line class="dn" x1="306.3" x2="306.3" y1="68.8" y2="82.1"/><rect class="dn" x="304.7" y="71.1" width="3.2" height="10.3"/><rect class="vol dn" x="304.7" y="135.7" width="3.2" height="8.3"/><line class="up" x1="311.4" x2="311.4" y1="36.5" y2="84.9"/><rect class="up" x="309.8" y="41.2" width="3.2" height="43.5"/><rect class="vol up" x="309.8" y="118.0" width="3.2" height="26.0"/><polyline class="ma25" points="8.6,42.2 13.7,43.9 18.8,45.1 24.0,46.8 29.1,47.8 34.2,48.3 39.4,48.6 44.5,48.1 49.6,46.7 54.8,46.1 59.9,46.1 65.0,46.7 70.2,46.5 75.3,47.1 80.4,48.5 85.6,49.8 90.7,50.5 95.8,50.7 101.0,50.5 106.1,49.5 111.2,48.6 116.4,47.5 121.5,46.7 126.6,45.9 131.8,45.5 136.9,45.8 142.0,46.6 147.2,48.4 152.3,50.0 157.4,51.3 162.6,52.6 167.7,52.9 172.8,53.7 178.0,55.6 183.1,58.2 188.2,61.4 193.4,64.2 198.5,67.2 203.6,69.6 208.8,72.1 213.9,73.8 219.0,76.2 224.2,78.9 229.3,81.3 234.4,83.5 239.6,85.6 244.7,87.2 249.8,87.8 255.0,88.5 260.1,88.4 265.2,87.7 270.4,86.6 275.5,85.0 280.6,83.0 285.8,82.4 290.9,80.8 296.0,80.0 301.2,79.9 306.3,79.7 311.4,77.4"/><polyline class="ma75" points="8.6,7.2 13.7,7.5 18.8,7.6 24.0,7.7 29.1,7.6 34.2,7.5 39.4,7.6 44.5,7.5 49.6,7.2 54.8,6.6 59.9,6.3 65.0,6.3 70.2,6.0 75.3,6.1 80.4,6.6 85.6,7.3 90.7,7.8 95.8,8.3 101.0,9.0 106.1,9.8 111.2,10.4 116.4,11.4 121.5,13.0 126.6,14.3 131.8,15.8 136.9,17.2 142.0,18.7 147.2,20.4 152.3,22.4 157.4,24.3 162.6,26.2 167.7,27.7 172.8,29.3 178.0,31.0 183.1,33.0 188.2,34.9 193.4,36.7 198.5,38.1 203.6,39.7 208.8,41.6 213.9,43.6 219.0,45.9 224.2,48.5 229.3,50.5 234.4,52.4 239.6,53.9 244.7,55.3 249.8,56.5 255.0,57.3 260.1,58.1 265.2,58.6 270.4,59.0 275.5,59.5 280.6,60.0 285.8,60.5 290.9,60.6 296.0,60.5 301.2,60.5 306.3,60.7 311.4,60.6"/></svg>
+      <p class="legend"><span class="l-up">陽線</span><span class="l-dn">陰線</span><span class="l-ma25">25日線</span><span class="l-ma75">75日線</span>／ 下の棒は出来高（直近60日）</p>
+      <button class="btn" type="button" data-code="6222" onclick="toggleTV(this)">📈 TradingViewで詳しく見る</button>
+      <div class="tv" id="tv-6222" hidden>
+        <div id="tvc-6222" class="tv-box"></div>
+        <a class="tv-link" href="https://jp.tradingview.com/chart/?symbol=TSE%3A6222" target="_blank" rel="noopener">TradingViewで開く ↗</a>
+      </div>
+    </div>
+
+    
+  </article>
+  
+  <article class="card stock ">
+    <header class="stock-head">
+      <div class="rank r10">10</div>
+      <div class="ident">
+        <h3>デモ銘柄057</h3>
+        <p class="sub">3373 ・ プライム ・ サービス業</p>
+      </div>
+      <span class="pill mild" title="">やや強気</span>
+    </header>
+
+    <div class="kpis">
+      <div class="kpi">
+        <span class="k">前営業日の終値</span>
+        <span class="v">¥2,894</span>
+        <span class="chg up">前日比 +4.5%</span>
+      </div>
+      <div class="kpi score-kpi">
+        <span class="k">総合スコア</span>
+        <span class="v big">56<small>/100</small></span>
+        <span class="bar"><i class="mild" style="width: 56.5%"></i></span>
+      </div>
+    </div>
+    
+
+    <ul class="chips" aria-label="点数の内訳">
+      
+      <li class="full">高値更新 30<small>/30</small></li>
+      
+      <li class="part">出来高 20<small>/30</small></li>
+      
+      <li class="zero">トレンド 0<small>/20</small></li>
+      
+      <li class="part">業績 15<small>/25</small></li>
+      
+      <li class="zero">規模 0<small>/10</small></li>
+      
+    </ul>
+
+    <section class="block why">
+      <h4>なぜ選ばれた？</h4>
+      <ul class="reasons">
+        <li>✅ 60日高値更新（約3か月ぶりの高値）</li><li>✅ 出来高2.5倍（直近20日の平均と比べて）</li><li>✅ 営業利益が赤字から黒字に転換</li>
+      </ul>
+      <p class="indicators">RSI 73：やや過熱　／　MACD：上昇の勢いが強い</p>
+    </section>
+
+    <section class="block easy">
+      <h4>💡 初心者向け解説</h4>
+      <p>株価が約3か月ぶりの高値を更新しました。出来高も普段の2.5倍に増え、買いが集まっています。営業利益が黒字に転換し、業績も改善しています。</p>
+    </section>
+
+    <section class="block risk">
+      <h4>⚠️ リスク</h4>
+      <ul>
+        <li>時価総額が小さく、値動きが荒くなりやすい</li><li>黒字転換直後のため、業績が続くか次の決算で確認を</li><li>市場全体が下落基調で、順張りは勝ちにくい局面</li>
+      </ul>
+      
+      <p class="stop">撤退ラインの目安：25日線 <b>¥2,543</b>（現在値から -12.1%）を終値で割ったら見直す</p>
+      
+    </section>
+
+    <div class="chart">
+      <svg viewBox="0 0 320 150" class="candle" role="img" aria-label="直近60日のローソク足と25日・75日移動平均線"><line class="dn" x1="8.6" x2="8.6" y1="19.4" y2="27.3"/><rect class="dn" x="7.0" y="20.5" width="3.2" height="2.5"/><rect class="vol dn" x="7.0" y="136.3" width="3.2" height="7.7"/><line class="dn" x1="13.7" x2="13.7" y1="21.4" y2="28.1"/><rect class="dn" x="12.1" y="21.4" width="3.2" height="5.3"/><rect class="vol dn" x="12.1" y="130.4" width="3.2" height="13.6"/><line class="dn" x1="18.8" x2="18.8" y1="28.5" y2="45.6"/><rect class="dn" x="17.2" y="30.8" width="3.2" height="9.3"/><rect class="vol dn" x="17.2" y="136.4" width="3.2" height="7.6"/><line class="dn" x1="24.0" x2="24.0" y1="40.5" y2="44.8"/><rect class="dn" x="22.4" y="40.8" width="3.2" height="1.2"/><rect class="vol dn" x="22.4" y="128.2" width="3.2" height="15.8"/><line class="up" x1="29.1" x2="29.1" y1="36.7" y2="40.5"/><rect class="up" x="27.5" y="37.8" width="3.2" height="2.2"/><rect class="vol up" x="27.5" y="132.8" width="3.2" height="11.2"/><line class="up" x1="34.2" x2="34.2" y1="28.7" y2="36.2"/><rect class="up" x="32.6" y="29.7" width="3.2" height="6.4"/><rect class="vol up" x="32.6" y="137.1" width="3.2" height="6.9"/><line class="up" x1="39.4" x2="39.4" y1="24.5" y2="31.1"/><rect class="up" x="37.8" y="26.9" width="3.2" height="3.5"/><rect class="vol up" x="37.8" y="135.4" width="3.2" height="8.6"/><line class="dn" x1="44.5" x2="44.5" y1="28.2" y2="45.0"/><rect class="dn" x="42.9" y="28.6" width="3.2" height="11.6"/><rect class="vol dn" x="42.9" y="138.0" width="3.2" height="6.0"/><line class="up" x1="49.6" x2="49.6" y1="31.4" y2="43.8"/><rect class="up" x="48.0" y="32.4" width="3.2" height="11.0"/><rect class="vol up" x="48.0" y="134.7" width="3.2" height="9.3"/><line class="dn" x1="54.8" x2="54.8" y1="31.6" y2="41.9"/><rect class="dn" x="53.2" y="32.8" width="3.2" height="5.8"/><rect class="vol dn" x="53.2" y="134.4" width="3.2" height="9.6"/><line class="up" x1="59.9" x2="59.9" y1="25.0" y2="40.7"/><rect class="up" x="58.3" y="25.5" width="3.2" height="13.4"/><rect class="vol up" x="58.3" y="137.7" width="3.2" height="6.3"/><line class="dn" x1="65.0" x2="65.0" y1="25.8" y2="36.6"/><rect class="dn" x="63.4" y="26.5" width="3.2" height="9.6"/><rect class="vol dn" x="63.4" y="129.7" width="3.2" height="14.3"/><line class="dn" x1="70.2" x2="70.2" y1="33.7" y2="41.7"/><rect class="dn" x="68.6" y="35.7" width="3.2" height="2.7"/><rect class="vol dn" x="68.6" y="135.3" width="3.2" height="8.7"/><line class="dn" x1="75.3" x2="75.3" y1="32.7" y2="52.7"/><rect class="dn" x="73.7" y="34.0" width="3.2" height="13.9"/><rect class="vol dn" x="73.7" y="127.9" width="3.2" height="16.1"/><line class="up" x1="80.4" x2="80.4" y1="46.5" y2="52.1"/><rect class="up" x="78.8" y="48.3" width="3.2" height="0.8"/><rect class="vol up" x="78.8" y="139.1" width="3.2" height="4.9"/><line class="dn" x1="85.6" x2="85.6" y1="48.0" y2="57.2"/><rect class="dn" x="84.0" y="50.6" width="3.2" height="3.7"/><rect class="vol dn" x="84.0" y="136.9" width="3.2" height="7.1"/><line class="up" x1="90.7" x2="90.7" y1="50.5" y2="58.0"/><rect class="up" x="89.1" y="50.8" width="3.2" height="5.1"/><rect class="vol up" x="89.1" y="137.0" width="3.2" height="7.0"/><line class="up" x1="95.8" x2="95.8" y1="44.2" y2="54.7"/><rect class="up" x="94.2" y="46.0" width="3.2" height="6.5"/><rect class="vol up" x="94.2" y="132.5" width="3.2" height="11.5"/><line class="up" x1="101.0" x2="101.0" y1="35.1" y2="53.6"/><rect class="up" x="99.4" y="36.5" width="3.2" height="11.7"/><rect class="vol up" x="99.4" y="137.9" width="3.2" height="6.1"/><line class="dn" x1="106.1" x2="106.1" y1="31.9" y2="60.0"/><rect class="dn" x="104.5" y="35.6" width="3.2" height="20.0"/><rect class="vol dn" x="104.5" y="137.4" width="3.2" height="6.6"/><line class="dn" x1="111.2" x2="111.2" y1="54.8" y2="58.0"/><rect class="dn" x="109.6" y="56.0" width="3.2" height="0.8"/><rect class="vol dn" x="109.6" y="140.3" width="3.2" height="3.7"/><line class="up" x1="116.4" x2="116.4" y1="53.9" y2="60.8"/><rect class="up" x="114.8" y="57.2" width="3.2" height="0.8"/><rect class="vol up" x="114.8" y="138.2" width="3.2" height="5.8"/><line class="dn" x1="121.5" x2="121.5" y1="56.2" y2="66.4"/><rect class="dn" x="119.9" y="56.3" width="3.2" height="2.0"/><rect class="vol dn" x="119.9" y="133.6" width="3.2" height="10.4"/><line class="dn" x1="126.6" x2="126.6" y1="54.5" y2="67.5"/><rect class="dn" x="125.0" y="56.8" width="3.2" height="8.6"/><rect class="vol dn" x="125.0" y="130.1" width="3.2" height="13.9"/><line class="up" x1="131.8" x2="131.8" y1="63.1" y2="66.9"/><rect class="up" x="130.2" y="63.3" width="3.2" height="2.9"/><rect class="vol up" x="130.2" y="137.6" width="3.2" height="6.4"/><line class="dn" x1="136.9" x2="136.9" y1="52.1" y2="75.1"/><rect class="dn" x="135.3" y="58.6" width="3.2" height="15.5"/><rect class="vol dn" x="135.3" y="134.5" width="3.2" height="9.5"/><line class="dn" x1="142.0" x2="142.0" y1="75.2" y2="100.0"/><rect class="dn" x="140.4" y="75.5" width="3.2" height="23.8"/><rect class="vol dn" x="140.4" y="135.2" width="3.2" height="8.8"/><line class="dn" x1="147.2" x2="147.2" y1="98.6" y2="109.8"/><rect class="dn" x="145.6" y="100.7" width="3.2" height="7.3"/><rect class="vol dn" x="145.6" y="131.1" width="3.2" height="12.9"/><line class="up" x1="152.3" x2="152.3" y1="86.7" y2="114.0"/><rect class="up" x="150.7" y="88.6" width="3.2" height="22.0"/><rect class="vol up" x="150.7" y="134.0" width="3.2" height="10.0"/><line class="up" x1="157.4" x2="157.4" y1="78.3" y2="88.3"/><rect class="up" x="155.8" y="79.2" width="3.2" height="7.9"/><rect class="vol up" x="155.8" y="138.6" width="3.2" height="5.4"/><line class="dn" x1="162.6" x2="162.6" y1="73.8" y2="87.3"/><rect class="dn" x="161.0" y="77.3" width="3.2" height="7.7"/><rect class="vol dn" x="161.0" y="133.1" width="3.2" height="10.9"/><line class="dn" x1="167.7" x2="167.7" y1="80.2" y2="95.9"/><rect class="dn" x="166.1" y="84.1" width="3.2" height="8.2"/><rect class="vol dn" x="166.1" y="134.6" width="3.2" height="9.4"/><line class="dn" x1="172.8" x2="172.8" y1="91.1" y2="94.8"/><rect class="dn" x="171.2" y="93.5" width="3.2" height="0.8"/><rect class="vol dn" x="171.2" y="127.6" width="3.2" height="16.4"/><line class="up" x1="178.0" x2="178.0" y1="93.2" y2="99.3"/><rect class="up" x="176.4" y="96.0" width="3.2" height="0.8"/><rect class="vol up" x="176.4" y="139.0" width="3.2" height="5.0"/><line class="dn" x1="183.1" x2="183.1" y1="96.1" y2="98.1"/><rect class="dn" x="181.5" y="96.5" width="3.2" height="0.8"/><rect class="vol dn" x="181.5" y="130.7" width="3.2" height="13.3"/><line class="dn" x1="188.2" x2="188.2" y1="97.0" y2="105.4"/><rect class="dn" x="186.6" y="99.6" width="3.2" height="4.5"/><rect class="vol dn" x="186.6" y="139.0" width="3.2" height="5.0"/><line class="dn" x1="193.4" x2="193.4" y1="100.2" y2="109.2"/><rect class="dn" x="191.8" y="103.2" width="3.2" height="5.6"/><rect class="vol dn" x="191.8" y="119.8" width="3.2" height="24.2"/><line class="up" x1="198.5" x2="198.5" y1="97.1" y2="110.4"/><rect class="up" x="196.9" y="98.7" width="3.2" height="9.0"/><rect class="vol up" x="196.9" y="137.7" width="3.2" height="6.3"/><line class="up" x1="203.6" x2="203.6" y1="96.7" y2="106.7"/><rect class="up" x="202.0" y="98.3" width="3.2" height="3.4"/><rect class="vol up" x="202.0" y="135.6" width="3.2" height="8.4"/><line class="dn" x1="208.8" x2="208.8" y1="97.5" y2="106.9"/><rect class="dn" x="207.2" y="98.6" width="3.2" height="7.4"/><rect class="vol dn" x="207.2" y="135.2" width="3.2" height="8.8"/><line class="up" x1="213.9" x2="213.9" y1="99.6" y2="108.5"/><rect class="up" x="212.3" y="103.4" width="3.2" height="4.2"/><rect class="vol up" x="212.3" y="134.9" width="3.2" height="9.1"/><line class="up" x1="219.0" x2="219.0" y1="95.5" y2="104.9"/><rect class="up" x="217.4" y="97.0" width="3.2" height="5.9"/><rect class="vol up" x="217.4" y="133.6" width="3.2" height="10.4"/><line class="up" x1="224.2" x2="224.2" y1="87.4" y2="99.5"/><rect class="up" x="222.6" y="87.8" width="3.2" height="10.1"/><rect class="vol up" x="222.6" y="135.6" width="3.2" height="8.4"/><line class="up" x1="229.3" x2="229.3" y1="79.2" y2="89.3"/><rect class="up" x="227.7" y="81.1" width="3.2" height="5.7"/><rect class="vol up" x="227.7" y="135.3" width="3.2" height="8.7"/><line class="dn" x1="234.4" x2="234.4" y1="71.2" y2="84.2"/><rect class="dn" x="232.8" y="76.8" width="3.2" height="4.7"/><rect class="vol dn" x="232.8" y="135.1" width="3.2" height="8.9"/><line class="dn" x1="239.6" x2="239.6" y1="79.3" y2="95.8"/><rect class="dn" x="238.0" y="82.0" width="3.2" height="10.5"/><rect class="vol dn" x="238.0" y="132.8" width="3.2" height="11.2"/><line class="dn" x1="244.7" x2="244.7" y1="90.2" y2="99.2"/><rect class="dn" x="243.1" y="91.7" width="3.2" height="6.2"/><rect class="vol dn" x="243.1" y="129.5" width="3.2" height="14.5"/><line class="up" x1="249.8" x2="249.8" y1="92.3" y2="98.7"/><rect class="up" x="248.2" y="93.9" width="3.2" height="4.4"/><rect class="vol up" x="248.2" y="123.8" width="3.2" height="20.2"/><line class="up" x1="255.0" x2="255.0" y1="94.8" y2="95.9"/><rect class="up" x="253.4" y="94.9" width="3.2" height="0.8"/><rect class="vol up" x="253.4" y="136.2" width="3.2" height="7.8"/><line class="up" x1="260.1" x2="260.1" y1="85.9" y2="97.9"/><rect class="up" x="258.5" y="90.0" width="3.2" height="4.2"/><rect class="vol up" x="258.5" y="127.5" width="3.2" height="16.5"/><line class="dn" x1="265.2" x2="265.2" y1="88.6" y2="92.8"/><rect class="dn" x="263.6" y="89.8" width="3.2" height="0.9"/><rect class="vol dn" x="263.6" y="135.4" width="3.2" height="8.6"/><line class="up" x1="270.4" x2="270.4" y1="81.8" y2="92.0"/><rect class="up" x="268.8" y="82.7" width="3.2" height="9.0"/><rect class="vol up" x="268.8" y="134.3" width="3.2" height="9.7"/><line class="up" x1="275.5" x2="275.5" y1="71.0" y2="87.3"/><rect class="up" x="273.9" y="72.7" width="3.2" height="11.3"/><rect class="vol up" x="273.9" y="139.4" width="3.2" height="4.6"/><line class="up" x1="280.6" x2="280.6" y1="63.1" y2="74.2"/><rect class="up" x="279.0" y="69.1" width="3.2" height="2.2"/><rect class="vol up" x="279.0" y="136.2" width="3.2" height="7.8"/><line class="dn" x1="285.8" x2="285.8" y1="65.2" y2="73.3"/><rect class="dn" x="284.2" y="66.7" width="3.2" height="6.4"/><rect class="vol dn" x="284.2" y="127.0" width="3.2" height="17.0"/><line class="up" x1="290.9" x2="290.9" y1="50.4" y2="71.0"/><rect class="up" x="289.3" y="52.8" width="3.2" height="14.8"/><rect class="vol up" x="289.3" y="137.8" width="3.2" height="6.2"/><line class="up" x1="296.0" x2="296.0" y1="47.8" y2="55.7"/><rect class="up" x="294.4" y="49.5" width="3.2" height="4.0"/><rect class="vol up" x="294.4" y="128.6" width="3.2" height="15.4"/><line class="dn" x1="301.2" x2="301.2" y1="52.0" y2="60.0"/><rect class="dn" x="299.6" y="53.0" width="3.2" height="4.2"/><rect class="vol dn" x="299.6" y="138.6" width="3.2" height="5.4"/><line class="up" x1="306.3" x2="306.3" y1="43.1" y2="61.5"/><rect class="up" x="304.7" y="43.5" width="3.2" height="15.1"/><rect class="vol up" x="304.7" y="137.6" width="3.2" height="6.4"/><line class="up" x1="311.4" x2="311.4" y1="19.5" y2="46.0"/><rect class="up" x="309.8" y="22.2" width="3.2" height="21.4"/><rect class="vol up" x="309.8" y="118.0" width="3.2" height="26.0"/><polyline class="ma25" points="8.6,34.6 13.7,34.9 18.8,35.7 24.0,36.4 29.1,36.8 34.2,36.2 39.4,35.7 44.5,35.3 49.6,34.2 54.8,33.6 59.9,32.8 65.0,32.4 70.2,32.3 75.3,32.7 80.4,33.4 85.6,34.1 90.7,35.3 95.8,36.2 101.0,36.3 106.1,37.3 111.2,38.3 116.4,39.2 121.5,40.1 126.6,41.5 131.8,43.1 136.9,45.1 142.0,48.0 147.2,50.7 152.3,52.6 157.4,54.3 162.6,56.5 167.7,59.1 172.8,61.3 178.0,63.8 183.1,66.2 188.2,69.3 193.4,72.2 198.5,74.6 203.6,76.6 208.8,78.9 213.9,80.9 219.0,82.8 224.2,84.4 229.3,86.2 234.4,87.3 239.6,88.7 244.7,90.3 249.8,91.8 255.0,92.9 260.1,94.0 265.2,94.7 270.4,94.0 275.5,92.6 280.6,91.8 285.8,91.6 290.9,90.3 296.0,88.6 301.2,87.1 306.3,85.0 311.4,82.0"/><polyline class="ma75" points="8.6,6.0 13.7,6.8 18.8,7.6 24.0,8.5 29.1,9.4 34.2,10.4 39.4,11.3 44.5,12.2 49.6,13.1 54.8,14.2 59.9,15.4 65.0,16.5 70.2,17.5 75.3,18.5 80.4,19.4 85.6,20.5 90.7,21.5 95.8,22.3 101.0,23.0 106.1,23.8 111.2,24.6 116.4,25.4 121.5,26.2 126.6,27.2 131.8,28.2 136.9,29.3 142.0,30.9 147.2,32.6 152.3,33.8 157.4,34.8 162.6,35.9 167.7,37.0 172.8,38.0 178.0,38.9 183.1,39.7 188.2,40.6 193.4,41.8 198.5,42.9 203.6,43.9 208.8,45.3 213.9,46.7 219.0,48.1 224.2,49.4 229.3,50.5 234.4,51.8 239.6,53.0 244.7,54.3 249.8,55.5 255.0,56.5 260.1,57.3 265.2,58.1 270.4,59.0 275.5,59.7 280.6,60.3 285.8,60.9 290.9,61.0 296.0,61.1 301.2,61.2 306.3,61.0 311.4,60.6"/></svg>
+      <p class="legend"><span class="l-up">陽線</span><span class="l-dn">陰線</span><span class="l-ma25">25日線</span><span class="l-ma75">75日線</span>／ 下の棒は出来高（直近60日）</p>
+      <button class="btn" type="button" data-code="3373" onclick="toggleTV(this)">📈 TradingViewで詳しく見る</button>
+      <div class="tv" id="tv-3373" hidden>
+        <div id="tvc-3373" class="tv-box"></div>
+        <a class="tv-link" href="https://jp.tradingview.com/chart/?symbol=TSE%3A3373" target="_blank" rel="noopener">TradingViewで開く ↗</a>
+      </div>
+    </div>
+
+    
+  </article>
+  
+
+  <!-- 業種・テーマ -->
+  <section class="card">
+    <h2>🏭 勢いのある業種 トップ5</h2>
+    <p class="hint">業種ごとの「平均テクニカル点（100点換算）」の高い順です。</p>
+    <ol class="rank-list">
+      
+      <li><span class="n">1</span>
+        <div class="grow"><b>小売業</b><small>デモ銘柄106・デモ銘柄022・デモ銘柄118</small></div>
+        <div class="num"><span>18<small>点</small></span><small>60日高値 2社</small></div></li>
+      
+      <li><span class="n">2</span>
+        <div class="grow"><b>情報・通信業</b><small>デモ銘柄050・デモ銘柄134・デモ銘柄170</small></div>
+        <div class="num"><span>17<small>点</small></span><small>60日高値 1社</small></div></li>
+      
+      <li><span class="n">3</span>
+        <div class="grow"><b>化学</b><small>デモ銘柄113・デモ銘柄029・デモ銘柄089</small></div>
+        <div class="num"><span>17<small>点</small></span><small>60日高値 1社</small></div></li>
+      
+      <li><span class="n">4</span>
+        <div class="grow"><b>電気機器</b><small>デモ銘柄169・デモ銘柄085・デモ銘柄001</small></div>
+        <div class="num"><span>15<small>点</small></span><small>60日高値 2社</small></div></li>
+      
+      <li><span class="n">5</span>
+        <div class="grow"><b>銀行業</b><small>デモ銘柄148・デモ銘柄016・デモ銘柄172</small></div>
+        <div class="num"><span>14<small>点</small></span><small>60日高値 0社</small></div></li>
+      
+    </ol>
+  </section>
+
+  
+
+  <!-- 検証実績 -->
+  
+  <section class="card backtest">
+    <h2>🧪 このスコアは過去に有効だった？</h2>
+    <p class="headline">過去2年の再現検証では、テクニカル80点以上の銘柄を買った場合の1か月後の平均騰落率は-0.6%（同期間のTOPIXは-1.1%）でした。</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>1週間後</th><th>1か月後</th><th>3か月後</th></tr></thead>
+      <tbody>
+      
+        <tr><th scope="row">毎週のトップ10を買った場合<small>過去再現</small></th>
+          <td class="neg">-0.1%<small>勝率48%</small></td><td class="neg">-0.1%<small>勝率46%</small></td><td class="neg">-0.3%<small>勝率46%</small></td>
+        </tr>
+      
+        <tr><th scope="row">　うち地合いが良い週だけ<small>TOPIXが75日線の上</small></th>
+          <td class="neg">-0.0%<small>勝率48%</small></td><td class="pos">+0.5%<small>勝率49%</small></td><td class="pos">+3.6%<small>勝率59%</small></td>
+        </tr>
+      
+        <tr><th scope="row">テクニカル80点以上の全銘柄<small>過去再現</small></th>
+          <td class="pos">+0.7%<small>勝率53%</small></td><td class="neg">-0.6%<small>勝率40%</small></td><td class="neg">-0.3%<small>勝率41%</small></td>
+        </tr>
+      
+        <tr><th scope="row">TOPIX（比較用）<small>同じ期間・同じ売買ルール</small></th>
+          <td class="neg">-0.4%</td><td class="neg">-0.9%</td><td class="neg">-2.4%</td>
+        </tr>
+      
+      </tbody>
+    </table>
+    </div>
+    <p class="hint">検証期間：2024-10-30 〜 2026-10-28（105週分）</p>
+    <p class="hint">実績の記録を蓄積中です（現在1日分）。1週間後の結果は記録の翌週から表示されます。</p>
+    <details>
+      <summary>この数字の注意点</summary>
+      <ul class="caveats"><li>過去再現は「現在の上場銘柄」で計算しているため、上場廃止になった銘柄が含まれず、成績がやや良く出ます（生存者バイアス）。</li><li>過去再現には業績・時価総額の点数が含まれません（過去時点の業績データを無料で入手できないため）。テクニカル点だけで計算しています。</li><li>ランキングの翌営業日の始値で買い、往復の売買コストを差し引いた計算です。ストップ高で買えない・約定が滑るといった実際のズレは含みません。</li><li>過去の成績は将来の利益を保証しません。</li></ul>
+    </details>
+  </section>
+  
+
+  <!-- 点数の見方 -->
+  <section class="card" id="guide">
+    <h2>📖 点数の見方</h2>
+    <details open>
+      <summary>スコアの内訳（合計 115 点を100点に換算）</summary>
+      <table class="guide">
+        <tr><th>高値更新</th><td>60日高値更新 +30／30日高値更新 +15</td></tr>
+        <tr><th>出来高</th><td>当日出来高が20日平均の2倍以上 +20／3倍以上 +30</td></tr>
+        <tr><th>トレンド</th><td>株価＞25日線＞75日線 +20</td></tr>
+        <tr><th>業績</th><td>営業利益が前年比+20%以上 +15／+50%以上 +25（黒字転換 +15）</td></tr>
+        <tr><th>規模</th><td>時価総額100億円以上 +5／500億円以上 +10</td></tr>
+      </table>
+      <p class="hint"><b>判定の目安：</b>70点以上＝強気、50点以上＝やや強気、それ未満＝中立。
+        RSIが高すぎる（過熱）場合や市場全体が弱い日は、判定を一段階下げます。</p>
+    </details>
+    <details>
+      <summary>用語のかんたん解説</summary>
+      <dl class="terms">
+        <dt>高値更新</dt><dd>株価が最近の一定期間でいちばん高くなること。上に抜けた＝買いたい人が多い、というサインです。</dd>
+        <dt>出来高</dt><dd>その日に売買された株数。普段より多いほど、注目や大きな資金が入っている可能性があります。</dd>
+        <dt>移動平均線（25日・75日）</dt><dd>過去の平均株価を線にしたもの。株価が線の上にあり、線自体も上向きなら上昇トレンドです。</dd>
+        <dt>RSI</dt><dd>買われすぎ・売られすぎの目安（0〜100）。70〜80を超えると過熱で、反落しやすくなります。</dd>
+        <dt>MACD</dt><dd>勢いの変化を見る指標。プラスでシグナル線を上に抜けると上昇の勢いが強い状態です。</dd>
+        <dt>営業利益</dt><dd>本業でどれだけ稼いだか。前年より増えているほど業績が良いと判断します。</dd>
+      </dl>
+    </details>
+    <p class="hint">スキャン対象：180銘柄のうち、株価100円以上・売買代金1億円以上などの条件を満たす180銘柄。
+      上位候補40銘柄の業績を確認しています。</p>
+  </section>
+
+  <footer class="foot">
+    <p>※ 本サイトは情報提供のみを目的とし、投資の勧誘・助言ではありません。株価は下がることがあり、元本を失う可能性があります。
+      最終的な売買は必ずご自身の判断で行ってください。データは無料の公開データ（Yahoo!ファイナンス等）で、遅延・誤りが含まれる場合があります。</p>
+  </footer>
+</main>
+
+<script>
+var btn=document.getElementById('themeBtn');
+function isDark(){var t=document.documentElement.getAttribute('data-theme');if(t)return t==='dark';return window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches;}
+btn.addEventListener('click',function(){var n=isDark()?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}});
+
+function toggleTV(b){
+  var code=b.getAttribute('data-code'),box=document.getElementById('tv-'+code);
+  if(!box.hidden){box.hidden=true;b.textContent='📈 TradingViewで詳しく見る';return;}
+  box.hidden=false;b.textContent='✕ チャートを閉じる';
+  if(box.getAttribute('data-ready'))return;
+  var make=function(){new TradingView.widget({autosize:true,symbol:'TSE:'+code,interval:'D',timezone:'Asia/Tokyo',
+    theme:isDark()?'dark':'light',style:'1',locale:'ja',enable_publishing:false,allow_symbol_change:false,
+    hide_side_toolbar:true,container_id:'tvc-'+code});box.setAttribute('data-ready','1');};
+  if(window.TradingView){make();}else{var s=document.createElement('script');s.src='https://s3.tradingview.com/tv.js';s.onload=make;document.head.appendChild(s);}
+}
+
+(function(){var gen=new Date('2026-11-02T17:13+09:00');
+  if(!isNaN(gen)&&Date.now()-gen.getTime()>84*3600*1000){document.getElementById('staleBanner').hidden=false;}})();
+</script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0f1a2b">
+<meta name="robots" content="noindex">
+<title>{{ title }}｜{{ data_date_label }}</title>
+<link rel="stylesheet" href="style.css">
+<script>
+(function(){try{var t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+</script>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-row">
+      <h1>📈 {{ title }}</h1>
+      <button id="themeBtn" class="icon-btn" type="button" aria-label="ライト／ダーク表示を切り替え">🌓</button>
+    </div>
+    <p class="meta">
+      <span>更新：{{ generated_at }}</span>
+      <span>データ基準日：{{ data_date_label }} 終値</span>
+    </p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  {% if demo %}
+  <div class="banner warn">⚠️ <b>デモ表示です。</b>架空のデータで、実在の銘柄・株価ではありません。</div>
+  {% endif %}
+  <div id="staleBanner" class="banner danger" hidden>
+    ⚠️ <b>自動更新が止まっている可能性があります。</b>表示中の内容は古いので、売買の判断に使わないでください（GitHubのActions画面を確認）。
+  </div>
+
+  <!-- 市場状況 -->
+  <section class="card market regime-{{ market.regime }}">
+    <div class="market-head">
+      <h2>🌏 市場の状況</h2>
+      <span class="pill {{ {'good':'bull','neutral':'mild','bad':'bear'}[market.regime] }}">{{ market.label }}</span>
+    </div>
+    <p>{{ market.comment }}</p>
+  </section>
+
+  <!-- ランキング -->
+  <h2 class="section-title">🏆 本日の注目銘柄 トップ{{ top_n }}</h2>
+  <p class="lead">高値更新・出来高増加・業績改善が重なっている「順張り」候補です。
+    スコア（100点満点）が高いほど条件がそろっています。<a href="#guide">点数の見方</a></p>
+
+  {% for c in cards %}
+  <article class="card stock {% if c.rank <= 3 %}top top{{ c.rank }}{% endif %}">
+    <header class="stock-head">
+      <div class="rank r{{ c.rank }}">{{ c.rank }}</div>
+      <div class="ident">
+        <h3>{{ c.name }}</h3>
+        <p class="sub">{{ c.code }} ・ {{ c.market }} ・ {{ c.sector }}</p>
+      </div>
+      <span class="pill {{ c.css }}" title="{{ c.label_note }}">{{ c.label }}</span>
+    </header>
+
+    <div class="kpis">
+      <div class="kpi">
+        <span class="k">前営業日の終値</span>
+        <span class="v">{{ c.close|yen }}</span>
+        {% if c.ret1d is not none %}<span class="chg {{ 'up' if c.ret1d >= 0 else 'down' }}">前日比 {{ c.ret1d|pct }}</span>{% endif %}
+      </div>
+      <div class="kpi score-kpi">
+        <span class="k">総合スコア</span>
+        <span class="v big">{{ '%.0f'|format(c.score) }}<small>/100</small></span>
+        <span class="bar"><i class="{{ c.css }}" style="width: {{ [c.score, 100]|min }}%"></i></span>
+      </div>
+    </div>
+    {% if c.label_note %}<p class="note">※ {{ c.label_note }}</p>{% endif %}
+
+    <ul class="chips" aria-label="点数の内訳">
+      {% for b in c.breakdown %}
+      <li class="{{ 'full' if b.pts >= b.max else ('part' if b.pts > 0 else 'zero') }}">{{ b.name }} {{ b.pts }}<small>/{{ b.max }}</small></li>
+      {% endfor %}
+    </ul>
+
+    <section class="block why">
+      <h4>なぜ選ばれた？</h4>
+      <ul class="reasons">
+        {% for r in c.reasons %}<li>{{ r }}</li>{% endfor %}
+      </ul>
+      <p class="indicators">{{ c.indicators|join('　／　') }}</p>
+    </section>
+
+    <section class="block easy">
+      <h4>💡 初心者向け解説</h4>
+      <p>{{ c.explain }}</p>
+    </section>
+
+    <section class="block risk">
+      <h4>⚠️ リスク</h4>
+      <ul>
+        {% for r in c.risks %}<li>{{ r }}</li>{% endfor %}
+      </ul>
+      {% if c.stop %}
+      <p class="stop">撤退ラインの目安：25日線 <b>{{ c.stop.price|yen }}</b>（現在値から {{ c.stop.pct|pct }}）を終値で割ったら見直す</p>
+      {% endif %}
+    </section>
+
+    <div class="chart">
+      {{ c.svg|safe }}
+      <p class="legend"><span class="l-up">陽線</span><span class="l-dn">陰線</span><span class="l-ma25">25日線</span><span class="l-ma75">75日線</span>／ 下の棒は出来高（直近60日）</p>
+      <button class="btn" type="button" data-code="{{ c.code }}" onclick="toggleTV(this)">📈 TradingViewで詳しく見る</button>
+      <div class="tv" id="tv-{{ c.code }}" hidden>
+        <div id="tvc-{{ c.code }}" class="tv-box"></div>
+        <a class="tv-link" href="https://jp.tradingview.com/chart/?symbol=TSE%3A{{ c.code }}" target="_blank" rel="noopener">TradingViewで開く ↗</a>
+      </div>
+    </div>
+
+    {% if c.themes %}
+    <p class="tags">{% for t in c.themes %}<span class="tag">#{{ t }}</span>{% endfor %}</p>
+    {% endif %}
+  </article>
+  {% endfor %}
+
+  <!-- 業種・テーマ -->
+  <section class="card">
+    <h2>🏭 勢いのある業種 トップ5</h2>
+    <p class="hint">業種ごとの「平均テクニカル点（100点換算）」の高い順です。</p>
+    <ol class="rank-list">
+      {% for s in sectors %}
+      <li><span class="n">{{ loop.index }}</span>
+        <div class="grow"><b>{{ s.name }}</b><small>{{ s.leaders|join('・') }}</small></div>
+        <div class="num"><span>{{ '%.0f'|format(s.score) }}<small>点</small></span><small>60日高値 {{ s.n_high }}社</small></div></li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  {% if themes %}
+  <section class="card">
+    <h2>🚀 勢いのあるテーマ トップ5</h2>
+    <p class="hint">AI・半導体・防衛などのテーマ（themes.yml で編集可）。平均テクニカル点の高い順です。</p>
+    <ol class="rank-list">
+      {% for s in themes %}
+      <li><span class="n">{{ loop.index }}</span>
+        <div class="grow"><b>{{ s.name }}</b><small>{{ s.leaders|join('・') }}</small></div>
+        <div class="num"><span>{{ '%.0f'|format(s.score) }}<small>点</small></span><small>60日高値 {{ s.n_high }}社</small></div></li>
+      {% endfor %}
+    </ol>
+  </section>
+  {% endif %}
+
+  <!-- 検証実績 -->
+  {% if bt %}
+  <section class="card backtest">
+    <h2>🧪 このスコアは過去に有効だった？</h2>
+    {% if bt.headline %}<p class="headline">{{ bt.headline }}</p>{% endif %}
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th></th>{% for h in bt.horizons %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+      <tbody>
+      {% for row in bt.rows %}
+        <tr><th scope="row">{{ row.label }}<small>{{ row.note }}</small></th>
+          {% for c in row.cells %}<td class="{{ c.cls }}">{{ c.txt }}{% if c.sub %}<small>{{ c.sub }}</small>{% endif %}</td>{% endfor %}
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    {% if bt.period %}<p class="hint">検証期間：{{ bt.period }}</p>{% endif %}
+    {% if bt.forward_note %}<p class="hint">{{ bt.forward_note }}</p>{% endif %}
+    <details>
+      <summary>この数字の注意点</summary>
+      <ul class="caveats">{% for c in bt.caveats %}<li>{{ c }}</li>{% endfor %}</ul>
+    </details>
+  </section>
+  {% endif %}
+
+  <!-- 点数の見方 -->
+  <section class="card" id="guide">
+    <h2>📖 点数の見方</h2>
+    <details open>
+      <summary>スコアの内訳（合計 {{ max_raw }} 点を100点に換算）</summary>
+      <table class="guide">
+        <tr><th>高値更新</th><td>60日高値更新 +{{ sc.high60 }}／30日高値更新 +{{ sc.high30 }}</td></tr>
+        <tr><th>出来高</th><td>当日出来高が20日平均の2倍以上 +20／3倍以上 +30</td></tr>
+        <tr><th>トレンド</th><td>株価＞25日線＞75日線 +{{ sc.trend }}</td></tr>
+        <tr><th>業績</th><td>営業利益が前年比+20%以上 +15／+50%以上 +25（黒字転換 +{{ sc.turnaround_points }}）</td></tr>
+        <tr><th>規模</th><td>時価総額100億円以上 +5／500億円以上 +10</td></tr>
+      </table>
+      <p class="hint"><b>判定の目安：</b>{{ bull.strong }}点以上＝強気、{{ bull.mild }}点以上＝やや強気、それ未満＝中立。
+        RSIが高すぎる（過熱）場合や市場全体が弱い日は、判定を一段階下げます。</p>
+    </details>
+    <details>
+      <summary>用語のかんたん解説</summary>
+      <dl class="terms">
+        <dt>高値更新</dt><dd>株価が最近の一定期間でいちばん高くなること。上に抜けた＝買いたい人が多い、というサインです。</dd>
+        <dt>出来高</dt><dd>その日に売買された株数。普段より多いほど、注目や大きな資金が入っている可能性があります。</dd>
+        <dt>移動平均線（25日・75日）</dt><dd>過去の平均株価を線にしたもの。株価が線の上にあり、線自体も上向きなら上昇トレンドです。</dd>
+        <dt>RSI</dt><dd>買われすぎ・売られすぎの目安（0〜100）。70〜80を超えると過熱で、反落しやすくなります。</dd>
+        <dt>MACD</dt><dd>勢いの変化を見る指標。プラスでシグナル線を上に抜けると上昇の勢いが強い状態です。</dd>
+        <dt>営業利益</dt><dd>本業でどれだけ稼いだか。前年より増えているほど業績が良いと判断します。</dd>
+      </dl>
+    </details>
+    <p class="hint">スキャン対象：{{ n_universe|default(0) }}銘柄のうち、株価{{ min_price }}円以上・売買代金{{ '%g'|format(min_turnover_oku) }}億円以上などの条件を満たす{{ n_scanned }}銘柄。
+      上位候補{{ n_fetched }}銘柄の業績を確認しています。</p>
+  </section>
+
+  <footer class="foot">
+    <p>※ 本サイトは情報提供のみを目的とし、投資の勧誘・助言ではありません。株価は下がることがあり、元本を失う可能性があります。
+      最終的な売買は必ずご自身の判断で行ってください。データは無料の公開データ（Yahoo!ファイナンス等）で、遅延・誤りが含まれる場合があります。</p>
+  </footer>
+</main>
+
+<script>
+var btn=document.getElementById('themeBtn');
+function isDark(){var t=document.documentElement.getAttribute('data-theme');if(t)return t==='dark';return window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches;}
+btn.addEventListener('click',function(){var n=isDark()?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}});
+
+function toggleTV(b){
+  var code=b.getAttribute('data-code'),box=document.getElementById('tv-'+code);
+  if(!box.hidden){box.hidden=true;b.textContent='📈 TradingViewで詳しく見る';return;}
+  box.hidden=false;b.textContent='✕ チャートを閉じる';
+  if(box.getAttribute('data-ready'))return;
+  var make=function(){new TradingView.widget({autosize:true,symbol:'TSE:'+code,interval:'D',timezone:'Asia/Tokyo',
+    theme:isDark()?'dark':'light',style:'1',locale:'ja',enable_publishing:false,allow_symbol_change:false,
+    hide_side_toolbar:true,container_id:'tvc-'+code});box.setAttribute('data-ready','1');};
+  if(window.TradingView){make();}else{var s=document.createElement('script');s.src='https://s3.tradingview.com/tv.js';s.onload=make;document.head.appendChild(s);}
+}
+
+(function(){var gen=new Date('{{ generated_iso }}');
+  if(!isNaN(gen)&&Date.now()-gen.getTime()>84*3600*1000){document.getElementById('staleBanner').hidden=false;}})();
+</script>
+</body>
+</html>
