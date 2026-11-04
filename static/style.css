@@ -1,0 +1,223 @@
+/* ============ 色の定義（ここを変えると全体の色が変わります）============ */
+:root {
+  --bg: #f1f4f8; --card: #ffffff; --text: #17202c; --sub: #5a6676; --line: #e2e7ee;
+  --green: #0f9d58; --green-bg: #e4f6ec;
+  --yellow: #b8860b; --yellow-bg: #fff4cf;
+  --red: #d93025; --red-bg: #fdeceb;
+  --gray: #7a8696; --gray-bg: #eef1f5;
+  --accent: #1d4ed8;
+  --gold: #f2b01e; --silver: #9aa5b4; --bronze: #c9803f;
+  --shadow: 0 1px 2px rgba(15, 26, 43, .06), 0 4px 14px rgba(15, 26, 43, .05);
+  --ma25: #e07b00; --ma75: #7c4dff;
+}
+:root[data-theme="dark"] {
+  --bg: #0d131c; --card: #151d29; --text: #e7edf5; --sub: #9aa7b8; --line: #263143;
+  --green: #3ddc84; --green-bg: #12301f;
+  --yellow: #ffd54a; --yellow-bg: #3a3112;
+  --red: #ff6b60; --red-bg: #3a1a18;
+  --gray: #8e9bad; --gray-bg: #1e2836;
+  --accent: #7aa2ff; --shadow: none;
+  --ma25: #ffb347; --ma75: #b39dff;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d131c; --card: #151d29; --text: #e7edf5; --sub: #9aa7b8; --line: #263143;
+    --green: #3ddc84; --green-bg: #12301f;
+    --yellow: #ffd54a; --yellow-bg: #3a3112;
+    --red: #ff6b60; --red-bg: #3a1a18;
+    --gray: #8e9bad; --gray-bg: #1e2836;
+    --accent: #7aa2ff; --shadow: none;
+    --ma25: #ffb347; --ma75: #b39dff;
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif;
+  font-size: 16px; line-height: 1.65;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+a { color: var(--accent); }
+h1, h2, h3, h4, p, ul, ol, dl { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+small { font-size: .78em; color: var(--sub); font-weight: 400; }
+
+/* ============ ヘッダー ============ */
+.hero { background: #0f1a2b; color: #fff; padding: calc(14px + env(safe-area-inset-top)) 16px 16px; }
+.hero-inner { max-width: 760px; margin: 0 auto; }
+.hero-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.hero h1 { font-size: 1.3rem; line-height: 1.35; }
+.meta { margin-top: 6px; font-size: .82rem; color: #b9c6d8; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.icon-btn { border: 1px solid #ffffff44; background: #ffffff14; color: #fff; border-radius: 10px;
+  width: 42px; height: 42px; font-size: 1.2rem; cursor: pointer; flex: none; }
+
+.wrap { max-width: 760px; margin: 0 auto; padding: 14px 12px 40px; }
+.section-title { font-size: 1.2rem; margin: 22px 4px 4px; }
+.lead { font-size: .9rem; color: var(--sub); margin: 0 4px 12px; }
+
+/* ============ 共通カード ============ */
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+  padding: 16px; margin-bottom: 14px; box-shadow: var(--shadow); }
+.card > h2 { font-size: 1.05rem; margin-bottom: 8px; }
+.hint { font-size: .82rem; color: var(--sub); margin-top: 8px; }
+
+.banner { border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; font-size: .9rem; }
+.banner.warn { background: var(--yellow-bg); color: var(--text); border: 1px solid var(--yellow); }
+.banner.danger { background: var(--red-bg); color: var(--text); border: 1px solid var(--red); }
+
+/* ============ ピル（強気判定） ============ */
+.pill { display: inline-block; padding: 3px 12px; border-radius: 999px; font-weight: 700; font-size: .85rem;
+  white-space: nowrap; flex: none; }
+.pill.bull { background: var(--green-bg); color: var(--green); border: 1px solid var(--green); }
+.pill.mild { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow); }
+.pill.neutral { background: var(--gray-bg); color: var(--gray); border: 1px solid var(--gray); }
+.pill.bear { background: var(--red-bg); color: var(--red); border: 1px solid var(--red); }
+
+/* ============ 市場 ============ */
+.market { border-left: 6px solid var(--gray); }
+.market.regime-good { border-left-color: var(--green); }
+.market.regime-neutral { border-left-color: var(--yellow); }
+.market.regime-bad { border-left-color: var(--red); }
+.market-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.market-head h2 { font-size: 1.05rem; }
+
+/* ============ 銘柄カード ============ */
+.stock { padding: 14px; }
+.stock.top { border-width: 2px; }
+.stock.top1 { border-color: var(--gold); box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 22%, transparent), var(--shadow); }
+.stock.top2 { border-color: var(--silver); }
+.stock.top3 { border-color: var(--bronze); }
+
+.stock-head { display: flex; align-items: center; gap: 10px; }
+.rank { width: 38px; height: 38px; border-radius: 50%; background: var(--gray-bg); color: var(--sub);
+  display: grid; place-items: center; font-weight: 800; font-size: 1.05rem; flex: none; }
+.rank.r1 { background: var(--gold); color: #3b2a00; width: 46px; height: 46px; font-size: 1.3rem; }
+.rank.r2 { background: var(--silver); color: #fff; width: 42px; height: 42px; font-size: 1.2rem; }
+.rank.r3 { background: var(--bronze); color: #fff; width: 42px; height: 42px; font-size: 1.2rem; }
+.ident { flex: 1; min-width: 0; }
+.ident h3 { font-size: 1.08rem; line-height: 1.3; overflow-wrap: anywhere; }
+.stock.top1 .ident h3 { font-size: 1.2rem; }
+.sub { font-size: .8rem; color: var(--sub); }
+
+.kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0 8px; }
+.kpi { background: var(--gray-bg); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+.kpi .k { font-size: .74rem; color: var(--sub); }
+.kpi .v { font-size: 1.3rem; font-weight: 800; line-height: 1.2; }
+.kpi .v.big { font-size: 1.9rem; }
+.kpi .v small { font-size: .8rem; }
+.chg { font-size: .82rem; font-weight: 700; }
+.chg.up { color: var(--green); }
+.chg.down { color: var(--red); }
+.bar { display: block; height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; margin-top: 4px; }
+.bar i { display: block; height: 100%; border-radius: 99px; background: var(--gray); }
+.bar i.bull { background: var(--green); }
+.bar i.mild { background: var(--yellow); }
+.note { font-size: .78rem; color: var(--sub); margin-bottom: 6px; }
+
+.chips-unused { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 12px; }
+.chips li { font-size: .78rem; padding: 2px 9px; border-radius: 8px; background: var(--gray-bg); color: var(--sub); font-weight: 600; }
+.chips li.full { background: var(--green-bg); color: var(--green); }
+.chips li.part { background: var(--yellow-bg); color: var(--yellow); }
+.chips li small { color: inherit; opacity: .7; }
+
+.block { border-radius: 12px; padding: 11px 13px; margin-bottom: 10px; }
+.block h4 { font-size: .86rem; margin-bottom: 4px; }
+.block.why { background: var(--green-bg); }
+.block.why h4 { color: var(--green); }
+.reasons li { padding: 1px 0; font-weight: 600; font-size: .95rem; }
+.indicators { margin-top: 6px; font-size: .8rem; color: var(--sub); }
+.block.easy { background: var(--gray-bg); }
+.block.easy p { font-size: .95rem; }
+.block.risk { background: var(--red-bg); }
+.block.risk h4 { color: var(--red); }
+.block.risk li { font-size: .92rem; padding-left: 1em; text-indent: -1em; }
+.block.risk li::before { content: "・"; }
+.stop { margin-top: 6px; font-size: .84rem; border-top: 1px dashed var(--red); padding-top: 6px; }
+
+/* ============ チャート ============ */
+.chart { margin-top: 4px; }
+.candle { width: 100%; height: auto; display: block; background: var(--gray-bg); border-radius: 12px; }
+.candle line.up, .candle rect.up { stroke: var(--green); fill: var(--green); }
+.candle line.dn, .candle rect.dn { stroke: var(--red); fill: var(--red); }
+.candle rect.vol { opacity: .35; stroke: none; }
+.candle polyline { fill: none; stroke-width: 1.4; stroke-linejoin: round; }
+.candle polyline.ma25 { stroke: var(--ma25); }
+.candle polyline.ma75 { stroke: var(--ma75); stroke-dasharray: 4 2; }
+.legend { font-size: .72rem; color: var(--sub); margin: 4px 2px 8px; display: flex; flex-wrap: wrap; gap: 2px 10px; }
+.legend span::before { content: "■ "; }
+.l-up::before { color: var(--green); } .l-dn::before { color: var(--red); }
+.l-ma25::before { color: var(--ma25); } .l-ma75::before { color: var(--ma75); }
+.btn { width: 100%; padding: 11px; border-radius: 12px; border: 1px solid var(--accent); background: transparent;
+  color: var(--accent); font-weight: 700; font-size: .95rem; cursor: pointer; }
+.tv { margin-top: 10px; }
+.tv-box { height: 420px; border-radius: 12px; overflow: hidden; background: var(--gray-bg); }
+.tv-link { display: inline-block; margin-top: 6px; font-size: .85rem; }
+.tags { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font-size: .76rem; background: var(--gray-bg); color: var(--sub); padding: 2px 9px; border-radius: 99px; }
+
+/* ============ ランキング表・検証 ============ */
+.rank-list li { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); }
+.rank-list li:first-child { border-top: 0; }
+.rank-list .n { width: 26px; height: 26px; border-radius: 50%; background: var(--gray-bg); display: grid; place-items: center;
+  font-weight: 800; font-size: .82rem; flex: none; }
+.rank-list .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.rank-list .grow small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rank-list .num { text-align: right; font-weight: 800; font-size: 1.2rem; line-height: 1.2; display: flex; flex-direction: column; }
+
+.headline { font-weight: 700; margin-bottom: 10px; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td { padding: 8px 6px; border-top: 1px solid var(--line); text-align: right; vertical-align: top; }
+thead th { border-top: 0; color: var(--sub); font-size: .78rem; }
+tbody th { text-align: left; font-weight: 600; }
+tbody th small, td small { display: block; }
+td { font-weight: 800; font-size: 1rem; }
+td.pos { color: var(--green); } td.neg { color: var(--red); } td.na { color: var(--gray); }
+.guide th { text-align: left; white-space: nowrap; width: 5.5em; color: var(--sub); font-weight: 600; }
+.guide td { text-align: left; font-weight: 500; font-size: .88rem; }
+
+details { margin-top: 8px; }
+summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
+.caveats { padding-left: 1.1em; list-style: disc; font-size: .84rem; color: var(--sub); }
+.caveats li { margin-bottom: 4px; }
+.terms dt { font-weight: 700; margin-top: 8px; }
+.terms dd { margin: 0; font-size: .88rem; color: var(--sub); }
+
+.foot { font-size: .76rem; color: var(--sub); padding: 6px 6px 0; }
+
+@media (min-width: 640px) {
+  .hero h1 { font-size: 1.5rem; }
+  .stock { padding: 18px; }
+  .kpi .v.big { font-size: 2.2rem; }
+}
+
+/* ============ 期待値・点数グリッド・評価イベント ============ */
+.formula { font-size: .76rem; color: var(--sub); margin: 0 2px 10px; line-height: 1.5; }
+.formula b { color: var(--yellow); }
+.scores { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0 0 12px; }
+.sc { background: var(--gray-bg); border-radius: 12px; padding: 8px 10px; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.sc .k { font-size: .72rem; color: var(--sub); }
+.sc .n { font-size: 1.25rem; font-weight: 800; line-height: 1.25; }
+.sc .n small { font-size: .72rem; }
+.sc > small { font-size: .68rem; line-height: 1.3; }
+.sc.total { background: var(--green-bg); }
+.sc.total .n { color: var(--green); }
+.sc.ev { background: var(--yellow-bg); }
+.sc.ev .n { color: var(--yellow); }
+.bar.mini { height: 5px; margin-top: 3px; }
+.block.events { background: var(--yellow-bg); }
+.block.events h4 { color: var(--yellow); }
+.block.events li { font-weight: 600; font-size: .93rem; padding: 2px 0 2px 1.6em; text-indent: -1.6em; }
+.block.events li.momentum { color: var(--text); }
+.block.events li.bonus { color: var(--green); font-weight: 800; }
+.block.events li.none { font-weight: 400; color: var(--sub); text-indent: 0; padding-left: 0; font-size: .86rem; }
+.ev-pts { display: inline-block; font-size: .74rem; font-weight: 800; padding: 0 7px; border-radius: 99px;
+  background: var(--card); color: var(--green); text-indent: 0; }
+.badge { display: inline-block; font-size: .68rem; font-weight: 700; padding: 0 6px; border-radius: 6px;
+  border: 1px solid var(--sub); color: var(--sub); text-indent: 0; }
+.block.easy .indicators { margin-top: 6px; }
+table.period td { font-weight: 700; font-size: .92rem; }
+table.period tbody th { font-weight: 600; font-size: .84rem; }
+@media (max-width: 360px) { .scores { grid-template-columns: repeat(2, 1fr); } }
