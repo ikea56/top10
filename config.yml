@@ -1,67 +1,119 @@
 # ============================================================
-#  設定ファイル（ここを書き換えるだけで挙動を変えられます）
-#  ※ 文字の前後の「:」やインデント（半角スペース）は消さないでください
+#  設定ファイル（点数配分・出来高倍率・最低売買代金・高値更新期間・除外条件はすべてここで管理）
+#  ※ 「:」やインデント（半角スペース）は消さないでください。数字は 1e10 ではなく 10000000000 と書きます
+#  ※ 配点の合計は起動時に自動チェックされ、weights と合わないとエラーで止まります
 # ============================================================
 
 site_title: 本日の注目銘柄ランキング
-top_n: 10                      # 何銘柄表示するか
+top_n: 10                      # 何銘柄表示するか（期待値点の高い順）
 
-# 対象市場（JPXの上場銘柄一覧から自動取得）
 markets: [プライム, スタンダード, グロース]
 
 # ---- 株価データ取得 ----
 data:
-  period: 2y                   # 取得期間（52週高値や75日線の計算に必要）
-  chunk_size: 150              # 一度に取得する銘柄数（多すぎるとエラーになりやすい）
-  sleep_between_chunks: 1.5    # 取得の合間の待ち時間（秒）
-  min_success_ratio: 0.5       # 取得できた銘柄がこの割合未満なら「失敗」とみなして更新を止める
+  period: 2y                   # 取得期間（252日高値の計算に1年超が必要）
+  chunk_size: 150
+  sleep_between_chunks: 1.5
+  min_success_ratio: 0.5       # 取得できた銘柄がこの割合未満なら更新を止める
 
-# ---- 除外条件 ----
+# ---- 除外条件（ランキングから除外）----
 filters:
-  min_price: 100               # 株価100円未満は除外（極端な低位株）
-  min_turnover_yen: 100000000  # 売買代金（直近20日平均）1億円未満は除外
-  exclude_codes_file: data/exclude_codes.txt   # 手動で除外したい銘柄コード（監理銘柄など）
+  min_price: 100                       # 極端な低位株：株価がこの円未満は除外
+  min_turnover_yen: 100000000          # 売買代金不足：20日平均売買代金がこの円未満は除外
+  min_avg_volume: 50000                # 出来高不足：20日平均出来高がこの株数未満は除外
+  min_today_volume: 10000              # 出来高不足：当日出来高がこの株数未満は除外
+  exclude_codes_file: data/exclude_codes.txt   # 手動で除外したい銘柄コード
   exclude_name_keywords: ["監理", "整理"]       # 銘柄名にこの文字があれば除外
+  exclude_supervision: true            # JPX公式「監理・整理銘柄一覧」を取得して除外
+  supervision_urls: ["https://www.jpx.co.jp/listing/market-alerts/supervision/01.html"]
 
 # ---- 業績データ（yfinance）----
 fundamentals:
-  min_fetch: 40                # 最低でもテクニカル上位この数だけは業績を取得
-  max_fetch: 250               # 取得数の上限（取得しすぎるとYahooに制限されます）
-  sleep: 0.4                   # 1銘柄ごとの待ち時間（秒）
-  cache_days: 7                # 取得済みの業績を再利用する日数
-  exclude_loss_making: true    # 赤字企業（営業利益TTMが0以下）を除外
+  min_fetch: 60                # 最低でもテクニカル上位この数だけは業績を取得
+  max_fetch: 150               # 取得数の上限（取得しすぎるとYahooに制限されます）
+  survivor_multiple: 3         # 除外後に top_n × この数の候補が残れば取得を打ち切る
+  sleep: 0.4
+  cache_days: 7
+  exclude_loss_making: true    # 赤字企業（直近12か月の営業利益が0以下）を除外
+  exclude_chronic_loss: true   # 継続赤字企業（通期の営業利益が連続で赤字）を除外
+  chronic_loss_years: 2        # 何期連続の赤字を「継続赤字」とするか
+  allow_forecast_turnaround: true   # 今期黒字予想がある赤字企業（継続赤字を除く）は黒字転換候補として残す
   exclude_if_missing: false    # 業績が取れない銘柄を除外するか（銀行・保険などは取れないことがあります）
 
-# ---- スコア配点（元の仕様どおり）----
-# ※ 出来高・高値・業績などは「段階の高い方だけ」加点されます（重複加点なし）
-scoring:
-  high60: 30                   # 60日高値更新
-  high30: 15                   # 30日高値更新（60日高値更新の場合は加算されません）
-  vol_ratio:                   # [倍率, 点数]  当日出来高 ÷ 20日平均出来高
-    - [2.0, 20]
-    - [3.0, 30]
-  trend: 20                    # 株価 > 25日線 かつ 25日線 > 75日線
-  op_growth:                   # [前年比, 点数]  営業利益の前年比
-    - [0.20, 15]
-    - [0.50, 25]
-  turnaround_points: 15        # 赤字→黒字転換のときの点数
-  mcap:                        # [時価総額(円), 点数]
-    - [10000000000, 5]         # 100億円
-    - [50000000000, 10]        # 500億円
-  normalize_to: 100            # 配点の合計(115点)を100点満点に換算して表示
+# ---- 基本スコア（合計100点）----
+weights: {trend: 50, demand: 25, earnings: 15, market: 10}
 
-# ---- 強気判定（換算後スコアで判定）----
+scoring:
+  trend:                       # トレンド評価（モメンタム＝高値更新を優遇）
+    windows: {short: 20, mid: 60, long: 252}    # 高値更新の判定期間（営業日）
+    near_high_ratio: 0.97      # 52週高値接近：252日高値の97%以上
+    high:                      # 高値更新（一番高い段階だけ加点）
+      new252: 22               # 252日高値更新（最も大きく加点）
+      new60: 15
+      near52w: 12
+      new20: 8
+    ma_alignment: 15           # 株価 > 25日線 > 75日線
+    ma_partial: 7              # 株価 > 25日線 のみ
+    macd: 4                    # MACD > シグナル かつ MACD > 0
+    rsi: {points: 4, low: 50, high: 75}   # RSIが適温ゾーン（過熱を除く）
+    rel_strength: 5            # 20日騰落率がTOPIXを上回る
+  demand:                      # 需給評価
+    vol_ratio: [[1.5, 6], [2.0, 12], [3.0, 18]]   # [倍率, 点数] 当日出来高 ÷ 前日までの20日平均
+    up_day_volume: {min_ratio: 1.5, points: 3}    # 上昇日に出来高が増えている
+    liquidity: {min_turnover_yen: 500000000, points: 4}   # 売買代金が十分
+  earnings:                    # 業績評価
+    op_growth: [[0.20, 8], [0.50, 12]]            # 営業利益の前年比
+    mcap: [[10000000000, 1], [50000000000, 3]]    # 時価総額
+  market:                      # 地合い評価
+    regime: {good: 6, neutral: 3, bad: 0}         # TOPIXの状態
+    sector: {top: 4, mid: 2, bottom: 0}           # 業種の勢い（20日騰落率の順位）
+    sector_min_members: 5
+
+# ---- 評価イベント（基本点に上乗せ。業績イベント＋株主還元＋同時発生ボーナス）----
+events:
+  cap: 30                      # イベント点の上限
+  earnings:
+    turnaround: 10             # 黒字転換（前期赤字→今期黒字予想）
+    turnaround_actual: 8       # 黒字転換（予想が無く、直近12か月の実績で判定）
+    sustained_profit: 4        # 継続黒字化（来期も黒字予想）
+    record_high: 5             # 最高益更新
+    upward_revision: 4         # 上方修正
+    revision_min_change: 0.03  # 予想EPSが30日前より3%以上上方修正
+  shareholder:
+    dividend_increase: 2       # 増配
+    increase_tiers: [[0.10, 4], [0.20, 6], [0.30, 8]]   # 大幅増配（増配率→点数）
+    streak_tiers: [[3, 2], [5, 4], [10, 6]]             # 連続増配（年数→点数）
+    payout_improve: 2          # 配当性向の改善（取得できる場合のみ）
+    payout_max: 0.70           # 配当性向がこの値を超える場合は加点しない
+    buyback: 3                 # 自社株買い（取得できる場合のみ）
+    buyback_min_ratio: 0.003   # 時価総額比0.3%以上
+  momentum_bonus: {2: 3, 3: 10, 4: 15}   # 252日高値更新 ＋ {増配, 黒字転換, 最高益} の同時発生数 → ボーナス点
+
+# ---- 期待値点 = 総合点 × (過去勝率 ÷ 基準勝率) × 流動性係数 ----
+expected_score:
+  win_rate_baseline: 0.5       # この勝率なら係数1.0（総合点と同じ尺度にそろえる）
+  default_win_rate: 0.5        # バックテスト結果が未取得／サンプル不足のときに使う勝率
+  winrate_horizon: 1m
+  winrate_years: 5             # 勝率の集計に使う直近年数
+  bands: [0, 40, 55, 70, 85, 101]   # テクニカル点（100点換算）のスコア帯
+  min_samples: 200
+  liquidity_factor: [[0, 0.70], [300000000, 0.85], [1000000000, 0.95], [5000000000, 1.00]]  # [20日平均売買代金, 係数]
+
+# ---- 強気判定（総合点で判定）----
 bull:
-  strong: 70                   # この点以上で「強気」
-  mild: 50                     # この点以上で「やや強気」、未満は「中立」
-overheat:                      # 過熱とみなす基準（該当すると「強気」を「やや強気」に格下げ）
+  strong: 75
+  mild: 55
+overheat:
   rsi: 80
-  ma25_gap: 0.25               # 25日線からの乖離率 25%
+  ma25_gap: 0.25
 
 # ---- バックテスト ----
 backtest:
-  replay_years: 5              # 過去何年を再現検証するか（長いほど信頼度は上がるが、実行時間も増える）
+  replay_years: 10             # 取得・再現する年数（1/3/5/10年の成績を出すには10）。重ければ5に
+  periods: [1, 3, 5, 10]       # 成績を出す期間（年）
+  table_years: 5               # 画面の「1週間/1か月/3か月後」表に使う期間
   step_days: 5                 # 何営業日ごとにランキングを作るか（5=毎週）
   cost_pct: 0.2                # 売買コスト（往復・％）
-  horizons: {1w: 5, 1m: 21, 3m: 63}   # 保有期間（営業日）
-  min_forward_samples: 15      # 実運用記録がこの回数未満なら「データ蓄積中」と表示
+  horizons: {1w: 5, 1m: 20, 3m: 60}   # 保有期間（営業日）
+  equity_horizon: 1m           # 資産曲線（DD・シャープ・年率）に使う保有期間
+  min_forward_samples: 15
