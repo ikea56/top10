@@ -1,0 +1,87 @@
+{
+ "date": "2026-11-04",
+ "demo": false,
+ "regime": "bad",
+ "picks": [
+  {
+   "rank": 1,
+   "code": "2121",
+   "name": "ＭＩＸＩ",
+   "total": 99,
+   "expected": 96.4,
+   "close": 4045.0
+  },
+  {
+   "rank": 2,
+   "code": "3399",
+   "name": "丸千代山岡家",
+   "total": 98,
+   "expected": 95.4,
+   "close": 5450.0
+  },
+  {
+   "rank": 3,
+   "code": "9766",
+   "name": "コナミグループ",
+   "total": 87,
+   "expected": 89.2,
+   "close": 27075.0
+  },
+  {
+   "rank": 4,
+   "code": "3994",
+   "name": "マネーフォワード",
+   "total": 90,
+   "expected": 87.6,
+   "close": 7033.0
+  },
+  {
+   "rank": 5,
+   "code": "7459",
+   "name": "メディパルホールディングス",
+   "total": 89,
+   "expected": 86.6,
+   "close": 3458.0
+  },
+  {
+   "rank": 6,
+   "code": "2702",
+   "name": "日本マクドナルドホールディングス",
+   "total": 84,
+   "expected": 86.1,
+   "close": 8730.0
+  },
+  {
+   "rank": 7,
+   "code": "3097",
+   "name": "物語コーポレーション",
+   "total": 85,
+   "expected": 82.8,
+   "close": 6150.0
+  },
+  {
+   "rank": 8,
+   "code": "9861",
+   "name": "吉野家ホールディングス",
+   "total": 84,
+   "expected": 81.8,
+   "close": 4581.0
+  },
+  {
+   "rank": 9,
+   "code": "4502",
+   "name": "武田薬品工業",
+   "total": 79,
+   "expected": 81.0,
+   "close": 6568.0
+  },
+  {
+   "rank": 10,
+   "code": "6196",
+   "name": "ストライクグループ",
+   "total": 98,
+   "expected": 79.0,
+   "close": 1801.0
+  }
+ ]
+}

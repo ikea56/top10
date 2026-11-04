@@ -116,7 +116,7 @@ small { font-size: .78em; color: var(--sub); font-weight: 400; }
 .bar i.mild { background: var(--yellow); }
 .note { font-size: .78rem; color: var(--sub); margin-bottom: 6px; }
 
-.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 12px; }
+.chips-unused { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 12px; }
 .chips li { font-size: .78rem; padding: 2px 9px; border-radius: 8px; background: var(--gray-bg); color: var(--sub); font-weight: 600; }
 .chips li.full { background: var(--green-bg); color: var(--green); }
 .chips li.part { background: var(--yellow-bg); color: var(--yellow); }
@@ -192,3 +192,32 @@ summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
   .stock { padding: 18px; }
   .kpi .v.big { font-size: 2.2rem; }
 }
+
+/* ============ 期待値・点数グリッド・評価イベント ============ */
+.formula { font-size: .76rem; color: var(--sub); margin: 0 2px 10px; line-height: 1.5; }
+.formula b { color: var(--yellow); }
+.scores { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0 0 12px; }
+.sc { background: var(--gray-bg); border-radius: 12px; padding: 8px 10px; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.sc .k { font-size: .72rem; color: var(--sub); }
+.sc .n { font-size: 1.25rem; font-weight: 800; line-height: 1.25; }
+.sc .n small { font-size: .72rem; }
+.sc > small { font-size: .68rem; line-height: 1.3; }
+.sc.total { background: var(--green-bg); }
+.sc.total .n { color: var(--green); }
+.sc.ev { background: var(--yellow-bg); }
+.sc.ev .n { color: var(--yellow); }
+.bar.mini { height: 5px; margin-top: 3px; }
+.block.events { background: var(--yellow-bg); }
+.block.events h4 { color: var(--yellow); }
+.block.events li { font-weight: 600; font-size: .93rem; padding: 2px 0 2px 1.6em; text-indent: -1.6em; }
+.block.events li.momentum { color: var(--text); }
+.block.events li.bonus { color: var(--green); font-weight: 800; }
+.block.events li.none { font-weight: 400; color: var(--sub); text-indent: 0; padding-left: 0; font-size: .86rem; }
+.ev-pts { display: inline-block; font-size: .74rem; font-weight: 800; padding: 0 7px; border-radius: 99px;
+  background: var(--card); color: var(--green); text-indent: 0; }
+.badge { display: inline-block; font-size: .68rem; font-weight: 700; padding: 0 6px; border-radius: 6px;
+  border: 1px solid var(--sub); color: var(--sub); text-indent: 0; }
+.block.easy .indicators { margin-top: 6px; }
+table.period td { font-weight: 700; font-size: .92rem; }
+table.period tbody th { font-weight: 600; font-size: .84rem; }
+@media (max-width: 360px) { .scores { grid-template-columns: repeat(2, 1fr); } }
