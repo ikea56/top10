@@ -73,6 +73,21 @@ def download_prices(tickers: list[str], period: str = "2y", chunk_size: int = 15
     return {k: v[ok] for k, v in panel.items()}
 
 
+def fix_splits(df: pd.DataFrame, name: str = "") -> pd.DataFrame:
+    """分割の調整漏れ（前日比が約1/2〜1/10や2〜10倍に飛ぶ）を補正する。
+    指数連動ETFなどで調整が効いていないと、成績比較が大きく狂うため。"""
+    c = df["close"]
+    ratio = (c / c.shift(1)).dropna()
+    out = df.copy()
+    for dt, r in ratio.items():
+        if r < 0.55 or r > 1.8:
+            k = round(1 / r) if r < 1 else round(r)
+            if 2 <= k <= 20 and abs((1 / r if r < 1 else r) - k) / k < 0.12:
+                out.loc[out.index < dt, ["open", "high", "low", "close"]] *= r   # それ以前の価格を新しい水準に揃える
+                log.warning("%s: %s に分割とみられる急変(%.2f倍)を補正しました", name, dt.date(), r)
+    return out
+
+
 def download_benchmarks(period: str = "3y", start: str | None = None) -> dict[str, pd.DataFrame]:
     """TOPIX連動ETF(1306)と日経平均。"""
     import yfinance as yf
@@ -85,7 +100,7 @@ def download_benchmarks(period: str = "3y", start: str | None = None) -> dict[st
             if isinstance(raw.columns, pd.MultiIndex):
                 raw.columns = raw.columns.get_level_values(0)
             raw = _naive_index(raw).dropna(subset=["Close"])
-            out[key] = raw[["Open", "High", "Low", "Close"]].rename(columns=str.lower)
+            out[key] = fix_splits(raw[["Open", "High", "Low", "Close"]].rename(columns=str.lower), tk)
         except Exception as e:  # noqa: BLE001
             log.warning("%s の取得に失敗: %s", tk, e)
     if "topix" not in out and "n225" in out:
