@@ -2,7 +2,7 @@
 値動きはランダムで、「勝てる癖」は一切仕込んでいません。"""
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from typing import Callable
 
 import numpy as np
@@ -19,7 +19,7 @@ Fund = dict
 def _demo_fund(code: str) -> Fund:
     r = np.random.default_rng(int(code))
     if r.random() < 0.04:
-        return {"v": 3, "status": "missing", "market_cap": None, "op_ttm": None, "op_yoy": None,
+        return {"v": 4, "status": "missing", "market_cap": None, "op_ttm": None, "op_yoy": None,
                 "op_basis": None, "op_annual": []}
     base = float(1e9 * np.exp(r.normal(2, 1.2)))
     turn = r.random() < 0.12                                   # 前期赤字の企業
@@ -30,7 +30,7 @@ def _demo_fund(code: str) -> Fund:
     inc = r.random() < 0.35
     prev = float(r.uniform(10, 80))
     return {
-        "v": 3, "status": "ok", "market_cap": float(10 ** r.uniform(9.5, 12.3)), "op_ttm": float(ttm),
+        "v": 4, "status": "ok", "market_cap": float(10 ** r.uniform(9.5, 12.3)), "op_ttm": float(ttm),
         "op_yoy": None if turn else float(r.normal(0.25, 0.4)), "op_basis": "直近四半期・前年同期比",
         "op_annual": [float(x) for x in annual], "eps_hist": [float(x) for x in eps],
         "eps_est_0y": float(eps[0] * 1.3 if not turn else abs(eps[0]) * 0.8),
@@ -41,6 +41,7 @@ def _demo_fund(code: str) -> Fund:
         "div_ttm": prev, "div_prev12": prev * 0.9,
         "payout_latest": float(r.uniform(0.25, 0.5)), "payout_prev": float(r.uniform(0.2, 0.45)),
         "buyback": float(1e9 * r.uniform(0.5, 5)) if r.random() < 0.3 else None,
+        "next_earnings": (date.today() + timedelta(days=int(r.integers(3, 60)))).isoformat(),
     }
 
 

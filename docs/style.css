@@ -221,3 +221,16 @@ summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
 table.period td { font-weight: 700; font-size: .92rem; }
 table.period tbody th { font-weight: 600; font-size: .84rem; }
 @media (max-width: 360px) { .scores { grid-template-columns: repeat(2, 1fr); } }
+
+/* ============ 押し目・注意事項 ============ */
+.scores { grid-template-columns: repeat(3, 1fr); }
+.block.pullback { background: var(--green-bg); }
+.block.pullback h4 { color: var(--green); }
+.block.pullback li { font-weight: 600; font-size: .93rem; padding: 2px 0; }
+.block.pullback li.none { font-weight: 400; color: var(--sub); font-size: .86rem; }
+.block.risk li.lv-high { font-weight: 800; color: var(--red); }
+.block.risk li.lv-low { color: var(--sub); }
+.block.risk li::before { content: ""; }
+.block.risk li { text-indent: -1.3em; padding-left: 1.3em; }
+details.legacy { margin: 0 0 10px; }
+details.legacy summary { font-size: .82rem; font-weight: 600; color: var(--sub); }

@@ -18,6 +18,11 @@ def regime_series(close: pd.Series) -> pd.Series:
     return out
 
 
+def above_ma50_series(close: pd.Series) -> pd.Series:
+    """日経平均などが50日線の上にあるか（True/False）。"""
+    return (close > close.rolling(50).mean()).fillna(False)
+
+
 def market_regime(close: pd.Series) -> str:
     c = close.dropna()
     return str(regime_series(c).iloc[-1]) if len(c) >= 80 else "neutral"

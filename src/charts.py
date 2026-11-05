@@ -50,4 +50,4 @@ def candle_svg(o: np.ndarray, h: np.ndarray, l: np.ndarray, c: np.ndarray, v: np
     path(ma25, "ma25")
     path(ma75, "ma75")
     return (f'<svg viewBox="0 0 {w} {ht}" class="candle" role="img" '
-            f'aria-label="直近{n}日のローソク足と25日・75日移動平均線">' + "".join(parts) + "</svg>")
+            f'aria-label="直近{n}日のローソク足と25日・50日移動平均線">' + "".join(parts) + "</svg>")

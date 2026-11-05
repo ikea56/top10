@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import math
+from datetime import date
 from typing import Any
 
 from .config import Config
@@ -102,3 +103,118 @@ def build_risks(r: Any, fund: dict | None, market: str, regime: str, ev: EventRe
     if regime == "bad":
         risks.append("市場全体が下落基調で、順張りは勝ちにくい局面")
     return (risks or ["高値圏での購入になるため、下がったときの撤退ラインを先に決めておく"])[:3]
+
+
+# ====================================================================== 押し目ランキング用の表示文
+def _pct(x: float) -> str:
+    return f"{x * 100:+.0f}%"
+
+
+def pullback_status(r: Any, cfg: Config, regime: str, nikkei_ok: bool) -> list[str]:
+    """【押し目状況】満たしている項目だけを✅で並べる。"""
+    pb = cfg["pullback"]
+    out: list[str] = []
+    if r["ma50"] > r["ma200"]:
+        out.append("長期上昇トレンド（50日線＞200日線）")
+    dd = r["dist52w"]
+    if -0.25 <= dd <= -0.03:
+        out.append(f"高値から{_pct(dd)}（52週高値比）")
+    elif dd > -0.03:
+        out.append(f"ほぼ高値圏（高値から{_pct(dd)}・調整は浅め）")
+    if -0.06 <= r["gap50"] <= 0.07:
+        out.append(f"50日線付近（乖離{r['gap50'] * 100:+.1f}%）")
+    vc = r["vol_cont"]
+    if vc == vc and vc <= pb["volume"]["tiers"][-1][0] and dd <= pb["volume"]["pullback_gate"]:
+        out.append(f"出来高縮小（直近10日が50日平均の{vc:.2f}倍）")
+    if regime == "good" or nikkei_ok:
+        out.append("地合いも良好（" + ("TOPIX追い風" if regime == "good" else "TOPIX中立") +
+                   ("・日経平均は50日線の上）" if nikkei_ok else "）"))
+    return out
+
+
+def strengths(ev: EventResult, td: Any) -> list[dict]:
+    """【強み】yfinance由来のイベントとTDnetの開示を、同じ種類は1つにまとめて並べる。"""
+    items: dict[str, dict] = {}
+    fmap = {"turnaround": "黒字転換", "record_high": "最高益更新", "dividend": "増配", "streak": None,
+            "buyback": "自社株買い", "revision": "上方修正", "sustained": "継続黒字化"}
+    for i in ev.items:
+        if i.key in fmap and i.key != "bonus":
+            key = {"dividend": "dividend_increase", "revision": "upward_revision"}.get(i.key, i.key)
+            items[key] = {"label": i.label, "src": "予想" if i.basis == "予想" else "実績"}
+    if td is not None and getattr(td, "status", "") == "ok":
+        for h in td.hits:
+            if h.points > 0:
+                items[h.kind] = {"label": f"{h.label}（TDnet {h.date[5:].replace('-', '/')}）", "src": "TDnet"}
+    return list(items.values())
+
+
+def cautions(r: Any, fund: dict | None, td: Any, ev: EventResult, cfg: Config, regime: str, market: str,
+             today: Any) -> list[dict]:
+    """【注意事項】重要度の高い順（level=high は赤、それ以外は黄）。"""
+    cp, pen = cfg["pullback"]["caution"], cfg["pullback"]["penalties"]
+    out: list[dict] = []
+    if td is not None and td.status == "ok":
+        for h in td.hits:
+            if h.kind == "downward_revision":
+                out.append({"label": f"下方修正履歴（{h.date.replace('-', '/')}開示）・大幅減点", "level": "high"})
+            elif h.kind == "dividend_cut":
+                out.append({"label": f"減配の開示（{h.date.replace('-', '/')}）・減点", "level": "high"})
+            elif h.kind == "unknown_revision":
+                out.append({"label": f"業績予想の修正あり（{h.date.replace('-', '/')}・増額か減額か判定できず）", "level": "mid"})
+    elif td is not None:
+        out.append({"label": "TDnetを確認できていません（TOB・下方修正などの有無が未確認）", "level": "high"})
+    rev = (fund or {}).get("eps_rev") or {}
+    if rev.get("cur") is not None and rev.get("d30") and rev["cur"] < rev["d30"] * 0.97 and not any(
+            c["label"].startswith("下方修正") for c in out):
+        out.append({"label": "アナリストの予想EPSが直近30日で下方修正", "level": "mid"})
+    ne = (fund or {}).get("next_earnings")
+    if ne and 0 <= (date.fromisoformat(ne) - today).days <= cp["earnings_days"]:
+        out.append({"label": f"決算接近（{ne[5:].replace('-', '/')}発表予定）・発表で大きく動く可能性", "level": "mid"})
+    v20, v60 = r.get("vol20"), r.get("vol60")
+    if v20 == v20 and v60 == v60 and v60 and v20 / v60 >= cp["vol_ratio"]:
+        out.append({"label": f"ボラティリティ上昇（直近の値動きが60日平均の{v20 / v60:.1f}倍）", "level": "mid"})
+    if r["ret5d"] == r["ret5d"] and r["ret5d"] >= pen["surge_5d"]["ret"]:
+        out.append({"label": f"直近5日で{_pct(r['ret5d'])}の急騰後（減点）", "level": "mid"})
+    if r["dist52w"] <= pen["far_from_high"]["dd"]:
+        out.append({"label": f"高値から{_pct(r['dist52w'])}と大きく下落（減点）", "level": "mid"})
+    if regime == "bad":
+        out.append({"label": "市場全体が下落基調。押し目が深くなる可能性", "level": "mid"})
+    mc = (fund or {}).get("market_cap")
+    if mc and mc < 3e10:
+        out.append({"label": "時価総額が小さく値動きが荒くなりやすい", "level": "low"})
+    if market == "グロース":
+        out.append({"label": "グロース市場は値動きが大きい傾向", "level": "low"})
+    if ev.uses_forecast:
+        out.append({"label": "強みの一部は会社・アナリストの予想に基づく（外れることがあります）", "level": "low"})
+    if not fund or fund.get("status") != "ok" or fund.get("op_ttm") is None:
+        out.append({"label": "営業利益データを取得できず業績面は未確認", "level": "low"})
+    order = {"high": 0, "mid": 1, "low": 2}
+    return sorted(out, key=lambda c: order[c["level"]])[:6]
+
+
+def pullback_reason(r: Any, stren: list[dict], regime: str, nikkei_ok: bool, limit: int = 100) -> str:
+    """初心者向けの選出理由（100文字以内）。『いまの状態』だけを書き、将来の値動きは予想しない。"""
+    phrases: list[str] = []
+    dd = r["dist52w"]
+    if -0.25 <= dd <= -0.03:
+        phrases.append(f"高値から{_pct(dd)}まで調整")
+    if -0.06 <= r["gap50"] <= 0.07:
+        phrases.append("50日線付近で推移")
+    if r["vol_cont"] == r["vol_cont"] and r["vol_cont"] <= 1.0 and dd <= -0.03:
+        phrases.append("出来高は縮小")
+    names = [s["label"].split("（")[0] for s in stren if s["label"].split("（")[0] in
+             ("増配", "自社株買い", "上方修正", "黒字転換", "最高益更新", "大型受注", "株式分割")][:3]
+    if names:
+        phrases.append("・".join(names) + "など業績・株主還元も良好")
+    if regime == "good":
+        phrases.append("市場全体の地合いも良好")
+    elif nikkei_ok:
+        phrases.append("日経平均は50日線の上")
+    if r["ma50"] > r["ma200"]:
+        phrases.append("長期の上昇トレンドは継続")
+    text = ""
+    for p in phrases:
+        cand = f"{text}{p}。"
+        if len(cand) <= limit:
+            text = cand
+    return text or "長期トレンドを保ったまま、調整局面にある銘柄です。"

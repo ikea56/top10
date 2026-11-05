@@ -18,20 +18,20 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from . import scoring
+from . import pullback, scoring
 from .config import JST, ROOT, Config, load_config
 from .features import Panel, compute_features, snapshot
 from .log import get_logger
-from .market import regime_series
+from .market import above_ma50_series, regime_series
 
 log = get_logger(__name__)
 
 HORIZON_LABEL = {"1w": "1週間後", "1m": "1か月後", "3m": "3か月後"}
 MIN_HISTORY = 210          # 252日高値・75日線の計算に必要な助走日数
-GROUPS = ("top10", "top10_ok", "tech80", "hi252")
+GROUPS = ("pb_top10", "pb_ok", "top10", "top10_ok", "tech80", "hi252")
 CAVEATS = [
     "過去再現は「現在の上場銘柄」で計算しているため、上場廃止になった銘柄が含まれず成績がやや良く出ます（生存者バイアス）。",
-    "過去再現にはトレンド・需給・地合いの点数だけを使っています。業績・増配・黒字転換などのイベントは過去データが無いため含みません。",
+    "過去再現に使うのは株価・出来高だけで決まる点数です（押し目スコアは業績維持20点を除く80点分、従来スコアはトレンド・需給・地合い）。業績・増配・TDnetの開示は過去データが無いため含みません。",
     "ランキングの翌営業日の始値で買い、往復の売買コストを差し引いた計算です。ストップ高で買えない・約定が滑るといった実際のズレは含みません。",
     "期間が重なる計算のため、1か月後などの結果は独立した試行ではありません。数字は目安として見てください。",
     "過去の成績は将来の利益を保証しません。",
@@ -76,7 +76,8 @@ def _mean(a: np.ndarray) -> float:
     return float(a.mean()) if a.size else float("nan")
 
 
-def period_stats(records: list[dict], years: int, end: pd.Timestamp, bt: dict) -> dict[str, Any] | None:
+def period_stats(records: list[dict], years: int, end: pd.Timestamp, bt: dict,
+                 group: str = "top10") -> dict[str, Any] | None:
     """直近 years 年ぶんの成績（トップ10を毎週買った場合）。期間に満たなければ None。"""
     if not records:
         return None
@@ -87,9 +88,9 @@ def period_stats(records: list[dict], years: int, end: pd.Timestamp, bt: dict) -
     hold = int(bt["horizons"][bt["equity_horizon"]])
     k = max(1, hold // int(bt["step_days"]))
     h = bt["equity_horizon"]
-    trades = np.concatenate([r["groups"]["top10"][h] for r in win]) if win else np.array([])
+    trades = np.concatenate([r["groups"][group][h] for r in win]) if win else np.array([])
     sub = win[::k]                                              # 保有期間が重ならないように間引く
-    strat = np.array([_mean(r["groups"]["top10"][h]) for r in sub])
+    strat = np.array([_mean(r["groups"][group][h]) for r in sub])
     bench = np.array([r["bench"][h] for r in sub], dtype=float)
     out: dict[str, Any] = {"n_dates": len(win), "n_periods": len(sub)}
     out.update(trade_metrics(trades) or {})
@@ -105,9 +106,9 @@ def group_stats(records: list[dict], group: str, horizons: dict[str, int]) -> di
     for h in horizons:
         means, bench, allr = [], [], []
         for r in records:
-            if group == "top10_ok" and r["regime"] == "bad":
+            if group.endswith("_ok") and r["regime"] == "bad":
                 continue
-            a = r["groups"]["top10" if group == "top10_ok" else group][h]
+            a = r["groups"][{"top10_ok": "top10", "pb_ok": "pb_top10"}.get(group, group)][h]
             a = a[np.isfinite(a)]
             if a.size and np.isfinite(r["bench"][h]):
                 means.append(float(a.mean()))
@@ -165,6 +166,9 @@ def run_replay(panel: Panel, bench: dict[str, pd.DataFrame], sectors: pd.Series,
     log.info("指標を計算中（%d銘柄 × %d日）", c.shape[1], c.shape[0])
     f = compute_features(panel, topix["close"], sc)
     regime = regime_series(topix["close"]).fillna("neutral")
+    n225 = bench.get("n225")
+    nikkei = (above_ma50_series(n225["close"].reindex(c.index).ffill()) if n225 is not None
+              else pd.Series(False, index=c.index))
 
     first = max(MIN_HISTORY, int(c.index.searchsorted(c.index[-1] - pd.DateOffset(years=bt["replay_years"]))))
     idx = list(range(first, len(c) - 1, int(bt["step_days"])))
@@ -182,8 +186,10 @@ def run_replay(panel: Panel, bench: dict[str, pd.DataFrame], sectors: pd.Series,
             continue
         tech = scoring.score_technical(s, regime.iloc[i], scoring.sector_points(s["ret20d"], sectors, sc), sc)
         scaled = tech["tech_base"] / tmax * 100
+        pb = pullback.score_technical(s, regime.iloc[i], bool(nikkei.iloc[i]), cfg)["pb_tech_scaled"]
+        pb_order = pd.DataFrame({"s": pb, "vr": s["vol_cont"]}).query("s > 0").sort_values(["s", "vr"], ascending=[False, True])
         order = pd.DataFrame({"s": scaled, "vr": s["vol_ratio"]}).sort_values(["s", "vr"], ascending=False)
-        pick = {"top10": order.index[:top_n],
+        pick = {"pb_top10": pb_order.index[:top_n], "top10": order.index[:top_n],
                 "tech80": scaled.index[scaled >= 80],
                 "hi252": s.index[s["hi252"].astype(bool)]}
         groups = {g: {k: fwd[k].iloc[pos].reindex(ix).to_numpy(dtype=float) for k in horizons} for g, ix in pick.items()}
@@ -203,7 +209,8 @@ def run_replay(panel: Panel, bench: dict[str, pd.DataFrame], sectors: pd.Series,
         "period": {"start": str(records[0]["date"].date()), "end": str(records[-1]["date"].date())},
         "n_universe": int(c.shape[1]), "n_dates": len(table_recs), "cost_pct": bt["cost_pct"],
         "hold": bt["equity_horizon"],
-        "periods": {f"{y}y": period_stats(records, y, end, bt) for y in bt["periods"]},
+        "periods": {f"{y}y": period_stats(records, y, end, bt, "pb_top10") for y in bt["periods"]},
+        "periods_legacy": {f"{y}y": period_stats(records, y, end, bt, "top10") for y in bt["periods"]},
         "bands": band_stats(records, cfg["expected_score"], end),
     }
     for g in GROUPS:
@@ -269,8 +276,9 @@ def build_table(summary: dict | None, forward: dict | None, cfg: Config) -> dict
                          "caveats": CAVEATS, "period": None, "forward_note": None}
     if summary:
         t["period"] = f"{summary['period']['start']} 〜 {summary['period']['end']}（直近{summary['years']}年・{summary['n_dates']}週分）"
-        for key, label, note in (("top10", "毎週のトップ10を買った場合", "過去再現"),
-                                 ("top10_ok", "　うち地合いが「逆風」でない週", "TOPIXが75日線の上"),
+        for key, label, note in (("pb_top10", "押し目トップ10（メイン）", "押し目スコアの技術80点分で再現"),
+                                 ("pb_ok", "　うち地合いが「逆風」でない週", "TOPIXが75日線の上"),
+                                 ("top10", "従来の「今強い」トップ10（補助）", "過去再現"),
                                  ("tech80", "テクニカル80点以上の全銘柄", "過去再現"),
                                  ("hi252", "252日高値を更新した全銘柄", "過去再現（モメンタム）")):
             if summary.get(key):
@@ -281,10 +289,11 @@ def build_table(summary: dict | None, forward: dict | None, cfg: Config) -> dict
             bench_cells.append({"txt": f"{s['bench'] * 100:+.1f}%", "sub": "", "cls": "pos" if s["bench"] > 0 else "neg"}
                                if s else _cell(None))
         t["rows"].append({"label": "TOPIX（比較用）", "note": "同じ期間・同じ売買ルール", "cells": bench_cells})
-        s1 = (summary.get("hi252") or {}).get("1m")
+        s1, s0 = (summary.get("pb_top10") or {}).get("1m"), (summary.get("top10") or {}).get("1m")
         if s1:
-            t["headline"] = (f"過去{summary['years']}年の再現検証では、252日高値を更新した銘柄を翌日に買った場合の"
-                             f"1か月後の平均騰落率は{s1['avg'] * 100:+.1f}%（同期間のTOPIXは{s1['bench'] * 100:+.1f}%）でした。")
+            t["headline"] = (f"過去{summary['years']}年の再現検証では、毎週の押し目トップ10を買った場合の1か月後の平均騰落率は"
+                             f"{s1['avg'] * 100:+.1f}%（同期間のTOPIXは{s1['bench'] * 100:+.1f}%"
+                             + (f"、従来の「今強い」トップ10は{s0['avg'] * 100:+.1f}%" if s0 else "") + "）でした。")
     if forward is not None:
         n = forward["n_records"]
         if any(forward["stats"].values()):
@@ -307,17 +316,18 @@ def _fmt(v: float | None, kind: str) -> str:
     return f"{v:.2f}"
 
 
-def build_period_table(summary: dict | None) -> dict[str, Any] | None:
+def build_period_table(summary: dict | None, key: str = "periods") -> dict[str, Any] | None:
     """画面の「期間別の成績（1年・3年・5年・10年）」表。"""
-    if not summary or not summary.get("periods"):
+    if not summary or not summary.get(key):
         return None
-    keys = list(summary["periods"])
+    periods = summary[key]
+    keys = list(periods)
     spec = [("勝率", "win", "pct"), ("平均利益率", "avg_win", "spct"), ("平均損失率", "avg_loss", "spct"),
             ("PF（総利益÷総損失）", "pf", "num"), ("最大ドローダウン", "max_dd", "spct"),
             ("シャープレシオ", "sharpe", "num"), ("年率リターン", "ann_ret", "spct"),
             ("（比較）TOPIX年率", "bench_ann", "spct")]
-    rows = [{"label": label, "cells": [_fmt((summary["periods"][k] or {}).get(key), kind) for k in keys]}
-            for label, key, kind in spec]
+    rows = [{"label": label, "cells": [_fmt((periods[k] or {}).get(kcol), kind) for k in keys]}
+            for label, kcol, kind in spec]
     return {"cols": [k.replace("y", "年") for k in keys], "rows": rows,
             "note": f"毎週のトップ10を翌営業日の始値で買い、約1か月（{summary.get('hold', '1m')}）保有→入れ替え、を繰り返した場合。"
                     "「—」は取得した株価の期間が足りない項目です。"}
@@ -330,6 +340,7 @@ def main() -> None:
     args = ap.parse_args()
     cfg = load_config()
     scoring.validate_config(cfg)
+    pullback.validate_config(cfg)
     _, summary_path = paths(args.demo)
     summary_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -350,7 +361,7 @@ def main() -> None:
     summary = run_replay(panel, bench, uni.set_index("ticker")["sector"], cfg)
     summary_path.write_text(json.dumps(summary, ensure_ascii=False, indent=1), encoding="utf-8")
     log.info("保存しました: %s", summary_path)
-    for k, p in summary["periods"].items():
+    for k, p in summary["periods"].items():           # 押し目トップ10（メイン）
         if p:
             log.info("  %s: 勝率%.0f%% 平均利益%s 平均損失%s PF%s DD%s シャープ%s 年率%s", k, p["win"] * 100,
                      _fmt(p.get("avg_win"), "spct"), _fmt(p.get("avg_loss"), "spct"), _fmt(p.get("pf"), "num"),

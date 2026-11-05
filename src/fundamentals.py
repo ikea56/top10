@@ -16,7 +16,7 @@ from .log import get_logger
 
 log = get_logger(__name__)
 CACHE = ROOT / "data" / "fundamentals_cache.json"
-SCHEMA_VERSION = 3          # 項目を増やしたら上げる（古いキャッシュを使わないため）
+SCHEMA_VERSION = 4          # 項目を増やしたら上げる（古いキャッシュを使わないため）
 Fund = dict[str, Any]
 
 
@@ -87,7 +87,7 @@ def fetch_one(code: str) -> Fund:
     out: Fund = {"v": SCHEMA_VERSION, "status": "missing", "market_cap": None, "op_ttm": None, "op_yoy": None,
                  "op_basis": None, "op_annual": [], "eps_hist": [], "eps_est_0y": None, "eps_est_1y": None,
                  "eps_rev": None, "div_cur": None, "div_prev": None, "div_basis": None, "div_streak": 0,
-                 "payout_latest": None, "payout_prev": None, "buyback": None}
+                 "payout_latest": None, "payout_prev": None, "buyback": None, "next_earnings": None}
     t = yf.Ticker(f"{code}.T")
     out["market_cap"] = _f(_safe(lambda: t.fast_info["market_cap"], "時価総額", code)
                            or _safe(lambda: t.info.get("marketCap"), "時価総額(info)", code))
@@ -130,6 +130,11 @@ def fetch_one(code: str) -> Fund:
             out["payout_latest"] = out["div_ttm"] / e0
         if e1 > 0 and out.get("div_prev12"):
             out["payout_prev"] = out["div_prev12"] / e1
+
+    cal = _safe(lambda: t.calendar, "決算予定日", code)
+    dates = (cal.get("Earnings Date") if isinstance(cal, dict) else None) or []
+    future = sorted(str(d)[:10] for d in dates if str(d)[:10] >= date.today().isoformat())
+    out["next_earnings"] = future[0] if future else None
 
     cf = _safe(lambda: t.cashflow, "キャッシュフロー", code)
     rep = _series(cf, ("Repurchase Of Capital Stock", "Common Stock Payments", "RepurchaseOfCapitalStock"))

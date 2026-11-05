@@ -46,11 +46,11 @@
   </section>
 
   <!-- ランキング -->
-  <h2 class="section-title">🏆 本日の監視候補 トップ{{ top_n }}</h2>
-  <p class="lead">「期待値点」の高い順です。高値更新・出来高・業績・還元などの<b>いまの状態</b>が強い銘柄を、
-    過去の統計をもとに並べています（将来の株価を予想するものではありません）。<a href="#guide">点数の見方</a></p>
-  {% if not win_known_any %}
-  <div class="banner warn">ℹ️ バックテスト結果が未取得のため、期待値点の勝率は仮置き（{{ '%.0f'|format(es.default_win_rate * 100) }}%）です。</div>
+  <h2 class="section-title">🏆 本日の押し目候補 トップ{{ top_n }}</h2>
+  <p class="lead">「業績・株主還元などの好材料があり、健全な押し目を形成中」の銘柄を、<b>押し目スコア＋イベント点</b>の高い順に並べています。
+    すでに急騰した銘柄は減点しています（将来の株価を予想するものではありません）。<a href="#guide">点数の見方</a></p>
+  {% if tdnet_warn %}
+  <div class="banner danger">⚠️ <b>TDnet（適時開示）を取得できていません。</b>TOB・下方修正などの有無が未確認の状態です。各銘柄の「注意事項」を確認してください。</div>
   {% endif %}
 
   {% for c in cards %}
@@ -71,34 +71,49 @@
         {% if c.ret1d is not none %}<span class="chg {{ 'up' if c.ret1d >= 0 else 'down' }}">前日比 {{ c.ret1d|pct }}</span>{% endif %}
       </div>
       <div class="kpi score-kpi">
-        <span class="k">期待値点（並び順）</span>
-        <span class="v big">{{ '%.0f'|format(c.expected) }}</span>
-        <span class="bar"><i class="{{ c.css }}" style="width: {{ [c.expected, 100]|min }}%"></i></span>
+        <span class="k">総合点（並び順）</span>
+        <span class="v big">{{ c.main }}</span>
+        <span class="bar"><i class="{{ c.css }}" style="width: {{ [c.main, 100]|min }}%"></i></span>
       </div>
     </div>
-    <p class="formula">期待値点 ＝ 総合点{{ c.total }} × 勝率{{ '%.0f'|format(c.win_rate * 100) }}%（基準{{ '%.0f'|format(es.win_rate_baseline * 100) }}%比）× 流動性{{ '%.2f'|format(c.liq) }}
-      {% if not c.win_known %}<b>※勝率は仮置き</b>{% else %}<small>（過去{{ es.winrate_years }}年・同じ点数帯{{ '{:,}'.format(c.win_n) }}件の1か月勝率）</small>{% endif %}</p>
+    <p class="formula">総合点 ＝ 押し目スコア{{ c.pb_total }} ＋ イベント点{{ '%+d'|format(c.td_score) }}（TDnet）
+      {% if c.penalty %}<b>※急騰などの減点 −{{ c.penalty }}点を反映済み</b>{% endif %}</p>
     {% if c.label_note %}<p class="note">※ {{ c.label_note }}</p>{% endif %}
 
-    <div class="scores" aria-label="点数の内訳">
-      <div class="sc total"><span class="k">総合点</span><span class="n">{{ c.total }}</span><small>基本{{ c.base }}＋イベント{{ c.events_pts }}</small></div>
-      {% for key, name in (('trend','トレンド点'),('demand','需給点'),('earnings','業績点'),('market','市場点')) %}
-      {% set v = c.scores[key] %}{% set ratio = (v[0] / v[1]) if v[1] else 0 %}
+    <div class="scores" aria-label="押し目スコアの内訳">
+      {% for key, name in (('trend','長期トレンド'),('drawdown','高値からの調整'),('ma50','50日線に接近'),('volume','出来高の収縮'),('quality','業績・還元'),('market','地合い')) %}
+      {% set v = c.parts[key] %}{% set ratio = (v[0] / v[1]) if v[1] else 0 %}
       <div class="sc"><span class="k">{{ name }}</span><span class="n">{{ v[0] }}<small>/{{ v[1] }}</small></span>
         <span class="bar mini"><i class="{{ 'bull' if ratio >= 0.7 else ('mild' if ratio >= 0.4 else 'neutral') }}" style="width: {{ (ratio * 100)|round|int }}%"></i></span></div>
       {% endfor %}
-      <div class="sc ev"><span class="k">イベント点</span><span class="n">+{{ c.events_pts }}</span><small>上限{{ ev.cap }}</small></div>
     </div>
 
     <section class="block events">
-      <h4>【評価イベント】</h4>
+      <h4>【強み】</h4>
       <ul>
-        {% for e in c.events %}
-        <li class="{{ e.kind }}">✅ {{ e.label }}{% if e.points %} <span class="ev-pts">+{{ e.points }}</span>{% endif %}{% if e.basis == '予想' %} <span class="badge">予想</span>{% endif %}</li>
+        {% for e in c.strengths %}
+        <li>✅ {{ e.label }}{% if e.src == '予想' %} <span class="badge">予想</span>{% endif %}</li>
         {% else %}
-        <li class="none">特筆すべきイベントは検出されていません（基本点の高さで上位に入っています）</li>
+        <li class="none">目立った好材料は検出されていません（押し目の形の良さで上位に入っています）</li>
         {% endfor %}
       </ul>
+    </section>
+
+    <section class="block pullback">
+      <h4>【押し目状況】</h4>
+      <ul>
+        {% for t in c.status %}<li>✅ {{ t }}</li>{% else %}<li class="none">押し目の条件を満たす項目は多くありません</li>{% endfor %}
+      </ul>
+    </section>
+
+    <section class="block risk">
+      <h4>【注意事項】</h4>
+      <ul>
+        {% for k in c.cautions %}<li class="lv-{{ k.level }}">⚠ {{ k.label }}</li>{% else %}<li class="none">特に目立った注意事項はありません</li>{% endfor %}
+      </ul>
+      {% if c.stop %}
+      <p class="stop">撤退ラインの目安：{{ c.stop.name }} <b>{{ c.stop.price|yen }}</b>（現在値から {{ c.stop.pct|pct }}）を終値で明確に割ったら見直す</p>
+      {% endif %}
     </section>
 
     <section class="block easy">
@@ -107,19 +122,16 @@
       <p class="indicators">{{ c.indicators|join('　／　') }}</p>
     </section>
 
-    <section class="block risk">
-      <h4>⚠️ リスク</h4>
-      <ul>
-        {% for r in c.risks %}<li>{{ r }}</li>{% endfor %}
-      </ul>
-      {% if c.stop %}
-      <p class="stop">撤退ラインの目安：25日線 <b>{{ c.stop.price|yen }}</b>（現在値から {{ c.stop.pct|pct }}）を終値で割ったら見直す</p>
-      {% endif %}
-    </section>
+    <details class="legacy">
+      <summary>補助指標：従来の「今強い」スコア（この銘柄は従来{{ c.legacy.rank }}位）</summary>
+      <p class="hint">総合点{{ c.legacy.total }}（基本{{ c.legacy.base }}＋イベント{{ c.legacy.events_pts }}）／ 期待値点{{ '%.0f'|format(c.legacy.expected) }}
+        ／ トレンド{{ c.legacy.trend[0] }}・需給{{ c.legacy.demand[0] }}・業績{{ c.legacy.earnings[0] }}・市場{{ c.legacy.market[0] }}
+        {% if not c.legacy.win_known %}／ 勝率は仮置き{% endif %}。値が高いほど「いま勢いがある」状態で、押し目の良さとは別の指標です。</p>
+    </details>
 
     <div class="chart">
       {{ c.svg|safe }}
-      <p class="legend"><span class="l-up">陽線</span><span class="l-dn">陰線</span><span class="l-ma25">25日線</span><span class="l-ma75">75日線</span>／ 下の棒は出来高（直近60日）</p>
+      <p class="legend"><span class="l-up">陽線</span><span class="l-dn">陰線</span><span class="l-ma25">25日線</span><span class="l-ma75">50日線</span>／ 下の棒は出来高（直近60日）</p>
       <button class="btn" type="button" data-code="{{ c.code }}" onclick="toggleTV(this)">📈 TradingViewで詳しく見る</button>
       <div class="tv" id="tv-{{ c.code }}" hidden>
         <div id="tvc-{{ c.code }}" class="tv-box"></div>
@@ -174,7 +186,15 @@
       </tbody>
     </table>
     </div>
-    <p class="hint">{{ pt.note }}</p>
+    <p class="hint">{{ pt.note }}（押し目トップ10・技術80点分で再現）</p>
+    {% if pt_legacy %}
+    <details><summary>参考：従来の「今強い」トップ10の期間別成績</summary>
+      <div class="table-wrap"><table class="period">
+        <thead><tr><th></th>{% for h in pt_legacy.cols %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+        <tbody>{% for row in pt_legacy.rows %}<tr><th scope="row">{{ row.label }}</th>{% for c in row.cells %}<td>{{ c }}</td>{% endfor %}</tr>{% endfor %}</tbody>
+      </table></div>
+    </details>
+    {% endif %}
   </section>
   {% endif %}
 
@@ -207,25 +227,32 @@
   <section class="card" id="guide">
     <h2>📖 点数の見方</h2>
     <details open>
-      <summary>総合点＝基本点（100点）＋イベント点（最大{{ ev.cap }}点）</summary>
+      <summary>総合点 ＝ 押し目スコア（100点）＋ イベント点（TDnet・−30〜＋20）</summary>
       <table class="guide">
-        <tr><th>トレンド {{ w.trend }}</th><td>高値更新（252日 +{{ sc.trend.high.new252 }}／60日 +{{ sc.trend.high.new60 }}／52週高値付近 +{{ sc.trend.high.near52w }}／20日 +{{ sc.trend.high.new20 }}・一番高いものだけ）、
-          株価＞25日線＞75日線 +{{ sc.trend.ma_alignment }}、MACD +{{ sc.trend.macd }}、RSI適温 +{{ sc.trend.rsi.points }}、TOPIXより強い +{{ sc.trend.rel_strength }}</td></tr>
-        <tr><th>需給 {{ w.demand }}</th><td>出来高が20日平均の1.5倍 +6／2倍 +12／3倍 +18、上昇日の出来高増 +{{ sc.demand.up_day_volume.points }}、売買代金が十分 +{{ sc.demand.liquidity.points }}</td></tr>
-        <tr><th>業績 {{ w.earnings }}</th><td>営業利益の前年比 +20% で +8／+50% で +12、時価総額100億円以上 +1／500億円以上 +3</td></tr>
-        <tr><th>市場 {{ w.market }}</th><td>TOPIXの地合い（追い風 +{{ sc.market.regime.good }}／中立 +{{ sc.market.regime.neutral }}）、業種の勢い（上位 +{{ sc.market.sector.top }}）</td></tr>
-        <tr><th>イベント</th><td>黒字転換 +{{ ev.earnings.turnaround }}、継続黒字化 +{{ ev.earnings.sustained_profit }}、最高益更新 +{{ ev.earnings.record_high }}、上方修正 +{{ ev.earnings.upward_revision }}、
-          増配 +{{ ev.shareholder.dividend_increase }}（10%以上 +4／20%以上 +6／30%以上 +8）、連続増配（3年 +2／5年 +4／10年 +6）、配当性向の改善 +{{ ev.shareholder.payout_improve }}、自社株買い +{{ ev.shareholder.buyback }}。
-          <b>252日高値更新と増配・黒字転換・最高益が重なると、強いモメンタムとしてボーナス</b>（2つで +3／3つで +10／4つで +15）</td></tr>
-        <tr><th>期待値点</th><td>総合点 × 過去の勝率（同じ点数帯の1か月後に上昇していた割合）÷ 基準{{ '%.0f'|format(es.win_rate_baseline * 100) }}% × 流動性係数。売買代金が小さい銘柄ほど低くなります。</td></tr>
+        <tr><th>長期トレンド {{ pb.weights.trend }}</th><td>50日線＞200日線 +{{ pb.trend.ma50_over_200 }}、株価＞200日線 +{{ pb.trend.above_ma200 }}、200日線が上向き +{{ pb.trend.ma200_rising }}</td></tr>
+        <tr><th>高値からの調整 {{ pb.weights.drawdown }}</th><td>52週高値から<b>−5%〜−15%が最高評価</b>。浅すぎ（高値圏）や深すぎ（−25%超）は低評価</td></tr>
+        <tr><th>50日線に接近 {{ pb.weights.ma50 }}</th><td>株価が50日線の付近（−3%〜＋4%）で最高評価</td></tr>
+        <tr><th>出来高の収縮 {{ pb.weights.volume }}</th><td>調整中に、直近10日の出来高が50日平均より減っている（0.7倍以下で最高）</td></tr>
+        <tr><th>業績・還元 {{ pb.weights.quality }}</th><td>黒字で減益でない、黒字転換、最高益、増配、連続増配、自社株買い など（上限あり）</td></tr>
+        <tr><th>地合い {{ pb.weights.market }}</th><td>TOPIX（追い風 +{{ pb.market.topix.good }}／中立 +{{ pb.market.topix.neutral }}）と日経平均（50日線の上 +{{ pb.market.nikkei.above_ma50 }}）</td></tr>
+        <tr><th>減点</th><td>直近5日で+{{ '%.0f'|format(pb.penalties.surge_5d.ret * 100) }}%以上の急騰 −{{ pb.penalties.surge_5d.pts }}、20日で+{{ '%.0f'|format(pb.penalties.surge_20d.ret * 100) }}%以上 −{{ pb.penalties.surge_20d.pts }}、
+          高値から{{ '%.0f'|format(pb.penalties.far_from_high.dd * 100) }}%以上 −{{ pb.penalties.far_from_high.pts }}、出来高急騰だけの上昇 −{{ pb.penalties.volume_spike.pts }}、調整中の出来高膨張 −{{ pb.penalties.volume_expansion.pts }}</td></tr>
+        <tr><th>イベント点<br>（TDnet）</th><td>直近{{ tdc.lookback_days }}日の適時開示。上方修正 +{{ tdc.points.upward_revision }}、増配 +{{ tdc.points.dividend_increase }}、自社株買い +{{ tdc.points.buyback }}、大型受注 +{{ tdc.points.large_order }}、
+          業務提携 +{{ tdc.points.alliance }}、設備投資・工場増設 +{{ tdc.points.capex }}、新製品 +{{ tdc.points.new_product }}、株式分割 +{{ tdc.points.stock_split }}。
+          <b>下方修正 {{ tdc.points.downward_revision }}（さらに−{{ tdc.downward_extra_penalty }}の大幅減点）、減配 {{ tdc.points.dividend_cut }}</b></td></tr>
+        <tr><th>除外</th><td>TOB・公開買付・MBO・完全子会社化・株式交換・スクイーズアウト・上場廃止・監理・整理銘柄は<b>ランキング対象外</b>（<a href="excluded_events.csv">excluded_events.csv</a>に一覧：{{ n_excluded_events }}件）</td></tr>
       </table>
-      <p class="hint"><b>判定の目安：</b>総合点{{ bull.strong }}以上＝強気、{{ bull.mild }}以上＝やや強気、それ未満＝中立。
-        RSIが高すぎる（過熱）場合や市場全体が弱い日は、判定を一段階下げます。「予想」バッジの項目は会社・アナリストの公表予想に基づきます。</p>
+      <p class="hint"><b>判定の目安：</b>総合点{{ pb.labels.good }}以上＝押し目良好、{{ pb.labels.fair }}以上＝押し目候補、それ未満＝様子見。下方修正・減配がある銘柄は「様子見」に下げます。
+        TDnetは<b>補助レイヤー</b>で、押し目スコア上位{{ tdc.top_k }}銘柄だけを解析して加点・減点・除外を行います（TDnetから銘柄を探すものではありません）。
+        {% if td.enabled %}今回の解析：{{ td.checked }}銘柄（除外 {{ td.excluded }}、取得失敗 {{ td.unavailable }}）。{% endif %}
+        「予想」バッジの項目は会社・アナリストの公表予想に基づきます。</p>
     </details>
     <details>
       <summary>用語のかんたん解説</summary>
       <dl class="terms">
-        <dt>252日高値更新</dt><dd>株価が約1年（252営業日）でいちばん高くなること。強い銘柄は高値更新を繰り返す傾向があります。</dd>
+        <dt>押し目</dt><dd>上昇トレンドの途中で、株価が一時的に下がって調整している状態。急騰した直後ではなく、落ち着いた位置にいる銘柄を探します。</dd>
+        <dt>50日線・200日線</dt><dd>過去50日・200日の平均株価の線。50日線が200日線より上なら長期の上昇トレンドです。</dd>
+        <dt>TDnet・下方修正</dt><dd>上場企業の適時開示（ニュース）。会社が業績予想を引き下げる「下方修正」は、株価が下がりやすい悪材料なので大きく減点します。</dd>
         <dt>出来高</dt><dd>その日に売買された株数。普段より多いほど、注目や大きな資金が入っている可能性があります。</dd>
         <dt>移動平均線（25日・75日）</dt><dd>過去の平均株価を線にしたもの。株価が線の上にあり、線自体も上向きなら上昇トレンドです。</dd>
         <dt>黒字転換・最高益</dt><dd>赤字だった本業の利益が黒字になる／過去で一番大きな利益になること。</dd>
@@ -239,7 +266,7 @@
   </section>
 
   <footer class="foot">
-    <p>※ 本サイトは情報提供のみを目的とし、投資の勧誘・助言ではありません。株価の将来を予想するものではなく、過去のデータから「統計的に強い状態」の銘柄を機械的に抽出しています。
+    <p>※ 本サイトは情報提供のみを目的とし、投資の勧誘・助言ではありません。株価の将来を予想するものではなく、過去のデータと企業の開示から「好材料があり、押し目の形が良い」銘柄を機械的に抽出しています。
       株価は下がることがあり、元本を失う可能性があります。最終的な売買は必ずご自身の判断で行ってください。データは無料の公開データ（Yahoo!ファイナンス等）で、遅延・誤りが含まれる場合があります。</p>
   </footer>
 </main>

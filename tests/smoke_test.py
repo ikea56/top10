@@ -1,7 +1,9 @@
-"""動作確認テスト。  python tests/smoke_test.py   （ネット接続不要・約10秒）
+"""動作確認テスト。  python tests/smoke_test.py   （ネット接続不要・約30秒）
 壊れていなければ最後に「ALL OK」と出ます。"""
+import json
 import subprocess
 import sys
+from datetime import date
 from pathlib import Path
 
 import numpy as np
@@ -10,92 +12,288 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from src import features, scoring, explain          # noqa: E402
-from src.config import load_config                  # noqa: E402
-from src.fundamentals import _yoy                   # noqa: E402
+from src import backtest, events, explain, features, fundamentals, scoring   # noqa: E402
+from src.config import ConfigError, load_config                              # noqa: E402
+from src.supervision import parse_codes                                      # noqa: E402
 
 cfg = load_config()
 sc = cfg["scoring"]
 
 
-def make_panel(last_vol_mult=3.5, n=120):
+def make_panel(last_vol_mult=3.5, n=300):
     idx = pd.bdate_range("2025-01-01", periods=n)
-    close = pd.Series(np.linspace(100, 160, n))
+    close = pd.Series(np.linspace(100, 200, n))
     close.iloc[-1] = close.iloc[-2] * 1.05
-    vol = pd.Series(1000.0, index=range(n))
-    vol.iloc[-1] = 1000 * last_vol_mult
+    vol = pd.Series(5_000_000.0, index=range(n))
+    vol.iloc[-1] *= last_vol_mult
     mk = lambda s: pd.DataFrame({"T.T": s.values}, index=idx)  # noqa: E731
     return {"open": mk(close), "high": mk(close), "low": mk(close), "close": mk(close), "volume": mk(vol)}
 
 
-def test_points():
-    f = features.compute_features(make_panel(3.5))
-    p = features.tech_points(f, sc)
-    assert f["vol_ratio"].iloc[-1, 0] == 3.5, "出来高倍率は『前日までの20日平均』との比"
-    assert p["pts_high"].iloc[-1, 0] == 30 and p["pts_vol"].iloc[-1, 0] == 30 and p["pts_trend"].iloc[-1, 0] == 20
-    f2 = features.compute_features(make_panel(2.2))
-    assert features.tech_points(f2, sc)["pts_vol"].iloc[-1, 0] == 20
-    f3 = features.compute_features(make_panel(1.5))
-    assert features.tech_points(f3, sc)["pts_vol"].iloc[-1, 0] == 0
-    print("ok  テクニカル点（高値・出来高・トレンド）")
+def score_last(panel):
+    f = features.compute_features(panel, None, sc)
+    snap = features.snapshot(f, -1)
+    t = scoring.score_technical(snap, "good", pd.Series({"T.T": 4.0}), sc)
+    return snap, t.iloc[0]
+
+
+def test_config_and_weights():
+    scoring.validate_config(cfg)
+    assert scoring.max_points(sc) == {"trend": 50, "demand": 25, "earnings": 15, "market": 10}
+    bad = json.loads(json.dumps(cfg))
+    bad["scoring"]["trend"]["macd"] = 9
+    try:
+        scoring.validate_config(bad)
+        raise AssertionError("配点ずれを検出できていない")
+    except ConfigError:
+        pass
+    print("ok  配点50/25/15/10と設定チェック")
+
+
+def test_momentum_points():
+    snap, t = score_last(make_panel(3.5))
+    r = snap.iloc[0]
+    assert r["hi252"] and r["hi60"] and r["hi20"] and r["vol_ratio"] == 3.5
+    assert t["pts_high"] == 22, "252日高値更新が最大点"
+    assert t["pts_ma"] == 15 and t["pts_vol"] == 18 and t["pts_upvol"] == 3 and t["pts_liq"] == 4
+    assert t["pts_regime"] == 6 and t["pts_market"] == 10
+    _, t2 = score_last(make_panel(1.2))
+    assert t2["pts_vol"] == 0
+    # 252日高値を割っている（ただし97%以内）→「52週高値接近」
+    p = make_panel()
+    for k in p:
+        p[k] = p[k].copy()
+    p["close"].iloc[-1] = p["close"].iloc[-2] * 0.99
+    p["close"].iloc[-3] = p["close"].iloc[-2] * 1.0001
+    snap3, t3 = score_last(p)
+    assert not snap3.iloc[0]["hi252"] and snap3.iloc[0]["near52w"] and t3["pts_high"] == 12
+    print("ok  モメンタム（20/60/252日高値・52週高値接近・出来高・トレンド）")
 
 
 def test_no_lookahead():
-    """未来のデータを足しても、過去日のスコアが変わらないこと"""
-    p = make_panel(3.5, 150)
-    full = features.tech_points(features.compute_features(p), sc)["tech_raw"]
-    cut = {k: v.iloc[:100] for k, v in p.items()}
-    part = features.tech_points(features.compute_features(cut), sc)["tech_raw"]
-    assert np.allclose(full.iloc[:100].fillna(-1), part.fillna(-1)), "未来の情報が混ざっています"
+    p = make_panel(3.5, 320)
+    f_full = features.compute_features(p, None, sc)
+    cut = {k: v.iloc[:290] for k, v in p.items()}
+    f_cut = features.compute_features(cut, None, sc)
+    for k in ("ma25", "hi252", "vol_ratio", "rsi", "rs20"):
+        a, b = f_full[k].iloc[:290].astype(float).fillna(-1), f_cut[k].astype(float).fillna(-1)
+        assert np.allclose(a, b), f"{k} に未来データが混入"
     print("ok  未来データ混入なし")
 
 
-def test_fundamental_points():
-    assert scoring.earn_points({"op_yoy": 0.68}, sc) == 25
-    assert scoring.earn_points({"op_yoy": 0.20}, sc) == 15
-    assert scoring.earn_points({"op_yoy": 0.19}, sc) == 0
-    assert scoring.earn_points({"op_yoy": None, "turnaround": True}, sc) == 15
-    assert scoring.mcap_points({"market_cap": 6e10}, sc) == 10
-    assert scoring.mcap_points({"market_cap": 2e10}, sc) == 5
-    assert scoring.mcap_points({"market_cap": 5e9}, sc) == 0
-    assert scoring.max_raw(sc) == 115 and scoring.to_score(115, sc) == 100
-    assert _yoy(150, 100) == (0.5, False) and _yoy(10, -5) == (None, True) and _yoy(-5, 10) == (-1.5, False)
-    print("ok  業績・時価総額の点数／前年比")
+def fund(**kw):
+    base = {"status": "ok", "market_cap": 6e10, "op_ttm": 5e8, "op_yoy": 0.3, "op_annual": [4e8, 3e8, 2e8, 1e8],
+            "eps_hist": [40, 30, 20, 10], "eps_est_0y": None, "eps_est_1y": None, "eps_rev": None,
+            "div_cur": 10, "div_prev": 10, "div_basis": "forecast", "div_streak": 0,
+            "payout_latest": None, "payout_prev": None, "buyback": None}
+    base.update(kw)
+    return base
 
 
-def test_labels_and_text():
-    assert scoring.bull_label(80, False, "good", cfg)[0] == "強気"
-    assert scoring.bull_label(80, True, "good", cfg)[0] == "やや強気"      # 過熱で格下げ
-    assert scoring.bull_label(80, False, "bad", cfg)[0] == "やや強気"      # 逆風で格下げ
-    assert scoring.bull_label(40, False, "good", cfg)[0] == "中立"
-    r = {"hi52w": True, "hi60": True, "hi30": True, "vol_ratio": 12.3, "trend": True}
-    assert len(explain.beginner_text(r, {"op_yoy": 12.34, "turnaround": False})) <= 100
-    print("ok  強気判定・100文字制限")
+ROW = {"hi252": True, "near52w": True, "vol_ratio": 4.2}
+
+
+def test_events():
+    # 黒字転換（予想）＋継続黒字化＋増配20%＋最高益 ＋ 252日高値更新 → ボーナス
+    f = fund(op_annual=[-1e8, -2e8, 1e8], op_ttm=-5e7, eps_est_0y=50, eps_est_1y=60, eps_hist=[-5, -3, 2],
+             div_cur=12, div_prev=10, div_streak=5)
+    r = events.evaluate_events(ROW, f, cfg)
+    keys = {i.key for i in r.items}
+    assert {"turnaround", "sustained", "record_high", "dividend", "streak", "bonus", "hi252", "volume"} <= keys
+    pts = {i.key: i.points for i in r.items}
+    assert pts["turnaround"] == 10 and pts["sustained"] == 4 and pts["record_high"] == 5
+    assert pts["dividend"] == 6 and pts["streak"] == 4 and pts["bonus"] == 15   # 4つ同時
+    assert r.total == cfg["events"]["cap"] and r.uses_forecast
+    # 例：252日高値更新＋増配＋黒字転換 → +10
+    f2 = fund(op_annual=[-1e8, 1e8, 1e8], op_ttm=-1e7, eps_est_0y=5, eps_hist=[-3, 5, 6], div_cur=11, div_prev=10)
+    r2 = events.evaluate_events(ROW, f2, cfg)
+    assert r2.bonus == 10 and not r2.has("record_high")
+    # 252日高値でなければボーナスなし
+    r3 = events.evaluate_events({**ROW, "hi252": False, "near52w": False}, f2, cfg)
+    assert r3.bonus == 0 and r3.has("turnaround")
+    # 増配率の段階（9%→2点, 10%→4点, 30%→8点）
+    for g, want in ((1.09, 2), (1.10, 4), (1.30, 8)):
+        it = events.evaluate_events(ROW, fund(div_cur=10 * g), cfg)
+        assert {i.key: i.points for i in it.items}["dividend"] == want, g
+    # 上方修正・自社株買い・配当性向
+    r4 = events.evaluate_events(ROW, fund(eps_rev={"cur": 105, "d30": 100, "d90": 90}, buyback=3e8,
+                                          payout_latest=0.45, payout_prev=0.35), cfg)
+    assert {"revision", "buyback", "payout"} <= {i.key for i in r4.items}
+    # 取得できない項目は評価しない
+    r5 = events.evaluate_events(ROW, None, cfg)
+    assert r5.total == 0
+    print("ok  評価イベント（黒字転換・継続黒字化・最高益・上方修正・増配・連続増配・自社株買い・ボーナス）")
+
+
+def test_dividend_and_exclusion():
+    idx = pd.to_datetime([f"{y}-{m:02d}-01" for y in range(2019, 2027) for m in (6, 12)][:-1]).tz_localize("Asia/Tokyo")
+    vals = [10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 16, 16, 17]
+    d = fundamentals.dividend_stats(pd.Series(vals, index=idx), 36.0, pd.Timestamp("2026-11-04"))
+    assert d["div_streak"] == 6 and d["div_cur"] == 36.0 and d["div_prev"] == 33.0
+    fc = cfg["fundamentals"]
+    ok = {"op_ttm": 1e8, "op_annual": [1e8, 1e8]}
+    assert fundamentals.exclusion_reason(ok, fc) is None
+    assert fundamentals.exclusion_reason({"op_ttm": -1e8, "op_annual": [-1e8, 1e8]}, fc) == "赤字"
+    assert fundamentals.exclusion_reason({"op_ttm": -1e8, "op_annual": [-1e8, -2e8]}, fc) == "継続赤字"
+    # 前期だけ赤字で今期黒字予想 → 黒字転換候補として残す。継続赤字は予想があっても除外
+    assert fundamentals.exclusion_reason({"op_ttm": -1e8, "op_annual": [-1e8, 1e8], "eps_est_0y": 5}, fc) is None
+    assert fundamentals.exclusion_reason({"op_ttm": -1e8, "op_annual": [-1e8, -2e8], "eps_est_0y": 5}, fc) == "継続赤字"
+    assert fundamentals._yoy(150, 100) == (0.5, False) and fundamentals._yoy(10, -5) == (None, True)
+    html = ("<table><tr><th>銘柄名</th><th>コード</th><th>解除年月日</th></tr><tr><td>A</td><td>1234</td><td></td></tr>"
+            "<tr><td>B</td><td>130A</td><td>2020/01/01</td></tr></table>")
+    assert parse_codes(html, date(2026, 11, 4)) == {"1234"}
+    flt = cfg["filters"]
+    snap = pd.DataFrame({"close": [50, 500, 500, 500, 500], "volume": [1e6, 1e6, 100, 1e6, 1e6],
+                         "turnover20": [1e9, 5e7, 1e9, 1e9, 1e9], "avgvol20": [1e6, 1e6, 1e6, 1e3, 1e6]})
+    assert list(scoring.eligible_mask(snap, flt)) == [False, False, False, False, True]
+    print("ok  配当計算・赤字/継続赤字の除外・監理銘柄パーサ・数値除外条件")
+
+
+def test_expected_and_metrics():
+    es = cfg["expected_score"]
+    assert scoring.expected_score(80, 0.6, 1.0, es) == 96.0 and scoring.expected_score(80, 0.5, 0.85, es) == 68.0
+    assert scoring.liquidity_factor(2e8, es) == 0.7 and scoring.liquidity_factor(6e9, es) == 1.0
+    summ = {"bands": {"rows": [{"lo": 0, "hi": 50, "n": 500, "win": 0.4, "avg": 0},
+                              {"lo": 50, "hi": 101, "n": 10, "win": 0.9, "avg": 0}]}}
+    assert backtest.win_rate_lookup(summ, 30, es) == (0.4, 500, True)
+    assert backtest.win_rate_lookup(summ, 80, es) == (0.5, 0, False)       # サンプル不足 → 仮置き
+    assert backtest.win_rate_lookup(None, 80, es) == (0.5, 0, False)
+    tm = backtest.trade_metrics(np.array([0.10, -0.05, 0.20, -0.05]))
+    assert tm["win"] == 0.5 and abs(tm["avg_win"] - 0.15) < 1e-9 and abs(tm["avg_loss"] + 0.05) < 1e-9
+    assert abs(tm["pf"] - 3.0) < 1e-9
+    em = backtest.equity_metrics(np.array([0.1, -0.1, 0.1, 0.1]), 63)    # 63営業日×4期＝1年
+    eq = 1.1 * 0.9 * 1.1 * 1.1
+    assert abs(em["ann_ret"] - (eq - 1)) < 1e-9 and abs(em["max_dd"] + 0.1) < 1e-9
+    r = np.array([0.1, -0.1, 0.1, 0.1])
+    assert abs(em["sharpe"] - r.mean() / r.std(ddof=1) * 2) < 1e-9
+    print("ok  期待値点・勝率の引き当て・勝率/PF/DD/シャープ/年率")
+
+
+FORBIDDEN = ("上がります", "上昇します", "値上がり確実", "必ず上", "儲かり", "予想される株価", "上昇が見込", "買うべき")
+
+
+def test_text():
+    _, t = score_last(make_panel(3.5))
+    snap, _ = score_last(make_panel(3.5))
+    r = snap.iloc[0]
+    r = r.copy()
+    ev = events.evaluate_events(r, fund(op_annual=[-1, 1, 1], op_ttm=-1, eps_est_0y=3, eps_hist=[-1, 2, 2],
+                                        div_cur=12, div_prev=10, op_yoy=0.35), cfg)
+    txt = explain.reason_text(r, fund(op_yoy=0.35), ev, "good")
+    assert 0 < len(txt) <= 100 and "出来高が通常の3.5倍に増加" in txt and "市場全体の地合いも良好" in txt
+    assert not any(w in txt for w in FORBIDDEN)
+    for lbl in scoring.bull_label(80, True, "good", cfg)[:1] + scoring.bull_label(80, False, "bad", cfg)[:1]:
+        assert lbl == "やや強気"
+    print("ok  理由文（100文字以内・予測表現なし）")
+
+
+def test_pullback():
+    from src import pullback
+    pullback.validate_config(cfg)
+    pb = cfg["pullback"]
+    assert sum(pb["weights"].values()) == 100
+    idx = pd.Index(["A.T", "B.T", "C.T"])
+    snap = pd.DataFrame({
+        "close": [100.0] * 3, "ma50": [100.0, 100.0, 100.0], "ma200": [80.0] * 3, "ma200_slope": [0.01] * 3,
+        "gap50": [0.0, 0.0, 0.0], "dist52w": [-0.10, -0.10, -0.10], "vol_cont": [0.6, 0.6, 0.6],
+        "ret5d": [0.0, 0.20, 0.0], "ret20d": [0.0, 0.0, 0.0], "ret1d": [0.0, 0.0, 0.0],
+        "vol_ratio": [1.0, 1.0, 1.0]}, index=idx)
+    snap.loc["C.T", "dist52w"] = -0.40
+    try:
+        t = pullback.score_technical(snap, "good", True, cfg)
+    except KeyError as e:   # 列名が違う場合は実データの列名に合わせる
+        raise AssertionError(f"snapshotの列名不一致: {e}")
+    a, b, c = (t.loc[k] for k in idx)
+    assert a["pb_sum"] - a["pb_penalty"] > b["pb_sum"] - b["pb_penalty"], "急騰は減点される"
+    assert b["pb_penalty"] >= pb["penalties"]["surge_5d"]["pts"]
+    assert a["pb_sum"] - a["pb_penalty"] > c["pb_sum"] - c["pb_penalty"], "高値から遠すぎる銘柄は低評価"
+    assert pullback.total(80, 10, 5) == 85
+    lab = pullback.label(90, True, cfg)[0]
+    assert lab == "様子見", "下方修正・減配があれば様子見"
+    print("ok  押し目スコア（急騰・高値乖離の減点／悪材料でラベル降格）")
+
+
+def test_tdnet():
+    from src import tdnet, tdnet_events as te
+    D = tdnet.Disclosure
+    today = date(2026, 11, 2)
+    d = lambda t, dt="2026-10-20": D(dt, t, "")  # noqa: E731
+    # 除外判定
+    assert te.detect_exclusions(d("株式会社○○による当社株式に対する公開買付けに関する意見表明のお知らせ"))
+    assert te.detect_exclusions(d("MBOの実施及び応募の推奨に関するお知らせ"))
+    assert te.detect_exclusions(d("株式交換契約締結のお知らせ"))
+    assert te.detect_exclusions(d("上場廃止に関するお知らせ"))
+    assert te.detect_exclusions(d("監理銘柄（確認中）への指定のお知らせ"))
+    assert not te.detect_exclusions(d("自己株式の取得及び自己株式の公開買付けに関するお知らせ")), "自己株式TOBは除外しない"
+    # イベント点
+    r = te.analyze([d("自己株式取得に係る事項の決定に関するお知らせ"), d("剰余金の配当（増配）に関するお知らせ"),
+                    d("業績予想の上方修正に関するお知らせ")], None, cfg, today)
+    assert r.score == 16 and not r.excluded and not r.serious_negative, r.score
+    r = te.analyze([d("業績予想の下方修正に関するお知らせ")], None, cfg, today)
+    assert r.has_down_revision and r.serious_negative and r.score <= -10, r.score
+    r = te.analyze([d("配当予想の修正（減配）に関するお知らせ")], None, cfg, today)
+    assert r.score == -10, r.score
+    # 同種イベントは1回だけ数える
+    r = te.analyze([d("上方修正のお知らせ", "2026-10-01"), d("業績予想の上方修正のお知らせ", "2026-10-20")], None, cfg, today)
+    assert r.score == 6, r.score
+    # パーサ（形式の揺れに耐える）
+    payload = {"items": [{"Tdnet": {"pubdate": "2026-10-20 15:00:00", "company_code": "72030",
+                                    "title": "増配のお知らせ", "document_url": "https://x/y.pdf"}}]}
+    ds = tdnet.parse_payload(payload, "7203")
+    assert len(ds) == 1 and ds[0].title == "増配のお知らせ" and ds[0].date == "2026-10-20"
+    assert tdnet.parse_payload({"items": []}, "7203") == []
+    for bad in ({}, None, "x"):          # 形式が違えばエラー → 「TDnet未確認」警告になる
+        try:
+            tdnet.parse_payload(bad, "7203")
+            raise AssertionError("想定外の形式でエラーにならない")
+        except tdnet.TdnetError:
+            pass
+    print("ok  TDnet解析（除外・自己株TOB非除外・加点減点・重複・パーサ）")
+
+
+def test_excluded_csv(tmp=ROOT / "data" / "demo" / "_ex_test.csv"):
+    from src.render import write_excluded_csv
+    tmp.parent.mkdir(parents=True, exist_ok=True)
+    write_excluded_csv([{"code": "1234", "name": "テスト", "reason": "TOB・公開買付", "events": "公開買付け", "date": "2026-10-11"}], tmp)
+    raw = tmp.read_text(encoding="utf-8-sig").splitlines()
+    assert raw[0] == "銘柄コード,銘柄名,除外理由,検出イベント,検出日" and raw[1].startswith("1234,テスト")
+    tmp.unlink()
+    print("ok  excluded_events.csv の列と内容")
 
 
 def test_end_to_end():
     for cmd in (["-m", "src.backtest", "--demo"], ["-m", "src.main", "--demo"]):
         res = subprocess.run([sys.executable, *cmd], cwd=ROOT, capture_output=True, text=True)
         assert res.returncode == 0, res.stdout + res.stderr
-    import json
     d = json.loads((ROOT / "docs" / "latest.json").read_text(encoding="utf-8"))
     assert len(d["picks"]) == cfg["top_n"]
     for p in d["picks"]:
-        assert p["reasons"], "選出理由が空"
-        assert 0 < len(p["explain"]) <= 100, f"解説が100文字超: {p['explain']}"
-        assert p["risks"], "リスクが空"
-    scores = [p["score"] for p in d["picks"]]
-    assert scores == sorted(scores, reverse=True), "スコア順になっていない"
+        assert 0 < len(p["explain"]) <= 100, p["name"]
+        assert not any(w in p["explain"] for w in FORBIDDEN)
+        assert set(p["parts"]) == {"trend", "drawdown", "ma50", "volume", "quality", "market"}
+        assert p["main"] == p["pb_total"] + p["td_score"] or abs(p["main"] - p["pb_total"] - p["td_score"]) <= 1
+        assert isinstance(p["cautions"], list) and "legacy" in p
+    mains = [p["main"] for p in d["picks"]]
+    assert mains == sorted(mains, reverse=True), "総合点の順になっていない"
+    csv_text = (ROOT / "docs" / "excluded_events.csv").read_text(encoding="utf-8-sig")
+    assert csv_text.splitlines()[0] == "銘柄コード,銘柄名,除外理由,検出イベント,検出日"
+    excluded_codes = {ln.split(",")[0] for ln in csv_text.splitlines()[1:]}
+    assert not excluded_codes & {p["code"] for p in d["picks"]}, "除外銘柄がランキングに残っている"
+    summ = json.loads((ROOT / "data" / "demo" / "backtest_summary.json").read_text(encoding="utf-8"))
+    assert set(summ["periods"]) == {"1y", "3y", "5y", "10y"} and all(summ["periods"].values())
+    assert "periods_legacy" in summ
+    for k in ("win", "avg_win", "avg_loss", "pf", "max_dd", "sharpe", "ann_ret"):
+        assert k in summ["periods"]["5y"], k
     html = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
-    for word in ("なぜ選ばれた", "初心者向け解説", "リスク", "TradingView", "viewport", "prefers-color-scheme"):
-        assert word in html or word in (ROOT / "docs" / "style.css").read_text(encoding="utf-8"), word
-    print("ok  デモ一式の生成（10銘柄・理由・100文字以内・リスク）")
+    for word in ("【強み】", "【押し目状況】", "【注意事項】", "押し目スコア", "イベント点", "なぜ選ばれた",
+                 "補助指標", "期間別の成績", "excluded_events.csv"):
+        assert word in html, word
+    print("ok  デモ一式（10銘柄・総合点順・除外CSV・押し目/強み/注意・期間別成績）")
 
 
 if __name__ == "__main__":
-    test_points()
-    test_no_lookahead()
-    test_fundamental_points()
-    test_labels_and_text()
-    test_end_to_end()
+    for fn in (test_config_and_weights, test_momentum_points, test_no_lookahead, test_events,
+               test_dividend_and_exclusion, test_expected_and_metrics, test_text, test_pullback, test_tdnet,
+               test_excluded_csv, test_end_to_end):
+        fn()
     print("\nALL OK")

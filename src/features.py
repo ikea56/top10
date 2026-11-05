@@ -53,6 +53,14 @@ def compute_features(panel: Panel, topix_close: pd.Series | None, sc: dict) -> F
     f["ret1d"] = c.pct_change(fill_method=None)
     f["ret20d"] = c.pct_change(20, fill_method=None)
 
+    # --- 押し目スコア用 ---
+    f["ma50"] = c.rolling(50, min_periods=50).mean()
+    f["ma200"] = c.rolling(200, min_periods=200).mean()
+    f["ma200_slope"] = f["ma200"] / f["ma200"].shift(20) - 1
+    f["gap50"] = c / f["ma50"] - 1
+    f["ret5d"] = c.pct_change(5, fill_method=None)
+    f["vol_cont"] = v.rolling(10, min_periods=8).mean() / v.rolling(50, min_periods=40).mean()   # 出来高の収縮率
+
     if topix_close is not None and len(topix_close.dropna()) > 21:
         tx = topix_close.reindex(c.index).ffill()
         f["rs20"] = f["ret20d"].sub(tx.pct_change(20, fill_method=None), axis=0)
@@ -64,3 +72,13 @@ def compute_features(panel: Panel, topix_close: pd.Series | None, sc: dict) -> F
 def snapshot(f: Features, row: int) -> pd.DataFrame:
     """ある1日の断面（行=ティッカー, 列=指標）。row=-1 で最新日。"""
     return pd.DataFrame({k: df.iloc[row] for k, df in f.items()})
+
+
+def add_live_extras(f: Features) -> Features:
+    """毎朝のランキング専用の指標（バックテストでは使わない＝メモリ節約）。"""
+    c, r1 = f["close"], f["ret1d"]
+    f["vol20"] = r1.rolling(20, min_periods=15).std()
+    f["vol60"] = r1.rolling(60, min_periods=40).std()
+    f["max_ret60"] = r1.rolling(60, min_periods=40).max()
+    f["range10"] = c.rolling(10, min_periods=10).max() / c.rolling(10, min_periods=10).min() - 1
+    return {k: (v.astype("float32") if v.dtypes.iloc[0].kind == "f" else v) for k, v in f.items()}
