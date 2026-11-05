@@ -223,7 +223,7 @@ tdnet:
 #  保有銘柄の監視（㉒）。保有銘柄の保存先は Google スプレッドシート＋Apps Script（README参照）
 # ============================================================
 holdings:
-  endpoint: ""                 # Apps Script の「ウェブアプリ」URL（https://script.google.com/macros/s/.../exec）。空なら機能オフ
+  endpoint: "https://script.google.com/macros/s/AKfycbzjG548aNKEbuxKhw784JmIlhL8q8KwvxMiKgoQVo5fRyRrPVaS7HRSD8xXPv1Ll0PXfQ/exec"                 # Apps Script の「ウェブアプリ」URL（https://script.google.com/macros/s/.../exec）。空なら機能オフ
   max_holdings: 50
   earnings_watch_days: 10      # 決算までこの日数以内なら「要監視」
   down_watch_days: 90          # 下方修正から31〜90日は「要監視」（30日以内は「売却検討」）
