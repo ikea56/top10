@@ -33,6 +33,16 @@ def trim_to_valid_last(panel: features.Panel) -> features.Panel:
     return {k: v.loc[:last] for k, v in panel.items()}
 
 
+def drop_unfinished_bar(panel: features.Panel, now: datetime, close_hour: float = 16.0) -> features.Panel:
+    """取引時間中に実行された場合、今日の足は未確定（途中の値）なので切り捨てる。
+    東証の終了は15:30。16:00より前に今日の日付の足があれば、それは「終値」ではない。"""
+    last = panel["close"].index[-1]
+    if last.date() >= now.date() and now.hour + now.minute / 60 < close_hour:
+        log.info("今日(%s)の足は取引時間中の未確定値のため使いません", last.date())
+        return {k: v.iloc[:-1] for k, v in panel.items()}
+    return panel
+
+
 def load_data(cfg: Config, demo: bool) -> tuple[pd.DataFrame, features.Panel, dict, FundFn, Any]:
     if demo:
         from .demo import make_demo
@@ -230,6 +240,8 @@ def run(demo: bool) -> None:
 
     universe, panel, bench, fund_fn, store = load_data(cfg, demo)
     panel = trim_to_valid_last(panel)
+    if not demo:
+        panel = drop_unfinished_bar(panel, datetime.now(JST))
     data_date = panel["close"].index[-1]
     log.info("データ基準日: %s", data_date.date())
 
