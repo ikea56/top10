@@ -25,6 +25,8 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - name: ランキング生成
+        env:
+          HOLDINGS_KEY: ${{ secrets.HOLDINGS_KEY }}      # 保有銘柄の合言葉（Secrets。未設定なら保有銘柄の監視だけ省略）
         run: python -m src.main
       - name: 結果を保存（コミット）
         run: |
@@ -38,4 +40,3 @@ jobs:
             git pull --rebase origin "${GITHUB_REF_NAME}"
             git push
           fi
-          
