@@ -8,17 +8,19 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from collections import Counter
 from datetime import date, datetime
 from typing import Any, Callable
 
 import pandas as pd
 
-from . import backtest, charts, events, explain, features, fundamentals, pullback, rankings, scoring, tdnet, tdnet_events
+from . import (backtest, charts, events, explain, features, fundamentals, holdings, movers, pullback, rankings,
+               scoring, tdnet, tdnet_events)
 from .config import JST, Config, ConfigError, load_config, load_exclude_codes, load_themes
 from .log import get_logger
 from .market import above_ma50_series, build_market
-from .render import render_site, write_excluded_csv
+from .render import render_site, write_excluded_csv, write_holdings_files
 
 log = get_logger(__name__)
 WEEKDAY = "月火水木金土日"
@@ -229,12 +231,110 @@ def make_cards(top: list[dict], f: features.Features, panel: features.Panel, the
     return cards
 
 
-def save_history(hist_dir, data_date: pd.Timestamp, cards: list[dict], market: dict, demo: bool) -> None:
+def save_history(hist_dir, data_date: pd.Timestamp, cards: list[dict], market: dict, demo: bool,
+                 ranking: list[dict] | None = None) -> None:
     hist_dir.mkdir(parents=True, exist_ok=True)
     rec = {"date": data_date.strftime("%Y-%m-%d"), "demo": demo, "regime": market["regime"],
            "picks": [{"rank": c["rank"], "code": c["code"], "name": c["name"], "main": c["main"],
-                      "pb_total": c["pb_total"], "close": c["close"]} for c in cards]}
+                      "pb_total": c["pb_total"], "close": c["close"]} for c in cards],
+           "ranking": ranking or []}            # 上位30（前回比較用）。保有銘柄は記録しない（公開リポジトリのため）
     (hist_dir / f"{rec['date']}.json").write_text(json.dumps(rec, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
+# ---------------------------------------------------------------- 7. 保有銘柄の監視（ランキング順位に関係なく常に評価）
+def monitor_holdings(codes: list[str], snap_full: pd.DataFrame, snap: pd.DataFrame, rank_of: dict[str, int],
+                     regime: str, nikkei_ok: bool, topix_below200: bool, fund_fn: FundFn, client: Any,
+                     cfg: Config, today: date, demo: bool) -> list[dict]:
+    """保有銘柄ごとに、押し目スコア・イベント点・順位・開示・注意事項・推奨アクション（🟢🟡🔴）を作る。
+    売買代金などの除外条件は掛けない（流動性が低くても、TOBでも、監視を続ける）。"""
+    hc, flt = cfg["holdings"], cfg["filters"]
+    jpx: set[str] = set()
+    if flt["exclude_supervision"] and not demo:
+        try:
+            from .supervision import fetch_supervision_codes
+            jpx = fetch_supervision_codes(flt["supervision_urls"])
+        except Exception as e:                               # noqa: BLE001 取得できなくても監視は続ける
+            log.warning("監理・整理銘柄一覧を取得できませんでした（保有銘柄の判定は他の情報で行います）: %s", e)
+    manual = load_exclude_codes(cfg)
+    kw = "|".join(flt["exclude_name_keywords"])
+    lock = flt["tob_price_lock"]
+    pdf_fn = None if client is None or isinstance(client, tdnet.DemoTdnet) else \
+        lambda u: tdnet.pdf_text(u, cfg["tdnet"]["timeout"])
+    by_code = {r["code"]: (tk, r) for tk, r in snap_full.iterrows()}
+    out: list[dict] = []
+    for code in codes:
+        if code not in by_code:
+            out.append({"code": code, "name": "（銘柄が見つかりません）", "found": False,
+                        "action": {"key": "watch", **holdings.ACTIONS["watch"], "reasons": ["東証の上場銘柄に見つかりません。証券コードを確認してください"]}})
+            continue
+        tk, r0 = by_code[code]
+        r = r0.copy()
+        for k, v in pullback.score_technical(snap_full.loc[[tk]], regime, nikkei_ok, cfg, topix_below200).iloc[0].items():
+            r[k] = v
+        fund = fund_fn(code)
+        ev = events.evaluate_events(r, fund, cfg)
+        q, _ = pullback.quality_points(fund, ev, cfg)
+        earn_pen, earn_days = pullback.earnings_penalty(fund.get("next_earnings"), today, cfg)
+        td = None
+        td_status = "off"
+        if client is not None:
+            try:
+                td = tdnet_events.analyze(client.fetch(code), fund, cfg, today, pdf_fn)
+                td_status = "ok"
+            except tdnet.TdnetError as e:
+                log.warning("%s（保有銘柄）", e)
+                td, td_status = tdnet_events.TdnetResult(status="unavailable", error=str(e)), "unavailable"
+        cand = {"pb_total": pullback.total(float(r["pb_sum"]), q, float(r["pb_penalty"]), earn_pen), "td": td, "fund": fund}
+        main, td_score, down_pen, down_src = final_score(cand, cfg)
+        hits = list(td.hits) if td is not None and td.status == "ok" else []
+        down_hits = [h for h in hits if h.kind == "downward_revision"]
+        cut = [h for h in hits if h.kind == "dividend_cut"]
+        close, ma50, ma200, atr = float(r["close"]), r["ma50"], r["ma200"], r.get("atr")
+        broken: list[str] = []
+        data_ok = ma200 == ma200 and ma50 == ma50
+        if data_ok:
+            if close < ma200:
+                broken.append("株価が200日線を下回りました（長期トレンド割れ）")
+            elif ma50 < ma200:
+                broken.append("50日線が200日線を下回っています（トレンドが弱まっています）")
+            if atr == atr and atr and close < ma50 - atr:
+                broken.append("株価が「50日線−ATR」を下回りました（押し目が崩れた可能性）")
+            if r["dist52w"] <= hc["collapse_dd"]:
+                broken.append(f"52週高値から{r['dist52w'] * 100:.0f}%下落しています")
+        ne = fund.get("next_earnings")
+        e_days = (date.fromisoformat(ne) - today).days if ne and date.fromisoformat(ne) >= today else None
+        locked = bool(lock["enabled"] and r.get("max_ret60", 0) >= lock["jump"] and r.get("range10", 1) <= lock["range10"])
+        act = holdings.decide_action({
+            "corporate": [x["event"] for x in (td.excluded if td is not None else [])],
+            "supervised": code in jpx or code in manual or bool(kw and __import__("re").search(kw, str(r["name"]))),
+            "price_lock": locked, "down_recent": down_src,
+            "down_days": min((h.age for h in down_hits), default=None),
+            "dividend_cut_days": min((h.age for h in cut), default=None),
+            "broken": broken, "earnings_days": e_days, "earn_pen": earn_pen,
+            "unknown_rev": any(h.kind == "unknown_revision" for h in hits), "td_status": td_status, "data_ok": data_ok,
+        }, cfg)
+        has = lambda *ks: [h for h in hits if h.kind in ks]  # noqa: E731
+        flag = lambda label, hs, bad=False: {"label": label, "state": ("bad" if bad else "good") if hs else "none",  # noqa: E731
+                                              "detail": hs[0].date[5:].replace("-", "/") if hs and not isinstance(hs[0], str) else (hs[0] if hs else "")}
+        tech_rank = int((snap["pb_tech_scaled"] > r["pb_tech_scaled"]).sum()) + 1
+        label, css, _ = pullback.label(main, tdnet_events.serious_negative(td, fund, cfg), cfg)
+        out.append({
+            "code": code, "name": r["name"], "found": True, "market": r["market"], "sector": r["sector"],
+            "close": close, "ret1d": None if r["ret1d"] != r["ret1d"] else float(r["ret1d"]) * 100,
+            "pb_total": round(cand["pb_total"]), "td_score": round(td_score), "main": round(main),
+            "down_pen": round(down_pen), "label": label, "css": css,
+            "rank_main": rank_of.get(code), "rank_tech": tech_rank, "n_tech": int(len(snap)),
+            "events": [flag("増配", has("dividend_increase")), flag("上方修正", has("upward_revision")),
+                       flag("下方修正", down_hits or ([] if not down_src else ["予想EPS"]), bad=True),
+                       flag("自社株買い", has("buyback"))],
+            "earnings": {"date": ne, "days": e_days, "penalty": round(earn_pen)},
+            "td_events": [{"label": h.label, "date": h.date, "points": round(h.points, 1)} for h in hits],
+            "td_status": td_status,
+            "cautions": explain.cautions(r, fund, td, ev, cfg, regime, r["market"], today, earn_pen, earn_days, down_src),
+            "stop": pullback.stop_line(r, cfg), "action": act,
+        })
+    order = {"sell": 0, "watch": 1, "hold": 2}
+    return sorted(out, key=lambda h: (order[h["action"]["key"]], h["code"]))          # 悪化している銘柄を先頭に
 
 
 # ---------------------------------------------------------------- 実行
@@ -256,6 +356,7 @@ def run(demo: bool) -> None:
     f = features.add_live_extras(features.compute_features(panel, bench["topix"]["close"], cfg["scoring"]), panel,
                                  int(cfg["pullback"]["atr"]["period"]))
     snap = features.snapshot(f, -1).join(universe.set_index("ticker")[["code", "name", "market", "sector"]], how="inner")
+    snap_full = snap                                     # 保有銘柄の監視用（除外条件を掛ける前）
     snap, excluded_rows = apply_exclusions(snap, cfg, demo, today)
     log.info("条件を満たす銘柄: %d / %d", len(snap), len(universe))
     if snap.empty:
@@ -295,7 +396,39 @@ def run(demo: bool) -> None:
         raise RuntimeError("ランキングが0件です（業績取得が全滅した可能性）。時間をおいて再実行してください")
     cards = make_cards(top, f, panel, themes, market["regime"], nikkei_ok, cfg, today)
 
-    save_history(hist_dir, data_date, cards, market, demo)
+    # ② 前回ランキングとの比較（上位30を記録）
+    mv = cfg["movers"]
+    ranking = [{"rank": i, "code": c["row"]["code"], "name": c["row"]["name"], "main": round(c["main"])}
+               for i, c in enumerate(kept[:mv["save_top"]], 1)]
+    prev_date, prev_rank = movers.load_previous(hist_dir, data_date.strftime("%Y-%m-%d"), demo)
+    mover = movers.compare(prev_rank, ranking, mv) if prev_rank else None
+
+    # ③ 保有銘柄の監視（保存先から一覧を取得 → 順位に関係なく評価 → 暗号化して出力）
+    hold_cards, hold_key = None, None
+    hc = cfg["holdings"]
+    endpoint = os.environ.get("HOLDINGS_ENDPOINT") or hc["endpoint"]
+    if demo:
+        ucodes = list(universe["code"])
+        pick = lambda m: next((c for c in ucodes if c.isdigit() and int(c) % m == 0), ucodes[3])  # noqa: E731 デモ開示の再現用
+        sample = [c["code"] for c in cards[:2]] + [pick(11), pick(17), ucodes[8], "9999"]
+        hold_codes, hold_key, endpoint = list(dict.fromkeys(sample)), "demo-passphrase", endpoint or "https://example.invalid/exec"
+    elif endpoint and os.environ.get("HOLDINGS_KEY"):
+        hold_key, hold_codes = os.environ["HOLDINGS_KEY"], []
+        try:
+            hold_codes = holdings.fetch_codes(endpoint, hold_key)
+        except holdings.HoldingsError as e:
+            log.warning("%s → 保有銘柄の監視は今回スキップします（前回の監視データはそのまま残ります）", e)
+            hold_key = None
+    elif endpoint:
+        log.warning("保有銘柄の合言葉（GitHub Secrets の HOLDINGS_KEY）が未設定のため、保有銘柄の監視をスキップします")
+    if hold_key:
+        rank_of = {c["row"]["code"]: i for i, c in enumerate(kept, 1)}
+        hold_cards = monitor_holdings(hold_codes, snap_full, snap, rank_of, market["regime"], nikkei_ok,
+                                      topix_below200, fund_fn, client, cfg, today, demo)
+        cnt = Counter(h["action"]["text"] for h in hold_cards)
+        log.info("保有銘柄の監視: %d銘柄（%s）", len(hold_cards), " / ".join(f"{k}{v}" for k, v in cnt.items()) or "なし")
+
+    save_history(hist_dir, data_date, cards, market, demo, ranking)
     forward = backtest.forward_stats(panel, bench["topix"], cfg, hist_dir)
     now = datetime.now(JST)
     pb = cfg["pullback"]
@@ -311,11 +444,14 @@ def run(demo: bool) -> None:
         "n_universe": len(universe), "n_scanned": len(snap), "n_fetched": fetched,
         "td": td_stats, "tdnet_warn": bool(client) and td_stats["checked"] > 0 and td_stats["unavailable"] > td_stats["checked"] / 2,
         "n_excluded_events": len(excluded_rows),
+        "movers": mover, "prev_date": prev_date, "mv": mv,
+        "hold": {"endpoint": endpoint, "enabled": bool(endpoint), "demo": demo, "n": None if hold_cards is None else len(hold_cards)},
         "pb": pb, "w": cfg["weights"], "tdc": cfg["tdnet"], "ev": cfg["events"], "es": cfg["expected_score"],
         "top_n": cfg["top_n"], "min_turnover_oku": cfg["filters"]["min_turnover_yen"] / 1e8, "min_price": cfg["filters"]["min_price"],
     }
     out = render_site(ctx)
     write_excluded_csv(excluded_rows, out.parent / "excluded_events.csv")
+    write_holdings_files(out.parent, universe, hold_cards, hold_key, data_date, today, hc["pbkdf2_iterations"])
     log.info("生成しました: %s（除外イベント %d件 → excluded_events.csv）", out, len(excluded_rows))
     for c in cards[:3]:
         log.info("  %d位 %s(%s) 総合%d（押し目%d＋イベント%+d） %s", c["rank"], c["name"], c["code"], c["main"],

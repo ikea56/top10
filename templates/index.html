@@ -46,7 +46,7 @@
   </section>
 
   <!-- ランキング -->
-  <h2 class="section-title">🏆 本日の押し目候補 トップ{{ top_n }}</h2>
+  <h2 class="section-title" id="top10">🏆 ① 本日の押し目候補 トップ{{ top_n }}</h2>
   <p class="lead">「業績・株主還元などの好材料があり、健全な押し目を形成中」の銘柄を、<b>押し目スコア＋イベント点</b>の高い順に並べています。
     すでに急騰した銘柄は減点しています（将来の株価を予想するものではありません）。<a href="#guide">点数の見方</a></p>
   {% if tdnet_warn %}
@@ -150,6 +150,40 @@
     {% endif %}
   </article>
   {% endfor %}
+
+  <!-- ② 急上昇・急下降 -->
+  <section class="panel" id="movers">
+    <h2>🔄 急上昇・急下降銘柄（前回ランキングとの比較）</h2>
+    {% if movers %}
+    <p class="hint">前回（{{ prev_date }}）の記録との比較です。順位は総合点の順位で、トップ{{ mv.show_top }}の出入りと、{{ mv.jump }}位以上の変動を表示します。</p>
+    {% for key, title in (('new','🆕 新規ランクイン'),('up','📈 急上昇'),('down','📉 急下降'),('out','🚪 ランクアウト')) %}
+    <h3 class="mv-title">{{ title }}</h3>
+    {% if movers[key] %}
+    <ul class="mv-list">
+      {% for m in movers[key] %}
+      <li><span class="mv-name">{{ m.code }} {{ m.name }}</span>
+        <span class="mv-rank">
+        {% if key == 'new' %}{{ m.prev ~ '位' if m.prev else '圏外' }} → <b>{{ m.rank }}位</b>
+        {% elif key == 'out' %}{{ m.prev }}位 → <b>{{ m.rank ~ '位' if m.rank else '圏外' }}</b>
+        {% else %}{{ m.prev }}位 → <b>{{ m.rank }}位</b>（{{ '+' if key == 'up' else '−' }}{{ m.delta }}）{% endif %}
+        </span></li>
+      {% endfor %}
+    </ul>
+    {% else %}<p class="none">該当なし</p>{% endif %}
+    {% endfor %}
+    {% else %}
+    <p class="none">比較できる前回の記録がまだありません。明日以降の更新から表示されます。</p>
+    {% endif %}
+  </section>
+
+  <!-- ③ 保有銘柄管理・監視 -->
+  <section class="panel" id="holdings-section">
+    <h2>👜 保有銘柄管理・監視</h2>
+    <p class="hint">登録した保有銘柄は、ランキングに入っていなくても毎日監視します（下方修正・減配・TOBなどの悪化を見逃さないため）。
+      保有銘柄は端末ではなくサーバー側に保存されるので、スマホやPCを変えても消えません。</p>
+    <div id="holdings"></div>
+    <noscript><p class="none">この機能にはJavaScriptが必要です。</p></noscript>
+  </section>
 
   <!-- 業種・テーマ -->
   <section class="card">
@@ -301,5 +335,7 @@ function toggleTV(b){
 (function(){var gen=new Date('{{ generated_iso }}');
   if(!isNaN(gen)&&Date.now()-gen.getTime()>84*3600*1000){document.getElementById('staleBanner').hidden=false;}})();
 </script>
+<script>window.HOLDINGS_CFG = {{ {'endpoint': hold.endpoint, 'statusUrl': 'holdings_status.enc.json', 'namesUrl': 'names.json'}|tojson }};</script>
+<script src="holdings.js" defer></script>
 </body>
 </html>

@@ -1,6 +1,7 @@
 """動作確認テスト。  python tests/smoke_test.py   （ネット接続不要・約30秒）
 壊れていなければ最後に「ALL OK」と出ます。"""
 import json
+import shutil
 import subprocess
 import sys
 from datetime import date
@@ -317,6 +318,53 @@ def test_accuracy_21():
     print("ok  ㉑ 地合い・決算接近・鮮度・自社株買い・下方修正・修正判定・ATR")
 
 
+def test_holdings():
+    from src import holdings as H, movers
+    # コードの正規化
+    assert H.normalize_code("７２０３") == "7203" and H.normalize_code("285a") == "285A"
+    assert H.normalize_code("12") is None and H.normalize_code("72031") is None and H.normalize_code("") is None
+    # 暗号化（往復・誤った合言葉・毎回違う暗号文）
+    blob = H.encrypt_payload({"a": "日本語"}, "pass-pass-1", 1000)
+    assert H.decrypt_payload(blob, "pass-pass-1") == {"a": "日本語"}
+    assert H.encrypt_payload({"a": 1}, "pass-pass-1", 1000)["ct"] != H.encrypt_payload({"a": 1}, "pass-pass-1", 1000)["ct"]
+    try:
+        H.decrypt_payload(blob, "wrong-pass-1")
+        raise AssertionError("誤った合言葉で復号できた")
+    except AssertionError:
+        raise
+    except Exception:
+        pass
+    assert "日本語" not in json.dumps(blob)
+    # 推奨アクション
+    base = {"corporate": [], "supervised": False, "price_lock": False, "down_recent": [], "down_days": None,
+            "dividend_cut_days": None, "broken": [], "earnings_days": None, "earn_pen": 0, "unknown_rev": False,
+            "td_status": "ok", "data_ok": True}
+    act = lambda **kw: H.decide_action({**base, **kw}, cfg)  # noqa: E731
+    assert act()["key"] == "hold" and act()["text"] == "保有継続"
+    assert act(down_recent=["TDnet"])["key"] == "sell"
+    assert act(dividend_cut_days=40)["key"] == "sell" and act(dividend_cut_days=120)["key"] == "hold"
+    assert act(corporate=["公開買付け"])["key"] == "sell" and act(supervised=True)["key"] == "sell"
+    assert act(price_lock=True)["key"] == "sell"
+    assert act(down_days=60)["key"] == "watch", "30日を過ぎた下方修正は要監視"
+    assert act(broken=["200日線割れ"])["key"] == "watch" and act(earn_pen=5, earnings_days=4)["key"] == "watch"
+    assert act(earnings_days=8)["key"] == "watch" and act(earnings_days=30)["key"] == "hold"
+    assert act(unknown_rev=True)["key"] == "watch" and act(td_status="unavailable")["key"] == "watch"
+    assert act(data_ok=False)["key"] == "watch"
+    assert act(down_recent=["TDnet"], broken=["x"])["key"] == "sell", "売却検討が最優先"
+    # 前回比較
+    mk = lambda ranks: [{"code": c, "name": f"N{c}", "rank": r, "main": 80} for c, r in ranks.items()]  # noqa: E731
+    prev = mk({"A": 1, "B": 2, "C": 3, "D": 4, "E": 5, "F": 6, "G": 7, "H": 8, "I": 9, "J": 10, "K": 11, "L": 20, "M": 25})
+    cur = mk({"A": 1, "K": 2, "C": 3, "D": 4, "E": 5, "F": 6, "G": 7, "H": 8, "I": 9, "N": 10, "B": 18, "M": 14, "L": 29, "J": 30})
+    r = movers.compare(prev, cur, cfg["movers"])
+    assert [x["code"] for x in r["new"]] == ["K", "N"] and r["new"][1]["prev"] is None
+    assert [x["code"] for x in r["out"]] == ["B", "J"] and r["out"][0]["rank"] == 18
+    assert [x["code"] for x in r["up"]] == ["M"] and r["up"][0]["delta"] == 11
+    assert [x["code"] for x in r["down"]] == ["L"] and r["down"][0]["delta"] == 9
+    cur2 = mk({"A": 1, "L": 9}); prev2 = mk({"A": 1, "L": 4})
+    assert movers.compare(prev2, cur2, cfg["movers"])["down"][0]["code"] == "L"
+    print("ok  保有銘柄（コード正規化・暗号化・推奨アクション・前回比較）")
+
+
 def test_excluded_csv(tmp=ROOT / "data" / "demo" / "_ex_test.csv"):
     from src.render import write_excluded_csv
     tmp.parent.mkdir(parents=True, exist_ok=True)
@@ -378,12 +426,35 @@ def test_end_to_end():
     for word in ("【強み】", "【押し目状況】", "【注意事項】", "押し目スコア", "イベント点", "なぜ選ばれた",
                  "補助指標", "期間別の成績", "excluded_events.csv", "推奨撤退ライン", "リスク幅", "ATR"):
         assert word in html, word
-    print("ok  デモ一式（10銘柄・総合点順・除外CSV・押し目/強み/注意・期間別成績）")
+    # ㉒ 保有銘柄：暗号化ファイル・名前一覧・前回比較・3ブロック
+    from src import holdings as H
+    enc = json.loads((ROOT / "docs" / "holdings_status.enc.json").read_text(encoding="utf-8"))
+    hd = H.decrypt_payload(enc, "demo-passphrase")["holdings"]
+    assert {h["action"]["key"] for h in hd.values()} >= {"hold", "sell"}, "デモに保有継続と売却検討が両方出るはず"
+    assert any(not h["found"] for h in hd.values()), "存在しないコードは『見つかりません』で残す"
+    top_codes = {p["code"] for p in d["picks"]}
+    assert any(c not in top_codes for c in hd), "ランキング外の保有銘柄も監視されている"
+    outside = [c for c, h in hd.items() if c not in top_codes and h["found"]]
+    public = (ROOT / "docs" / "latest.json").read_text(encoding="utf-8") + (ROOT / "docs" / "holdings_status.enc.json").read_text(encoding="utf-8")
+    assert not any(f'"{c}"' in public for c in outside), "保有銘柄が公開ファイルに平文で出ている"
+    names = json.loads((ROOT / "docs" / "names.json").read_text(encoding="utf-8"))
+    assert len(names) >= 100 and all(len(k) == 4 for k in names)
+    hist = sorted((ROOT / "data" / "demo" / "history").glob("*.json")) or sorted((ROOT / "data" / "history").glob("*.json"))
+    rec = json.loads(hist[-1].read_text(encoding="utf-8"))
+    assert len(rec["ranking"]) == cfg["movers"]["save_top"]
+    assert not any(f'"{c}"' in json.dumps(rec) for c in outside if c not in {x["code"] for x in rec["ranking"]}), "保有銘柄を履歴に書いてはいけない"
+    for word in ("① 本日の押し目候補", "急上昇・急下降", "保有銘柄管理・監視", 'id="holdings"', "holdings.js"):
+        assert word in html, word
+    if shutil.which("node"):
+        res = subprocess.run(["node", "tests/holdings_js_test.js", "docs/holdings_status.enc.json", "demo-passphrase"],
+                             cwd=ROOT, capture_output=True, text=True)
+        assert res.returncode == 0 and "JS OK" in res.stdout, res.stdout + res.stderr
+    print("ok  デモ一式（10銘柄・総合点順・除外CSV・押し目/強み/注意・期間別成績・保有銘柄の暗号化）")
 
 
 if __name__ == "__main__":
     for fn in (test_config_and_weights, test_momentum_points, test_no_lookahead, test_events,
-               test_dividend_and_exclusion, test_expected_and_metrics, test_text, test_pullback, test_tdnet, test_accuracy_21,
+               test_dividend_and_exclusion, test_expected_and_metrics, test_text, test_pullback, test_tdnet, test_accuracy_21, test_holdings,
                test_excluded_csv, test_data_fixes, test_end_to_end):
         fn()
     print("\nALL OK")

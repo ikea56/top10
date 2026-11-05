@@ -238,3 +238,31 @@ details.legacy summary { font-size: .82rem; font-weight: 600; color: var(--sub);
 .stoptbl { width: 100%; border-collapse: collapse; margin: 6px 0 0; font-size: .86rem; }
 .stoptbl th { text-align: left; font-weight: 600; color: var(--sub); padding: 3px 8px 3px 0; white-space: nowrap; width: 8.5em; }
 .stoptbl td { padding: 3px 0; }
+
+/* ============ 急上昇・急下降／保有銘柄管理 ============ */
+.mv-title { font-size: .95rem; margin: 12px 0 4px; }
+.mv-list { list-style: none; margin: 0; padding: 0; }
+.mv-list li { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line, #e5e7eb); font-size: .9rem; }
+.mv-rank { white-space: nowrap; color: var(--sub); }
+.pill.bad { background: #fde8e8; color: #b42318; }
+.h-form { display: flex; gap: 8px; align-items: center; margin: 8px 0; flex-wrap: wrap; }
+.h-input { flex: 1 1 8em; min-width: 0; font-size: 16px; padding: 10px 12px; border: 1px solid var(--line, #d1d5db); border-radius: 10px; background: transparent; color: inherit; }
+.h-title { font-size: 1rem; margin: 14px 0 6px; }
+.h-list { list-style: none; margin: 0; padding: 0; }
+.h-list li { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line, #e5e7eb); }
+.h-list .h-name { flex: 1; font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.h-msg { min-height: 1.3em; font-size: .86rem; margin: 2px 0; }
+.h-msg.ok { color: var(--green); } .h-msg.err { color: var(--red); font-weight: 700; }
+.btn.danger { color: var(--red); }
+.h-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 8px 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.chip { font-size: .8rem; padding: 3px 9px; border-radius: 999px; background: rgba(128,128,128,.12); }
+.chip.good { background: var(--green-bg); color: var(--green); font-weight: 700; }
+.chip.bad { background: #fde8e8; color: var(--red); font-weight: 700; }
+.hcard.act-sell { border-left: 5px solid #d92d20; } .hcard.act-watch { border-left: 5px solid #f79009; } .hcard.act-hold { border-left: 5px solid #12b76a; }
+.none { color: var(--sub); font-size: .86rem; }
+.h-form .btn, .h-list .btn { width: auto; flex: 0 0 auto; padding: 8px 14px; margin: 0; }
+.h-form .k { flex: 0 0 auto; }
+.h-list li { flex-wrap: wrap; }
+.h-list .h-name { flex: 1 1 9em; }
+.h-list .pill { flex: 0 0 auto; }
