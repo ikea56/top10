@@ -22,6 +22,11 @@ filters:
   min_turnover_yen: 100000000          # 売買代金不足：20日平均売買代金がこの円未満は除外
   min_avg_volume: 50000                # 出来高不足：20日平均出来高がこの株数未満は除外
   min_today_volume: 10000              # 出来高不足：当日出来高がこの株数未満は除外
+  tob_price_lock:                      # TOB疑い（価格固着）：TDnetが確認できない場合の保険
+    enabled: true
+    jump: 0.20                         # 直近lookback日に1日で+20%以上のギャップがあり
+    lookback: 60
+    range10: 0.015                     # 直近10日の値幅が1.5%以内に固着している銘柄
   exclude_codes_file: data/exclude_codes.txt   # 手動で除外したい銘柄コード
   exclude_name_keywords: ["監理", "整理"]       # 銘柄名にこの文字があれば除外
   exclude_supervision: true            # JPX公式「監理・整理銘柄一覧」を取得して除外
@@ -29,10 +34,10 @@ filters:
 
 # ---- 業績データ（yfinance）----
 fundamentals:
-  min_fetch: 60                # 最低でもテクニカル上位この数だけは業績を取得
-  max_fetch: 150               # 取得数の上限（取得しすぎるとYahooに制限されます）
-  survivor_multiple: 3         # 除外後に top_n × この数の候補が残れば取得を打ち切る
-  sleep: 0.4
+  min_fetch: 60                # 最低でもこの数だけは業績を取得
+  max_fetch: 200               # 取得数の上限（取得しすぎるとYahooに制限されます）
+  survivor_target: 80          # 赤字除外後にこの数の候補が残れば取得を打ち切る（TDnet解析の対象数＋予備）
+  sleep: 0.3
   cache_days: 7
   exclude_loss_making: true    # 赤字企業（直近12か月の営業利益が0以下）を除外
   exclude_chronic_loss: true   # 継続赤字企業（通期の営業利益が連続で赤字）を除外
@@ -117,3 +122,78 @@ backtest:
   horizons: {1w: 5, 1m: 20, 3m: 60}   # 保有期間（営業日）
   equity_horizon: 1m           # 資産曲線（DD・シャープ・年率）に使う保有期間
   min_forward_samples: 15
+
+# ============================================================
+#  押し目ランキング（メイン）  ※ 従来の「今強い銘柄」スコアは補助指標として残しています
+# ============================================================
+pullback:
+  weights: {trend: 20, drawdown: 25, ma50: 15, volume: 10, quality: 20, market: 10}   # 合計100
+  trend: {ma50_over_200: 14, above_ma200: 3, ma200_rising: 3}      # 長期上昇トレンド
+  drawdown_tiers:              # [下限, 上限, 点数] 52週高値（終値ベース）からの調整率。-5%〜-15%が最高評価
+    - [-0.15, -0.05, 25]
+    - [-0.20, -0.15, 15]
+    - [-0.05, -0.03, 15]
+    - [-0.25, -0.20, 6]
+    - [-0.03, 0.0, 5]          # ほぼ高値圏（調整が浅い）
+  ma50_gap_tiers:              # [下限, 上限, 点数] 50日線との乖離（50日線付近を加点）
+    - [-0.03, 0.04, 15]
+    - [-0.06, 0.07, 9]
+    - [-0.08, 0.10, 4]
+  volume:                      # 出来高の収縮（直近10日平均 ÷ 50日平均）。調整局面（高値から-3%以下）のみ評価
+    tiers: [[0.70, 10], [0.85, 7], [1.00, 3]]    # [この比率以下, 点数]
+    pullback_gate: -0.03
+  quality:                     # 業績・株主還元の維持（合計は weights.quality を上限）
+    profit_ok: 4               # 直近12か月が黒字で減益でない
+    turnaround: 5
+    record_high: 5
+    dividend: 4
+    streak: 3
+    buyback: 3
+    sustained: 2
+    revision: 3
+  market:                      # 地合い：TOPIX ＋ 日経平均
+    topix: {good: 6, neutral: 3, bad: 0}
+    nikkei: {above_ma50: 4, below: 0}
+  penalties:                   # 減点（すでに急騰した銘柄を優遇しない）
+    surge_5d: {ret: 0.12, pts: 10}            # 直近5日で+12%以上
+    surge_20d: {ret: 0.25, pts: 15}           # 直近20日で+25%以上
+    far_from_high: {dd: -0.25, pts: 15}       # 高値から-25%以上離れている
+    volume_spike: {vol_ratio: 3.0, ret1d: 0.04, pts: 10}   # 出来高急騰だけで上がった日
+    volume_expansion: {ratio: 1.5, pts: 6}    # 調整中なのに出来高が膨らんでいる
+  labels: {good: 75, fair: 55}                # 押し目良好 / 押し目候補 / 様子見
+  caution:
+    earnings_days: 10          # 決算発表がこの日数以内なら「決算接近」
+    vol_ratio: 1.5             # 20日ボラティリティ ÷ 60日ボラティリティ
+
+# ============================================================
+#  TDnet（適時開示）解析：押し目スコア上位だけ。全銘柄には実施しません
+# ============================================================
+tdnet:
+  enabled: true
+  provider: yanoshin           # yanoshin（外部の無料API・過去180日以上を銘柄別に取得）
+  base_url: "https://webapi.yanoshin.jp/webapi/tdnet/list/{code}.json"
+  lookback_days: 180
+  top_k: 50                    # 解析する銘柄数（押し目スコアの上位）
+  max_check: 80                # 除外で繰り上げた分を含め、解析する最大数
+  sleep: 0.5
+  timeout: 20
+  retries: 2
+  cache_hours: 18
+  on_error: warn               # warn＝確認できない銘柄は残して「TDnet未確認」と表示 / exclude＝除外
+  parse_pdf: true              # 「業績予想の修正」の増額・減額をPDFから判定（直近30日分のみ取得可）
+  pdf_max_age_days: 30
+  points:                      # Event Score（TDnetの開示ごとに1回だけ加点）
+    upward_revision: 6
+    dividend_increase: 5
+    buyback: 5
+    large_order: 4
+    alliance: 3
+    new_product: 2
+    capex: 3
+    factory: 3
+    stock_split: 2
+    downward_revision: -10
+    dividend_cut: -10
+    unknown_revision: -3       # 方向を判定できない「業績予想の修正」
+  cap: {plus: 20, minus: 30}
+  downward_extra_penalty: 10   # 下方修正は最重要減点：Event Scoreの-10に加えてさらに減点
