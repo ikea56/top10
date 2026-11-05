@@ -1,0 +1,87 @@
+{
+ "date": "2026-11-05",
+ "demo": false,
+ "regime": "bad",
+ "picks": [
+  {
+   "rank": 1,
+   "code": "4114",
+   "name": "日本触媒",
+   "main": 94,
+   "pb_total": 86,
+   "close": 2519.0
+  },
+  {
+   "rank": 2,
+   "code": "9507",
+   "name": "四国電力",
+   "main": 92,
+   "pb_total": 81,
+   "close": 2058.5
+  },
+  {
+   "rank": 3,
+   "code": "4471",
+   "name": "三洋化成工業",
+   "main": 92,
+   "pb_total": 79,
+   "close": 1554.0
+  },
+  {
+   "rank": 4,
+   "code": "8358",
+   "name": "スルガ銀行",
+   "main": 92,
+   "pb_total": 81,
+   "close": 2789.0
+  },
+  {
+   "rank": 5,
+   "code": "5975",
+   "name": "東プレ",
+   "main": 91,
+   "pb_total": 81,
+   "close": 3245.0
+  },
+  {
+   "rank": 6,
+   "code": "5101",
+   "name": "横浜ゴム",
+   "main": 89,
+   "pb_total": 78,
+   "close": 7002.0
+  },
+  {
+   "rank": 7,
+   "code": "3964",
+   "name": "オークネット",
+   "main": 88,
+   "pb_total": 86,
+   "close": 1393.0
+  },
+  {
+   "rank": 8,
+   "code": "4373",
+   "name": "シンプレクス・ホールディングス",
+   "main": 88,
+   "pb_total": 82,
+   "close": 1148.0
+  },
+  {
+   "rank": 9,
+   "code": "3176",
+   "name": "三洋貿易",
+   "main": 88,
+   "pb_total": 85,
+   "close": 1129.0
+  },
+  {
+   "rank": 10,
+   "code": "4290",
+   "name": "プレステージ・インターナショナル",
+   "main": 88,
+   "pb_total": 83,
+   "close": 671.0
+  }
+ ]
+}
