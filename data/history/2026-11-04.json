@@ -5,83 +5,83 @@
  "picks": [
   {
    "rank": 1,
-   "code": "7846",
-   "name": "パイロットコーポレーション",
-   "main": 98,
-   "pb_total": 87,
-   "close": 2098.5
+   "code": "7818",
+   "name": "トランザクション",
+   "main": 84,
+   "pb_total": 73,
+   "close": 1237.0
   },
   {
    "rank": 2,
-   "code": "4114",
-   "name": "日本触媒",
-   "main": 91,
-   "pb_total": 83,
-   "close": 2509.0
-  },
-  {
-   "rank": 3,
-   "code": "4443",
-   "name": "Ｓａｎｓａｎ",
-   "main": 90,
-   "pb_total": 80,
-   "close": 2146.0
-  },
-  {
-   "rank": 4,
-   "code": "2492",
-   "name": "インフォマート",
-   "main": 89,
-   "pb_total": 86,
-   "close": 726.0
-  },
-  {
-   "rank": 5,
-   "code": "7747",
-   "name": "朝日インテック",
-   "main": 88,
-   "pb_total": 82,
-   "close": 3603.0
-  },
-  {
-   "rank": 6,
    "code": "3964",
    "name": "オークネット",
-   "main": 88,
-   "pb_total": 86,
+   "main": 74,
+   "pb_total": 73,
    "close": 1345.0
   },
   {
-   "rank": 7,
-   "code": "4471",
-   "name": "三洋化成工業",
-   "main": 88,
-   "pb_total": 75,
-   "close": 1571.0
+   "rank": 3,
+   "code": "7747",
+   "name": "朝日インテック",
+   "main": 73,
+   "pb_total": 69,
+   "close": 3603.0
   },
   {
-   "rank": 8,
+   "rank": 4,
    "code": "256A",
    "name": "飛島ホールディングス",
-   "main": 88,
-   "pb_total": 83,
+   "main": 72,
+   "pb_total": 70,
    "close": 2184.0
   },
   {
+   "rank": 5,
+   "code": "4180",
+   "name": "Ａｐｐｉｅｒ　Ｇｒｏｕｐ",
+   "main": 71,
+   "pb_total": 67,
+   "close": 1394.0
+  },
+  {
+   "rank": 6,
+   "code": "4674",
+   "name": "クレスコ",
+   "main": 71,
+   "pb_total": 69,
+   "close": 1906.0
+  },
+  {
+   "rank": 7,
+   "code": "9310",
+   "name": "日本トランスシティ",
+   "main": 70,
+   "pb_total": 69,
+   "close": 1359.0
+  },
+  {
+   "rank": 8,
+   "code": "4431",
+   "name": "スマレジ",
+   "main": 70,
+   "pb_total": 70,
+   "close": 3640.0
+  },
+  {
    "rank": 9,
-   "code": "4088",
-   "name": "エア・ウォーター",
-   "main": 87,
-   "pb_total": 87,
-   "close": 2840.0
+   "code": "3284",
+   "name": "フージャースホールディングス",
+   "main": 70,
+   "pb_total": 70,
+   "close": 1224.0
   },
   {
    "rank": 10,
-   "code": "6080",
-   "name": "Ｍ＆Ａキャピタルパートナーズ",
-   "main": 87,
-   "pb_total": 76,
-   "close": 4145.0
+   "code": "8037",
+   "name": "カメイ",
+   "main": 70,
+   "pb_total": 69,
+   "close": 4685.0
   }
  ]
 }
