@@ -261,6 +261,30 @@ def test_excluded_csv(tmp=ROOT / "data" / "demo" / "_ex_test.csv"):
     print("ok  excluded_events.csv の列と内容")
 
 
+def test_data_fixes():
+    from datetime import datetime
+    from src import main as m, prices
+    # 分割の調整漏れ（10分割で価格が1/10に）を補正
+    idx = pd.bdate_range("2024-01-01", periods=10)
+    c = pd.Series([100, 101, 102, 103, 104, 10.5, 10.6, 10.7, 10.8, 10.9], index=idx)
+    df = pd.DataFrame({"open": c, "high": c, "low": c, "close": c})
+    fx = prices.fix_splits(df)
+    assert (fx["close"].pct_change().abs().dropna() < 0.05).all(), fx["close"].tolist()
+    assert abs(fx["close"].iloc[-1] - 10.9) < 1e-9
+    # 通常の値動き（-10%）は触らない
+    c2 = pd.Series([100, 90, 95, 99], index=idx[:4]); d2 = pd.DataFrame({"open": c2, "high": c2, "low": c2, "close": c2})
+    assert prices.fix_splits(d2)["close"].tolist() == c2.tolist()
+    # 取引時間中の今日の足は捨てる／引け後は使う
+    jst = __import__("datetime").timezone(__import__("datetime").timedelta(hours=9))
+    pidx = pd.to_datetime(["2026-11-04", "2026-11-05"])
+    panel = {"close": pd.DataFrame({"A": [1.0, 2.0]}, index=pidx)}
+    assert len(m.drop_unfinished_bar(panel, datetime(2026, 11, 5, 10, 36, tzinfo=jst))["close"]) == 1
+    assert len(m.drop_unfinished_bar(panel, datetime(2026, 11, 5, 7, 0, tzinfo=jst))["close"]) == 1
+    assert len(m.drop_unfinished_bar(panel, datetime(2026, 11, 5, 17, 0, tzinfo=jst))["close"]) == 2
+    assert len(m.drop_unfinished_bar(panel, datetime(2026, 11, 6, 7, 0, tzinfo=jst))["close"]) == 2
+    print("ok  分割補正・取引時間中の未確定足の除外")
+
+
 def test_end_to_end():
     for cmd in (["-m", "src.backtest", "--demo"], ["-m", "src.main", "--demo"]):
         res = subprocess.run([sys.executable, *cmd], cwd=ROOT, capture_output=True, text=True)
@@ -294,6 +318,6 @@ def test_end_to_end():
 if __name__ == "__main__":
     for fn in (test_config_and_weights, test_momentum_points, test_no_lookahead, test_events,
                test_dividend_and_exclusion, test_expected_and_metrics, test_text, test_pullback, test_tdnet,
-               test_excluded_csv, test_end_to_end):
+               test_excluded_csv, test_data_fixes, test_end_to_end):
         fn()
     print("\nALL OK")
