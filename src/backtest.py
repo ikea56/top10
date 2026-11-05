@@ -95,6 +95,8 @@ def period_stats(records: list[dict], years: int, end: pd.Timestamp, bt: dict,
     out: dict[str, Any] = {"n_dates": len(win), "n_periods": len(sub)}
     out.update(trade_metrics(trades) or {})
     out.update(equity_metrics(strat, hold) or {})
+    if np.isfinite(bench).any() and np.nanmin(bench) < -0.4:
+        log.warning("TOPIX比較に1期間で-40%超の値があります。指数データ（分割の調整漏れなど）を確認してください")
     be = equity_metrics(bench, hold) or {}
     out.update({"bench_ann": be.get("ann_ret"), "bench_sharpe": be.get("sharpe"), "bench_max_dd": be.get("max_dd")})
     return out
