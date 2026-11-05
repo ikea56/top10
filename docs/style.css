@@ -234,3 +234,7 @@ table.period tbody th { font-weight: 600; font-size: .84rem; }
 .block.risk li { text-indent: -1.3em; padding-left: 1.3em; }
 details.legacy { margin: 0 0 10px; }
 details.legacy summary { font-size: .82rem; font-weight: 600; color: var(--sub); }
+
+.stoptbl { width: 100%; border-collapse: collapse; margin: 6px 0 0; font-size: .86rem; }
+.stoptbl th { text-align: left; font-weight: 600; color: var(--sub); padding: 3px 8px 3px 0; white-space: nowrap; width: 8.5em; }
+.stoptbl td { padding: 3px 0; }

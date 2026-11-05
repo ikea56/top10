@@ -228,9 +228,9 @@ def test_tdnet():
     # イベント点
     r = te.analyze([d("自己株式取得に係る事項の決定に関するお知らせ"), d("剰余金の配当（増配）に関するお知らせ"),
                     d("業績予想の上方修正に関するお知らせ")], None, cfg, today)
-    assert r.score == 16 and not r.excluded and not r.serious_negative, r.score
+    assert r.score == 12 and not r.excluded, r.score          # 自社株買いは規模不明で+1、増配+5、上方修正+6
     r = te.analyze([d("業績予想の下方修正に関するお知らせ")], None, cfg, today)
-    assert r.has_down_revision and r.serious_negative and r.score <= -10, r.score
+    assert r.has_down_revision and te.serious_negative(r, None, cfg) and r.score == -10, r.score
     r = te.analyze([d("配当予想の修正（減配）に関するお知らせ")], None, cfg, today)
     assert r.score == -10, r.score
     # 同種イベントは1回だけ数える
@@ -249,6 +249,72 @@ def test_tdnet():
         except tdnet.TdnetError:
             pass
     print("ok  TDnet解析（除外・自己株TOB非除外・加点減点・重複・パーサ）")
+
+
+def test_accuracy_21():
+    from src import pullback, tdnet, tdnet_events as te
+    D = tdnet.Disclosure
+    today = date(2026, 11, 2)                                     # 月曜
+    d = lambda t, dt, url="": D(dt, t, url)  # noqa: E731
+    # ① 地合い -15〜+10
+    mp = lambda rg, nk, b200: pullback.market_points(rg, nk, b200, cfg)  # noqa: E731
+    assert mp("good", True, False) == 10 and mp("neutral", True, False) == 7
+    assert mp("bad", True, False) == -6 and mp("bad", False, False) == -13
+    assert mp("bad", False, True) == -15, "下限は-15"
+    assert mp("good", False, True) == 6 - 5 - 3
+    # ⑤ 決算接近（営業日）
+    ep = lambda dt: pullback.earnings_penalty(dt, today, cfg)  # noqa: E731
+    assert ep("2026-11-05")[0] == 10 and ep("2026-11-06")[0] == 5 and ep("2026-11-09")[0] == 5
+    assert ep("2026-11-10")[0] == 0 and ep("2026-10-30")[0] == 0 and ep(None)[0] == 0
+    # ③ 鮮度
+    assert [te.freshness(x, cfg) for x in (0, 30, 31, 90, 91, 180, 181)] == [1, 1, 0.7, 0.7, 0.4, 0.4, 0]
+    r = te.analyze([d("業績予想の上方修正のお知らせ", "2026-09-03")], None, cfg, today)     # 60日前
+    assert abs(r.score - 6 * 0.7) < 1e-9 and r.hits[0].weight == 0.7
+    r = te.analyze([d("業績予想の上方修正のお知らせ", "2026-10-20")], None, cfg, today)
+    assert r.score == 6
+    assert te.analyze([d("業績予想の上方修正のお知らせ", "2026-03-01")], None, cfg, today).score == 0   # 180日超
+    # ④ 自社株買い：時価総額比
+    assert [te.buyback_points(x, cfg) for x in (0.005, 0.01, 0.02, 0.03, 0.08, None)] == [1, 3, 3, 5, 5, 1]
+    assert abs(te.buyback_ratio_from_text("発行済株式総数（自己株式を除く）に対する割合 2.50％", None) - 0.025) < 1e-9
+    assert abs(te.buyback_ratio_from_text("取得価額の総額 上限 30億円", 1e11) - 0.03) < 1e-9
+    assert te.buyback_ratio_from_text("関係なし", 1e11) is None
+    pdf = lambda u: "取得する株式の総数 1,000,000株（発行済株式総数（自己株式を除く）に対する割合 3.2％）"  # noqa: E731
+    r = te.analyze([d("自己株式取得に係る事項の決定に関するお知らせ", "2026-10-25", "x.pdf")], {"market_cap": 1e11}, cfg, today, pdf)
+    assert r.score == 5 and "3.2%" in r.hits[0].label, (r.score, r.hits[0].label)
+    # ② 下方修正：30日以内は-15・様子見。それより前は対象外
+    r = te.analyze([d("業績予想の下方修正に関するお知らせ", "2026-10-20")], None, cfg, today)
+    assert te.recent_downward(r, None, cfg) == ["TDnet"] and te.serious_negative(r, None, cfg)
+    r = te.analyze([d("業績予想の下方修正に関するお知らせ", "2026-09-01")], None, cfg, today)     # 62日前
+    assert te.recent_downward(r, None, cfg) == [] and abs(r.score - (-10 * 0.7)) < 1e-9
+    okr = te.TdnetResult()
+    assert te.recent_downward(okr, {"eps_rev": {"cur": 90, "d30": 100, "d90": 100}}, cfg) == ["EPS予想"]
+    assert te.recent_downward(okr, {"eps_rev": {"cur": 99, "d30": 100, "d90": 100}}, cfg) == []
+    assert pullback.label(95, True, cfg)[0] == "様子見" and pullback.label(95, False, cfg)[0] == "押し目良好"
+    # ⑦ 修正の方向（表・語・△）
+    up = "修正前 修正後\n売上高 1,000 1,100\n営業利益 100 150\n経常利益 100 140\n増減額 50"
+    dn = "売上高 1,000 900\n営業利益 100 △50\n経常利益 100 80\n増減額 △50"
+    assert te.direction_from_text(up) == "up" and te.direction_from_text(dn) == "down"
+    assert te.direction_from_text("特に記載なし") is None
+    r = te.analyze([d("業績予想の修正に関するお知らせ", "2026-10-28", "u.pdf")], None, cfg, today, lambda u: dn)
+    assert r.hits[0].kind == "downward_revision"
+    r = te.analyze([d("通期業績予想の引き上げに関するお知らせ", "2026-10-28")], None, cfg, today)
+    assert r.hits[0].kind == "upward_revision"
+    r = te.analyze([d("業績予想の修正に関するお知らせ", "2026-10-28")], None, cfg, today)
+    assert r.hits[0].kind == "unknown_revision" and r.hits[0].label == "修正あり（未判定）"
+    # ⑥ ATR撤退ライン
+    row = {"close": 1000.0, "ma50": 960.0, "ma200": 800.0, "atr": 20.0}
+    sl = pullback.stop_line(row, cfg)
+    assert abs(sl["price"] - 940) < 1e-9 and abs(sl["risk_pct"] - 6.0) < 1e-9 and abs(sl["atr_pct"] - 2.0) < 1e-9
+    row2 = {"close": 1000.0, "ma50": 1100.0, "ma200": 1200.0, "atr": 20.0}
+    assert abs(pullback.stop_line(row2, cfg)["price"] - 960) < 1e-9
+    assert pullback.stop_line({**row, "atr": float("nan")}, cfg) is None
+    from src import features
+    n = 40; ix = pd.bdate_range("2026-01-01", periods=n)
+    base = pd.DataFrame({"A": 100.0 + np.arange(n)}, index=ix)
+    panel = {"close": base, "high": base + 2, "low": base - 2, "open": base, "volume": base * 0 + 1}
+    fx = features.add_live_extras({"close": base, "ret1d": base.pct_change()}, panel, 14)
+    assert abs(float(fx["atr"].iloc[-1, 0]) - 4.0) < 0.3, fx["atr"].iloc[-1, 0]
+    print("ok  ㉑ 地合い・決算接近・鮮度・自社株買い・下方修正・修正判定・ATR")
 
 
 def test_excluded_csv(tmp=ROOT / "data" / "demo" / "_ex_test.csv"):
@@ -310,14 +376,14 @@ def test_end_to_end():
         assert k in summ["periods"]["5y"], k
     html = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
     for word in ("【強み】", "【押し目状況】", "【注意事項】", "押し目スコア", "イベント点", "なぜ選ばれた",
-                 "補助指標", "期間別の成績", "excluded_events.csv"):
+                 "補助指標", "期間別の成績", "excluded_events.csv", "推奨撤退ライン", "リスク幅", "ATR"):
         assert word in html, word
     print("ok  デモ一式（10銘柄・総合点順・除外CSV・押し目/強み/注意・期間別成績）")
 
 
 if __name__ == "__main__":
     for fn in (test_config_and_weights, test_momentum_points, test_no_lookahead, test_events,
-               test_dividend_and_exclusion, test_expected_and_metrics, test_text, test_pullback, test_tdnet,
+               test_dividend_and_exclusion, test_expected_and_metrics, test_text, test_pullback, test_tdnet, test_accuracy_21,
                test_excluded_csv, test_data_fixes, test_end_to_end):
         fn()
     print("\nALL OK")

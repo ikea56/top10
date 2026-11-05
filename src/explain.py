@@ -149,26 +149,29 @@ def strengths(ev: EventResult, td: Any) -> list[dict]:
 
 
 def cautions(r: Any, fund: dict | None, td: Any, ev: EventResult, cfg: Config, regime: str, market: str,
-             today: Any) -> list[dict]:
+             today: Any, earn_pen: float = 0.0, earn_days: int | None = None, down_src: list | None = None) -> list[dict]:
     """【注意事項】重要度の高い順（level=high は赤、それ以外は黄）。"""
     cp, pen = cfg["pullback"]["caution"], cfg["pullback"]["penalties"]
     out: list[dict] = []
+    dpen = int(cfg["tdnet"]["downward_recent"]["penalty"])
     if td is not None and td.status == "ok":
         for h in td.hits:
             if h.kind == "downward_revision":
-                out.append({"label": f"下方修正履歴（{h.date.replace('-', '/')}開示）・大幅減点", "level": "high"})
+                recent = h.age <= int(cfg["tdnet"]["downward_recent"]["days"])
+                out.append({"label": f"下方修正（{h.date.replace('-', '/')}開示）" +
+                            (f"・総合点−{dpen}点、判定は様子見" if recent else "・大幅減点"), "level": "high"})
             elif h.kind == "dividend_cut":
                 out.append({"label": f"減配の開示（{h.date.replace('-', '/')}）・減点", "level": "high"})
             elif h.kind == "unknown_revision":
-                out.append({"label": f"業績予想の修正あり（{h.date.replace('-', '/')}・増額か減額か判定できず）", "level": "mid"})
+                out.append({"label": f"修正あり（未判定）：{h.date.replace('-', '/')}開示。増額か減額か確認してください", "level": "mid"})
     elif td is not None:
         out.append({"label": "TDnetを確認できていません（TOB・下方修正などの有無が未確認）", "level": "high"})
-    rev = (fund or {}).get("eps_rev") or {}
-    if rev.get("cur") is not None and rev.get("d30") and rev["cur"] < rev["d30"] * 0.97 and not any(
-            c["label"].startswith("下方修正") for c in out):
-        out.append({"label": "アナリストの予想EPSが直近30日で下方修正", "level": "mid"})
+    if down_src and "EPS予想" in down_src and "TDnet" not in down_src:
+        out.append({"label": f"アナリストの予想EPSが直近30日で下方修正（総合点−{dpen}点、判定は様子見）", "level": "high"})
     ne = (fund or {}).get("next_earnings")
-    if ne and 0 <= (date.fromisoformat(ne) - today).days <= cp["earnings_days"]:
+    if earn_pen > 0 and ne:
+        out.append({"label": f"決算接近（{ne[5:].replace('-', '/')}発表予定・あと{earn_days}営業日）・窓開けリスクで総合点−{earn_pen:.0f}点", "level": "high"})
+    elif ne and 0 <= (date.fromisoformat(ne) - today).days <= cp["earnings_days"]:
         out.append({"label": f"決算接近（{ne[5:].replace('-', '/')}発表予定）・発表で大きく動く可能性", "level": "mid"})
     v20, v60 = r.get("vol20"), r.get("vol60")
     if v20 == v20 and v60 == v60 and v60 and v20 / v60 >= cp["vol_ratio"]:
@@ -178,7 +181,7 @@ def cautions(r: Any, fund: dict | None, td: Any, ev: EventResult, cfg: Config, r
     if r["dist52w"] <= pen["far_from_high"]["dd"]:
         out.append({"label": f"高値から{_pct(r['dist52w'])}と大きく下落（減点）", "level": "mid"})
     if regime == "bad":
-        out.append({"label": "市場全体が下落基調。押し目が深くなる可能性", "level": "mid"})
+        out.append({"label": "市場全体が下落基調（地合い減点で総合点が下がっています）", "level": "mid"})
     mc = (fund or {}).get("market_cap")
     if mc and mc < 3e10:
         out.append({"label": "時価総額が小さく値動きが荒くなりやすい", "level": "low"})

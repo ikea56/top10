@@ -97,7 +97,8 @@ def apply_exclusions(snap: pd.DataFrame, cfg: Config, demo: bool, today: date) -
 
 
 # ---------------------------------------------------------------- 3. スコア（従来＝補助 ＋ 押し目＝メイン）
-def attach_scores(snap: pd.DataFrame, regime: str, nikkei_ok: bool, cfg: Config, summary: dict | None) -> pd.DataFrame:
+def attach_scores(snap: pd.DataFrame, regime: str, nikkei_ok: bool, cfg: Config, summary: dict | None,
+                  topix_below200: bool = False) -> pd.DataFrame:
     sc, es = cfg["scoring"], cfg["expected_score"]
     tech = scoring.score_technical(snap, regime, scoring.sector_points(snap["ret20d"], snap["sector"], sc), sc)
     out = snap.join(tech)
@@ -105,11 +106,11 @@ def attach_scores(snap: pd.DataFrame, regime: str, nikkei_ok: bool, cfg: Config,
     wr = out["tech_scaled"].map(lambda s: backtest.win_rate_lookup(summary, s, es))
     out["win_rate"], out["win_n"], out["win_known"] = (wr.map(lambda t: t[i]) for i in range(3))
     out["liq"] = scoring.liquidity_factor(out["turnover20"], es)
-    return out.join(pullback.score_technical(snap, regime, nikkei_ok, cfg))
+    return out.join(pullback.score_technical(snap, regime, nikkei_ok, cfg, topix_below200))
 
 
 # ---------------------------------------------------------------- 4. 候補の評価（業績・配当 → 押し目スコア確定）
-def evaluate_candidates(snap: pd.DataFrame, fund_fn: FundFn, cfg: Config) -> tuple[list[dict], int, Counter]:
+def evaluate_candidates(snap: pd.DataFrame, fund_fn: FundFn, cfg: Config, today: date) -> tuple[list[dict], int, Counter]:
     sc, fc, es = cfg["scoring"], cfg["fundamentals"], cfg["expected_score"]
     cands: list[dict] = []
     excluded: Counter = Counter()
@@ -130,8 +131,10 @@ def evaluate_candidates(snap: pd.DataFrame, fund_fn: FundFn, cfg: Config) -> tup
         op_pts, mc_pts = scoring.earnings_points(fund, sc)
         legacy_base = float(r["tech_base"]) + op_pts + mc_pts
         legacy_total = legacy_base + ev.total
+        earn_pen, earn_days = pullback.earnings_penalty(fund.get("next_earnings"), today, cfg)   # 決算接近の減点
         cands.append({"ticker": tk, "row": r, "fund": fund, "ev": ev, "quality": q, "qkeys": qkeys,
-                      "pb_total": pullback.total(float(r["pb_sum"]), q, float(r["pb_penalty"])),
+                      "earn_pen": earn_pen, "earn_days": earn_days,
+                      "pb_total": pullback.total(float(r["pb_sum"]), q, float(r["pb_penalty"]), earn_pen),
                       "op_pts": op_pts, "mc_pts": mc_pts, "legacy_base": legacy_base, "legacy_total": legacy_total,
                       "legacy_expected": scoring.expected_score(legacy_total, float(r["win_rate"]), float(r["liq"]), es)})
     cands.sort(key=lambda c: (c["pb_total"], c["legacy_expected"]), reverse=True)
@@ -174,11 +177,13 @@ def run_tdnet(cands: list[dict], client: Any, cfg: Config, today: date) -> tuple
 
 
 # ---------------------------------------------------------------- 6. 画面用データ
-def _stop(r: Any) -> dict | None:
-    for name, key in (("50日線", "ma50"), ("200日線", "ma200")):
-        if r[key] == r[key] and r[key] < r["close"]:
-            return {"name": name, "price": float(r[key]), "pct": float(r[key] / r["close"] - 1) * 100}
-    return None
+def final_score(c: dict, cfg: Config) -> tuple[float, float, float, list[str]]:
+    """(総合点, TDnetイベント点, 下方修正の減点, 下方修正の根拠)。総合点＝押し目スコア＋イベント点−下方修正の減点。"""
+    td = c.get("td")
+    td_score = td.score if td is not None and td.status == "ok" else 0.0
+    src = tdnet_events.recent_downward(td, c["fund"], cfg)
+    pen = float(cfg["tdnet"]["downward_recent"]["penalty"]) if src else 0.0
+    return c["pb_total"] + td_score - pen, td_score, pen, src
 
 
 def make_cards(top: list[dict], f: features.Features, panel: features.Panel, themes: dict, regime: str,
@@ -188,9 +193,10 @@ def make_cards(top: list[dict], f: features.Features, panel: features.Panel, the
     cards: list[dict] = []
     for rank, x in enumerate(top, 1):
         r, fund, ev, td, tk = x["row"], x["fund"], x["ev"], x["td"], x["ticker"]
-        td_score = td.score if td is not None and td.status == "ok" else 0.0
-        main = x["pb_total"] + td_score
-        label, css, note = pullback.label(main, bool(td and td.serious_negative), cfg)
+        main, td_score, down_pen, down_src = final_score(x, cfg)
+        label, css, note = pullback.label(main, tdnet_events.serious_negative(td, fund, cfg), cfg)
+        if note:
+            note = "直近30日以内に下方修正があるため" if down_src else "減配の開示があるため"
         sl = slice(-60, None)
         svg = charts.candle_svg(*(panel[k][tk].iloc[sl].to_numpy() for k in ("open", "high", "low", "close", "volume")),
                                 f["ma25"][tk].iloc[sl].to_numpy(), f["ma50"][tk].iloc[sl].to_numpy())
@@ -203,14 +209,15 @@ def make_cards(top: list[dict], f: features.Features, panel: features.Panel, the
             "themes": rankings.themes_of(r["code"], themes),
             "close": float(r["close"]), "ret1d": None if r["ret1d"] != r["ret1d"] else float(r["ret1d"]) * 100,
             "main": round(main), "pb_total": round(x["pb_total"]), "td_score": round(td_score),
-            "penalty": round(float(r["pb_penalty"])),
+            "penalty": round(float(r["pb_penalty"]) + x["earn_pen"]), "earn_pen": round(x["earn_pen"]),
+            "down_pen": round(down_pen), "market_pts": round(float(r["pb_market"])),
             "parts": {k: [round(float(a)), b] for k, (a, b) in parts.items()},
             "label": label, "css": css, "label_note": note,
             "strengths": stren,
             "status": explain.pullback_status(r, cfg, regime, nikkei_ok),
-            "cautions": explain.cautions(r, fund, td, ev, cfg, regime, r["market"], today),
+            "cautions": explain.cautions(r, fund, td, ev, cfg, regime, r["market"], today, x["earn_pen"], x["earn_days"], down_src),
             "explain": explain.pullback_reason(r, stren, regime, nikkei_ok),
-            "indicators": explain.build_indicators(r), "stop": _stop(r), "svg": svg,
+            "indicators": explain.build_indicators(r), "stop": pullback.stop_line(r, cfg), "svg": svg,
             "tdnet": "ok" if td is not None and td.status == "ok" else ("off" if td is None else "ng"),
             "legacy": {"rank": legacy_rank[tk], "total": round(x["legacy_total"]), "base": round(x["legacy_base"]),
                        "events_pts": round(ev.total), "expected": x["legacy_expected"],
@@ -246,7 +253,8 @@ def run(demo: bool) -> None:
     log.info("データ基準日: %s", data_date.date())
 
     bench = {k: v.loc[:data_date] for k, v in bench.items()}
-    f = features.add_live_extras(features.compute_features(panel, bench["topix"]["close"], cfg["scoring"]))
+    f = features.add_live_extras(features.compute_features(panel, bench["topix"]["close"], cfg["scoring"]), panel,
+                                 int(cfg["pullback"]["atr"]["period"]))
     snap = features.snapshot(f, -1).join(universe.set_index("ticker")[["code", "name", "market", "sector"]], how="inner")
     snap, excluded_rows = apply_exclusions(snap, cfg, demo, today)
     log.info("条件を満たす銘柄: %d / %d", len(snap), len(universe))
@@ -255,6 +263,8 @@ def run(demo: bool) -> None:
 
     market = build_market(bench, float((snap["close"] > snap["ma25"]).mean()), int(snap["hi60"].sum()), int(snap["hi252"].sum()))
     nikkei_ok = bool(above_ma50_series(bench["n225"]["close"]).iloc[-1]) if "n225" in bench else False
+    tc = bench["topix"]["close"].dropna()
+    topix_below200 = bool(len(tc) >= 200 and tc.iloc[-1] < tc.rolling(200).mean().iloc[-1])
     summary = None
     if summary_path.exists():
         try:
@@ -262,8 +272,8 @@ def run(demo: bool) -> None:
         except (OSError, ValueError) as e:
             log.warning("バックテスト結果を読めません（従来スコアの勝率は仮置きになります）: %s", e)
 
-    snap = attach_scores(snap, market["regime"], nikkei_ok, cfg, summary)
-    cands, fetched, excl = evaluate_candidates(snap, fund_fn, cfg)
+    snap = attach_scores(snap, market["regime"], nikkei_ok, cfg, summary, topix_below200)
+    cands, fetched, excl = evaluate_candidates(snap, fund_fn, cfg, today)
     log.info("業績を確認した銘柄: %d（除外: %s） 押し目候補: %d", fetched, dict(excl) or "なし", len(cands))
     if store:
         store.save()
@@ -278,7 +288,7 @@ def run(demo: bool) -> None:
     excluded_rows += td_rows
 
     for c in kept:
-        c["main"] = c["pb_total"] + (c["td"].score if c["td"] is not None and c["td"].status == "ok" else 0.0)
+        c["main"] = final_score(c, cfg)[0]
     kept.sort(key=lambda c: (c["main"], c["legacy_expected"]), reverse=True)
     top = kept[:cfg["top_n"]]
     if not top:

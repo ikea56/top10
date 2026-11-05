@@ -7,6 +7,7 @@
 """
 from __future__ import annotations
 
+from datetime import date
 from typing import Any
 
 import numpy as np
@@ -41,6 +42,8 @@ def validate_config(cfg: Config) -> None:
         if abs(got[k] - want[k]) > 1e-9:
             raise ConfigError(f"押し目スコアの配点が合いません: {k} は weights で {want[k]}点ですが、"
                               f"各項目の最大合計は {got[k]}点です（config.yml の pullback）")
+    if pb["market"]["floor"] >= 0 or pb["market"]["floor"] < -50:
+        raise ConfigError("pullback.market.floor は -50〜0 の負の値にしてください（-15 を推奨）")
     if sum(want.values()) != 100:
         raise ConfigError(f"pullback.weights の合計が100点ではありません（{sum(want.values())}点）")
 
@@ -51,7 +54,55 @@ def tech_max(cfg: Config) -> float:
     return float(100 - w["quality"])
 
 
-def score_technical(snap: pd.DataFrame, regime: str, nikkei_ok: bool, cfg: Config) -> pd.DataFrame:
+def market_points(regime: str, nikkei_ok: bool, topix_below200: bool, cfg: Config) -> float:
+    """地合い点（-15〜+10）。良い時は加点、TOPIX・日経平均が弱い時は減点して順位全体を押し下げる。"""
+    m = cfg["pullback"]["market"]
+    pts = float(m["topix"][regime]) + float(m["nikkei"]["above_ma50" if nikkei_ok else "below"])
+    if regime == "bad":
+        pts += float(m["topix_below_ma75"])
+    if topix_below200:
+        pts += float(m["topix_below_ma200"])
+    if not nikkei_ok:
+        pts += float(m["nikkei_below_ma50"])
+    return max(float(m["floor"]), min(pts, float(cfg["pullback"]["weights"]["market"])))
+
+
+def earnings_penalty(next_earnings: str | None, today: date, cfg: Config) -> tuple[float, int | None]:
+    """決算までの営業日数（土日を除く）に応じた減点。(減点, 営業日数)。決算日が不明・過去なら (0, None)。"""
+    if not next_earnings:
+        return 0.0, None
+    try:
+        d = date.fromisoformat(next_earnings)
+    except ValueError:
+        return 0.0, None
+    if d < today:
+        return 0.0, None
+    n = int(np.busday_count(today, d))
+    for tier in sorted(cfg["pullback"]["earnings_penalty"], key=lambda t: t["business_days"]):
+        if n <= tier["business_days"]:
+            return float(tier["pts"]), n
+    return 0.0, n
+
+
+def stop_line(r: Any, cfg: Config) -> dict | None:
+    """ATRベースの撤退ライン＝移動平均線 − ATR×倍率。50日線→200日線の順に、現在値より下にある線を使う。"""
+    a = cfg["pullback"]["atr"]
+    atr, close = r.get("atr"), float(r["close"])
+    if not atr or atr != atr or atr <= 0:
+        return None
+    for name, key in (("50日線", "ma50"), ("200日線", "ma200")):
+        ma = r[key]
+        if ma == ma and ma < close:
+            price = float(ma) - float(atr) * float(a["multiplier"])
+            return {"name": f"{name}−ATR", "ma": float(ma), "atr": float(atr), "atr_pct": float(atr) / close * 100,
+                    "price": price, "pct": (price / close - 1) * 100, "risk_pct": (1 - price / close) * 100}
+    price = close - float(atr) * float(a["fallback_multiplier"])
+    return {"name": f"現在値−ATR×{a['fallback_multiplier']:g}", "ma": None, "atr": float(atr), "atr_pct": float(atr) / close * 100,
+            "price": price, "pct": (price / close - 1) * 100, "risk_pct": (1 - price / close) * 100}
+
+
+def score_technical(snap: pd.DataFrame, regime: str, nikkei_ok: bool, cfg: Config,
+                    topix_below200: bool = False) -> pd.DataFrame:
     """断面（snapshot）から押し目スコアのテクニカル部分と減点を計算する。"""
     pb = cfg["pullback"]
     out = pd.DataFrame(index=snap.index)
@@ -69,8 +120,7 @@ def score_technical(snap: pd.DataFrame, regime: str, nikkei_ok: bool, cfg: Confi
     vpts = tier_points(-vc, [[-th, p] for th, p in vol["tiers"]])          # 比率が小さいほど高得点
     out["pb_vol"] = vpts.where(dd <= vol["pullback_gate"], 0.0)
 
-    m = pb["market"]
-    out["pb_market"] = float(m["topix"][regime]) + float(m["nikkei"]["above_ma50" if nikkei_ok else "below"])
+    out["pb_market"] = market_points(regime, nikkei_ok, topix_below200, cfg)
 
     p = pb["penalties"]
     flags = pd.DataFrame({
@@ -102,8 +152,9 @@ def quality_points(fund: dict | None, ev: EventResult | None, cfg: Config) -> tu
     return min(sum(float(q[k]) for k in keys), cap), keys
 
 
-def total(pb_sum: float, quality: float, penalty: float) -> float:
-    return max(0.0, pb_sum + quality - penalty)
+def total(pb_sum: float, quality: float, penalty: float, extra: float = 0.0) -> float:
+    """押し目スコア＋業績点−減点−追加減点（決算接近など）。地合い点が負のときは pb_sum に含まれて全体を下げる。"""
+    return max(0.0, pb_sum + quality - penalty - extra)
 
 
 def label(main: float, serious_negative: bool, cfg: Config) -> tuple[str, str, str]:

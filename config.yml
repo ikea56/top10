@@ -151,15 +151,26 @@ pullback:
     buyback: 3
     sustained: 2
     revision: 3
-  market:                      # 地合い：TOPIX ＋ 日経平均
+  market:                      # 地合い：-15〜+10点。良い時は加点、悪い時は減点して順位全体へ反映
     topix: {good: 6, neutral: 3, bad: 0}
     nikkei: {above_ma50: 4, below: 0}
+    topix_below_ma75: -10      # TOPIXが75日線の下
+    topix_below_ma200: -5      # TOPIXが200日線の下（上と重ねて減点）
+    nikkei_below_ma50: -3      # 日経平均が50日線の下
+    floor: -15                 # 合計の下限（上限は weights.market の10点）
   penalties:                   # 減点（すでに急騰した銘柄を優遇しない）
     surge_5d: {ret: 0.12, pts: 10}            # 直近5日で+12%以上
     surge_20d: {ret: 0.25, pts: 15}           # 直近20日で+25%以上
     far_from_high: {dd: -0.25, pts: 15}       # 高値から-25%以上離れている
     volume_spike: {vol_ratio: 3.0, ret1d: 0.04, pts: 10}   # 出来高急騰だけで上がった日
     volume_expansion: {ratio: 1.5, pts: 6}    # 調整中なのに出来高が膨らんでいる
+  earnings_penalty:            # 決算直前はギャップ（寄り付きの窓開け）リスクが高いため総合点から減点
+    - {business_days: 3, pts: 10}     # 決算まで3営業日以内
+    - {business_days: 5, pts: 5}      # 決算まで5営業日以内
+  atr:                         # 撤退ライン＝移動平均線 − ATR×倍率
+    period: 14
+    multiplier: 1.0
+    fallback_multiplier: 2.0   # 株価が50日線・200日線の下にあるとき：現在値 − ATR×この倍率
   labels: {good: 75, fair: 55}                # 押し目良好 / 押し目候補 / 様子見
   caution:
     earnings_days: 10          # 決算発表がこの日数以内なら「決算接近」
@@ -196,4 +207,14 @@ tdnet:
     dividend_cut: -10
     unknown_revision: -3       # 方向を判定できない「業績予想の修正」
   cap: {plus: 20, minus: 30}
-  downward_extra_penalty: 10   # 下方修正は最重要減点：Event Scoreの-10に加えてさらに減点
+  freshness:                   # イベントの鮮度：開示から [この日数以内, 評価割合]。180日より前は0%
+    - [30, 1.0]
+    - [90, 0.7]
+    - [180, 0.4]
+  downward_recent: {days: 30, penalty: 15}   # 直近30日以内の下方修正：総合点から-15、判定は「様子見」
+  downward_demote_dividend_cut_days: 90      # 減配で「様子見」に下げる期間
+  buyback_tiers:               # 自社株買い：時価総額比 [この比率以上, 点数]。比率が不明なら buyback_unknown
+    - [0.03, 5]
+    - [0.01, 3]
+    - [0.0, 1]
+  buyback_unknown: 1

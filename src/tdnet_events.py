@@ -42,21 +42,85 @@ EVENT_RULES: list[tuple[str, str, re.Pattern, re.Pattern | None]] = [
 ]
 BIG_ORDER = re.compile(r"大型|大口|大規模|多額|大量|過去最大|億円")
 REV_ANY = re.compile(r"業績予想.{0,6}修正|予想.{0,4}修正|通期.{0,6}修正|業績修正")
-REV_UP, REV_DOWN = re.compile(r"上方修正|上方に修正|増額"), re.compile(r"下方修正|下方に修正|減額")
+REV_UP = re.compile(r"上方修正|上方に修正|増額|引き上げ|引上げ|上振れ|上回る")
+REV_DOWN = re.compile(r"下方修正|下方に修正|減額|引き下げ|引下げ|下振れ|下回る")
 DIV_ANY = re.compile(r"配当予想.{0,4}修正|配当.{0,4}修正")
 DIV_UP, DIV_DOWN = re.compile(r"増配|記念配当|特別配当|復配|増額"), re.compile(r"減配|無配|減額")
 
 LABELS = {"upward_revision": "上方修正", "downward_revision": "下方修正", "dividend_increase": "増配",
           "dividend_cut": "減配", "buyback": "自社株買い", "large_order": "大型受注", "alliance": "業務提携",
           "new_product": "新製品発表", "capex": "設備投資拡大", "factory": "工場増設", "stock_split": "株式分割",
-          "unknown_revision": "業績予想の修正（増額・減額不明）"}
+          "unknown_revision": "修正あり（未判定）"}
+
+
+_NUM = re.compile(r"([△▲\-−‐])?\s*([0-9][0-9,]*(?:\.[0-9]+)?)")
+_LINE_WEIGHT = [(re.compile(r"営業利益|経常利益|純利益|当期利益|EBITDA"), 2), (re.compile(r"売上高|売上収益|営業収益"), 1)]
+
+
+def _signed(m: tuple[str, str]) -> float:
+    v = float(m[1].replace(",", ""))
+    return -v if m[0] else v
+
+
+def direction_from_table(text: str) -> str | None:
+    """開示PDFの「前回発表予想 → 今回修正予想」の表から、利益・売上の増減を判定する。
+    行頭が 営業利益／経常利益／純利益／売上高 の行で、最初の数字を前回・2番目を今回として比べる（△・▲はマイナス）。
+    『増減額』の行は先頭の数字の符号を見る。利益の行は売上の行より重く数える。"""
+    vote = 0
+    for line in text.splitlines():
+        line = line.strip()
+        nums = [_signed(m) for m in _NUM.findall(line)]
+        if line.startswith(("増減額", "増減率")):
+            if nums:
+                vote += 1 if nums[0] > 0 else -1 if nums[0] < 0 else 0
+            continue
+        for rx, w in _LINE_WEIGHT:
+            if rx.match(line) and len(nums) >= 2:
+                vote += w * ((nums[1] > nums[0]) - (nums[1] < nums[0]))
+                break
+    return "up" if vote > 0 else "down" if vote < 0 else None
 
 
 def direction_from_text(text: str) -> str | None:
-    """開示本文の語の多数決で増額(up)・減額(down)を判定。強い語だけを数え、同数なら不明。"""
-    up = len(re.findall(r"増額|上方修正|上方に修正", text))
-    down = len(re.findall(r"減額|下方修正|下方に修正", text))
+    """開示本文から増額(up)・減額(down)を判定。① 表の数値 → ② 強い語の多数決 の順。同数なら不明。"""
+    if dr := direction_from_table(text):
+        return dr
+    up = len(re.findall(r"増額|上方修正|上方に修正|上振れ|引き上げ", text))
+    down = len(re.findall(r"減額|下方修正|下方に修正|下振れ|引き下げ", text))
     return "up" if up > down else "down" if down > up else None
+
+
+_PCT = re.compile(r"割合[^\d\n]{0,8}([0-9]+(?:\.[0-9]+)?)\s*[%％]")
+_AMT = re.compile(r"取得価額の総額[^\d]{0,30}([0-9][0-9,]*(?:\.[0-9]+)?)\s*(億円|百万円|万円|円)")
+_UNIT = {"億円": 1e8, "百万円": 1e6, "万円": 1e4, "円": 1.0}
+
+
+def buyback_ratio_from_text(text: str, market_cap: float | None) -> float | None:
+    """自社株買いの規模（時価総額比）。開示にある『発行済株式に対する割合』を優先し、無ければ『取得価額の総額÷時価総額』。"""
+    if m := _PCT.search(text):
+        return float(m.group(1)) / 100
+    if (m := _AMT.search(text)) and market_cap and market_cap > 0:
+        return float(m.group(1).replace(",", "")) * _UNIT[m.group(2)] / market_cap
+    return None
+
+
+def buyback_points(ratio: float | None, cfg: Config) -> float:
+    """時価総額比→点数（1%未満+1／1〜3%+3／3%以上+5。比率が不明なら buyback_unknown）。"""
+    t = cfg["tdnet"]
+    if ratio is None:
+        return float(t["buyback_unknown"])
+    for th, pts in sorted(t["buyback_tiers"], key=lambda x: -x[0]):
+        if ratio >= th:
+            return float(pts)
+    return float(t["buyback_unknown"])
+
+
+def freshness(age_days: int, cfg: Config) -> float:
+    """イベントの鮮度（30日以内100%／90日以内70%／180日以内40%／それ以前0%）。"""
+    for days, w in sorted(cfg["tdnet"]["freshness"], key=lambda x: x[0]):
+        if age_days <= days:
+            return float(w)
+    return 0.0
 
 
 @dataclass
@@ -64,11 +128,14 @@ class EventHit:
     kind: str
     date: str
     title: str
-    points: float = 0.0
+    points: float = 0.0          # 鮮度を掛けたあとの点数
+    weight: float = 1.0          # 鮮度（1.0 / 0.7 / 0.4）
+    age: int = 0                 # 開示からの日数
+    detail: str = ""             # 例：時価総額比2.2%
 
     @property
     def label(self) -> str:
-        return LABELS[self.kind]
+        return LABELS[self.kind] + (f"（{self.detail}）" if self.detail else "")
 
 
 @dataclass
@@ -83,9 +150,26 @@ class TdnetResult:
     def has_down_revision(self) -> bool:
         return any(h.kind == "downward_revision" for h in self.hits)
 
-    @property
-    def serious_negative(self) -> bool:
-        return any(h.kind in ("downward_revision", "dividend_cut") for h in self.hits)
+
+def recent_downward(td: "TdnetResult | None", fund: dict | None, cfg: Config) -> list[str]:
+    """直近N日（既定30日）以内の下方修正の根拠。EPS予想・利益予想・営業利益予想の引き下げをまとめて見る。
+    TDnetの開示（日付で判定）と、アナリスト予想EPSの30日前比（-3%以下）のどちらかがあれば該当。"""
+    days = int(cfg["tdnet"]["downward_recent"]["days"])
+    out: list[str] = []
+    if td is not None and td.status == "ok" and any(h.kind == "downward_revision" and h.age <= days for h in td.hits):
+        out.append("TDnet")
+    r = (fund or {}).get("eps_rev") or {}
+    if r.get("cur") is not None and r.get("d30") and r["d30"] > 0 and r["cur"] <= r["d30"] * 0.97:
+        out.append("EPS予想")
+    return out
+
+
+def serious_negative(td: "TdnetResult | None", fund: dict | None, cfg: Config) -> bool:
+    """判定を「様子見」に下げる条件＝直近30日以内の下方修正、または90日以内の減配。"""
+    if recent_downward(td, fund, cfg):
+        return True
+    days = int(cfg["tdnet"]["downward_demote_dividend_cut_days"])
+    return bool(td is not None and td.status == "ok" and any(h.kind == "dividend_cut" and h.age <= days for h in td.hits))
 
 
 def detect_exclusions(d: Disclosure) -> list[tuple[str, str]]:
@@ -112,14 +196,15 @@ def _revision_direction(d: Disclosure, fund: dict | None, cfg: Config, today: da
         text = pdf_fn(d.url)
         if text and (dr := direction_from_text(text)):
             return dr
-    r = (fund or {}).get("eps_rev") or {}                     # アナリスト予想EPSの90日間の変化で補う
-    cur, d90 = r.get("cur"), r.get("d90")
-    if cur is not None and d90 and d90 > 0:
-        chg = cur / d90 - 1
-        if chg <= -0.03:
-            return "down"
-        if chg >= 0.03:
-            return "up"
+    r = (fund or {}).get("eps_rev") or {}                     # アナリスト予想EPSの変化で補う（最近の開示ほど30日前比を優先）
+    cur = r.get("cur")
+    for base in (r.get("d30"), r.get("d90")) if age <= 45 else (r.get("d90"),):
+        if cur is not None and base and base > 0:
+            chg = cur / base - 1
+            if chg <= -0.03:
+                return "down"
+            if chg >= 0.03:
+                return "up"
     return None
 
 
@@ -136,17 +221,32 @@ def _dividend_direction(d: Disclosure, fund: dict | None) -> str | None:
 
 def analyze(discs: list[Disclosure], fund: dict | None, cfg: Config, today: date | None = None,
             pdf_fn: Callable[[str], str | None] | None = None) -> TdnetResult:
-    """直近 lookback_days の開示を分類し、除外判定とEvent Scoreを返す。同じ種別は新しい1件だけ数える。"""
+    """直近 lookback_days の開示を分類し、除外判定とEvent Scoreを返す。
+    同じ種別は新しい1件だけ数え、点数は開示日からの日数（鮮度）で重み付けする。"""
     today = today or date.today()
     t = cfg["tdnet"]
     since = (today - timedelta(days=int(t["lookback_days"]))).isoformat()
     res = TdnetResult()
     found: dict[str, EventHit] = {}
     seen_ex: set[tuple[str, str]] = set()
+    mc = (fund or {}).get("market_cap")
 
-    def put(kind: str, d: Disclosure) -> None:
-        if kind not in found or d.date > found[kind].date:
-            found[kind] = EventHit(kind, d.date, d.title, float(t["points"][kind]))
+    def put(kind: str, d: Disclosure, base: float | None = None, detail: str = "") -> None:
+        age = (today - date.fromisoformat(d.date)).days
+        w = freshness(age, cfg)
+        if w <= 0 or (kind in found and d.date <= found[kind].date):
+            return
+        pts = float(t["points"][kind] if base is None else base)
+        found[kind] = EventHit(kind, d.date, d.title, pts * w, w, age, detail)
+
+    def buyback_ratio(d: Disclosure) -> float | None:
+        age = (today - date.fromisoformat(d.date)).days
+        if t["parse_pdf"] and pdf_fn and d.url and age <= t["pdf_max_age_days"]:
+            text = pdf_fn(d.url)
+            if text and (r := buyback_ratio_from_text(text, mc)) is not None:
+                return r
+        b = (fund or {}).get("buyback")                        # 無ければ直近の実績（キャッシュフロー）で代用
+        return float(b) / float(mc) if b and mc and mc > 0 else None
 
     for d in sorted((x for x in discs if x.date >= since), key=lambda x: x.date, reverse=True):
         for reason, ev in detect_exclusions(d):
@@ -154,8 +254,9 @@ def analyze(discs: list[Disclosure], fund: dict | None, cfg: Config, today: date
                 seen_ex.add((reason, d.date))
                 res.excluded.append({"reason": reason, "event": ev, "date": d.date})
         title = d.title
-        if BUYBACK.search(title) and not BUYBACK_SKIP.search(title):
-            put("buyback", d)
+        if BUYBACK.search(title) and not BUYBACK_SKIP.search(title) and "buyback" not in found:
+            ratio = buyback_ratio(d)
+            put("buyback", d, buyback_points(ratio, cfg), f"時価総額の{ratio * 100:.1f}%" if ratio is not None else "規模は未判定")
         for kind, _, rx, skip in EVENT_RULES:
             if rx.search(title) and not (skip and skip.search(title)):
                 if kind == "large_order" and not BIG_ORDER.search(title):
@@ -174,8 +275,5 @@ def analyze(discs: list[Disclosure], fund: dict | None, cfg: Config, today: date
     res.hits = sorted(found.values(), key=lambda h: -abs(h.points))
     plus = sum(h.points for h in res.hits if h.points > 0)
     minus = sum(h.points for h in res.hits if h.points < 0)
-    score = min(plus, t["cap"]["plus"]) + max(minus, -t["cap"]["minus"])
-    if res.has_down_revision:
-        score -= float(t["downward_extra_penalty"])         # 下方修正は最重要減点
-    res.score = score
+    res.score = min(plus, t["cap"]["plus"]) + max(minus, -t["cap"]["minus"])
     return res

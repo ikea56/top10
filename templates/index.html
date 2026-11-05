@@ -77,12 +77,13 @@
       </div>
     </div>
     <p class="formula">総合点 ＝ 押し目スコア{{ c.pb_total }} ＋ イベント点{{ '%+d'|format(c.td_score) }}（TDnet）
-      {% if c.penalty %}<b>※急騰などの減点 −{{ c.penalty }}点を反映済み</b>{% endif %}</p>
+      {% if c.down_pen %}− 下方修正{{ c.down_pen }}{% endif %}
+      {% if c.penalty %}<b>※急騰・決算接近などの減点 −{{ c.penalty }}点、地合い {{ '%+d'|format(c.market_pts) }}点を反映済み</b>{% elif c.market_pts < 0 %}<b>※地合いの減点 {{ c.market_pts }}点を反映済み</b>{% endif %}</p>
     {% if c.label_note %}<p class="note">※ {{ c.label_note }}</p>{% endif %}
 
     <div class="scores" aria-label="押し目スコアの内訳">
       {% for key, name in (('trend','長期トレンド'),('drawdown','高値からの調整'),('ma50','50日線に接近'),('volume','出来高の収縮'),('quality','業績・還元'),('market','地合い')) %}
-      {% set v = c.parts[key] %}{% set ratio = (v[0] / v[1]) if v[1] else 0 %}
+      {% set v = c.parts[key] %}{% set ratio = ([v[0] / v[1], 0]|max) if v[1] else 0 %}
       <div class="sc"><span class="k">{{ name }}</span><span class="n">{{ v[0] }}<small>/{{ v[1] }}</small></span>
         <span class="bar mini"><i class="{{ 'bull' if ratio >= 0.7 else ('mild' if ratio >= 0.4 else 'neutral') }}" style="width: {{ (ratio * 100)|round|int }}%"></i></span></div>
       {% endfor %}
@@ -112,7 +113,12 @@
         {% for k in c.cautions %}<li class="lv-{{ k.level }}">⚠ {{ k.label }}</li>{% else %}<li class="none">特に目立った注意事項はありません</li>{% endfor %}
       </ul>
       {% if c.stop %}
-      <p class="stop">撤退ラインの目安：{{ c.stop.name }} <b>{{ c.stop.price|yen }}</b>（現在値から {{ c.stop.pct|pct }}）を終値で明確に割ったら見直す</p>
+      <table class="stoptbl" aria-label="ATRベースの撤退ライン">
+        <tr><th>現在値</th><td>{{ c.close|yen }}</td></tr>
+        <tr><th>ATR（14日）</th><td>{{ c.stop.atr|yen }}（{{ '%.1f'|format(c.stop.atr_pct) }}%）</td></tr>
+        <tr><th>推奨撤退ライン</th><td><b>{{ c.stop.price|yen }}</b>（{{ c.stop.name }}{% if c.stop.ma %}：{{ c.stop.ma|yen }}−ATR{% endif %}）</td></tr>
+        <tr><th>リスク幅</th><td><b>{{ '%.1f'|format(c.stop.risk_pct) }}%</b>（終値でこの線を明確に割ったら見直す目安）</td></tr>
+      </table>
       {% endif %}
     </section>
 
@@ -234,12 +240,17 @@
         <tr><th>50日線に接近 {{ pb.weights.ma50 }}</th><td>株価が50日線の付近（−3%〜＋4%）で最高評価</td></tr>
         <tr><th>出来高の収縮 {{ pb.weights.volume }}</th><td>調整中に、直近10日の出来高が50日平均より減っている（0.7倍以下で最高）</td></tr>
         <tr><th>業績・還元 {{ pb.weights.quality }}</th><td>黒字で減益でない、黒字転換、最高益、増配、連続増配、自社株買い など（上限あり）</td></tr>
-        <tr><th>地合い {{ pb.weights.market }}</th><td>TOPIX（追い風 +{{ pb.market.topix.good }}／中立 +{{ pb.market.topix.neutral }}）と日経平均（50日線の上 +{{ pb.market.nikkei.above_ma50 }}）</td></tr>
+        <tr><th>地合い<br>{{ pb.market.floor }}〜+{{ pb.weights.market }}</th><td>加点：TOPIX（追い風 +{{ pb.market.topix.good }}／中立 +{{ pb.market.topix.neutral }}）＋日経平均が50日線の上 +{{ pb.market.nikkei.above_ma50 }}。
+          <b>減点：TOPIXが75日線の下 {{ pb.market.topix_below_ma75 }}、200日線の下 {{ pb.market.topix_below_ma200 }}、日経平均が50日線の下 {{ pb.market.nikkei_below_ma50 }}</b>。逆風時は全銘柄の総合点が下がります</td></tr>
         <tr><th>減点</th><td>直近5日で+{{ '%.0f'|format(pb.penalties.surge_5d.ret * 100) }}%以上の急騰 −{{ pb.penalties.surge_5d.pts }}、20日で+{{ '%.0f'|format(pb.penalties.surge_20d.ret * 100) }}%以上 −{{ pb.penalties.surge_20d.pts }}、
-          高値から{{ '%.0f'|format(pb.penalties.far_from_high.dd * 100) }}%以上 −{{ pb.penalties.far_from_high.pts }}、出来高急騰だけの上昇 −{{ pb.penalties.volume_spike.pts }}、調整中の出来高膨張 −{{ pb.penalties.volume_expansion.pts }}</td></tr>
+          高値から{{ '%.0f'|format(pb.penalties.far_from_high.dd * 100) }}%以上 −{{ pb.penalties.far_from_high.pts }}、出来高急騰だけの上昇 −{{ pb.penalties.volume_spike.pts }}、調整中の出来高膨張 −{{ pb.penalties.volume_expansion.pts }}、
+          <b>決算まで3営業日以内 −{{ pb.earnings_penalty[0].pts }}／5営業日以内 −{{ pb.earnings_penalty[1].pts }}</b>（発表後の窓開けリスク）</td></tr>
         <tr><th>イベント点<br>（TDnet）</th><td>直近{{ tdc.lookback_days }}日の適時開示。上方修正 +{{ tdc.points.upward_revision }}、増配 +{{ tdc.points.dividend_increase }}、自社株買い +{{ tdc.points.buyback }}、大型受注 +{{ tdc.points.large_order }}、
           業務提携 +{{ tdc.points.alliance }}、設備投資・工場増設 +{{ tdc.points.capex }}、新製品 +{{ tdc.points.new_product }}、株式分割 +{{ tdc.points.stock_split }}。
-          <b>下方修正 {{ tdc.points.downward_revision }}（さらに−{{ tdc.downward_extra_penalty }}の大幅減点）、減配 {{ tdc.points.dividend_cut }}</b></td></tr>
+          <b>下方修正 {{ tdc.points.downward_revision }}、減配 {{ tdc.points.dividend_cut }}</b>。
+          自社株買いは時価総額比で+1（1%未満）／+3（1〜3%）／+5（3%以上）。
+          <b>鮮度：</b>30日以内100%、90日以内70%、180日以内40%、それ以前は0%。
+          <b>直近{{ tdc.downward_recent.days }}日以内の下方修正（EPS・利益・営業利益の予想引き下げ）は、総合点からさらに−{{ tdc.downward_recent.penalty }}点し、判定を「様子見」に下げます。</b></td></tr>
         <tr><th>除外</th><td>TOB・公開買付・MBO・完全子会社化・株式交換・スクイーズアウト・上場廃止・監理・整理銘柄は<b>ランキング対象外</b>（<a href="excluded_events.csv">excluded_events.csv</a>に一覧：{{ n_excluded_events }}件）</td></tr>
       </table>
       <p class="hint"><b>判定の目安：</b>総合点{{ pb.labels.good }}以上＝押し目良好、{{ pb.labels.fair }}以上＝押し目候補、それ未満＝様子見。下方修正・減配がある銘柄は「様子見」に下げます。

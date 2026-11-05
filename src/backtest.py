@@ -168,6 +168,7 @@ def run_replay(panel: Panel, bench: dict[str, pd.DataFrame], sectors: pd.Series,
     log.info("指標を計算中（%d銘柄 × %d日）", c.shape[1], c.shape[0])
     f = compute_features(panel, topix["close"], sc)
     regime = regime_series(topix["close"]).fillna("neutral")
+    below200 = (topix["close"] < topix["close"].rolling(200).mean()).fillna(False)
     n225 = bench.get("n225")
     nikkei = (above_ma50_series(n225["close"].reindex(c.index).ffill()) if n225 is not None
               else pd.Series(False, index=c.index))
@@ -188,7 +189,7 @@ def run_replay(panel: Panel, bench: dict[str, pd.DataFrame], sectors: pd.Series,
             continue
         tech = scoring.score_technical(s, regime.iloc[i], scoring.sector_points(s["ret20d"], sectors, sc), sc)
         scaled = tech["tech_base"] / tmax * 100
-        pb = pullback.score_technical(s, regime.iloc[i], bool(nikkei.iloc[i]), cfg)["pb_tech_scaled"]
+        pb = pullback.score_technical(s, regime.iloc[i], bool(nikkei.iloc[i]), cfg, bool(below200.iloc[i]))["pb_tech_scaled"]
         pb_order = pd.DataFrame({"s": pb, "vr": s["vol_cont"]}).query("s > 0").sort_values(["s", "vr"], ascending=[False, True])
         order = pd.DataFrame({"s": scaled, "vr": s["vol_ratio"]}).sort_values(["s", "vr"], ascending=False)
         pick = {"pb_top10": pb_order.index[:top_n], "top10": order.index[:top_n],
