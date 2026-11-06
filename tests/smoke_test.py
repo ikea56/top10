@@ -360,6 +360,14 @@ def test_holdings():
     assert [x["code"] for x in r["out"]] == ["B", "J"] and r["out"][0]["rank"] == 18
     assert [x["code"] for x in r["up"]] == ["M"] and r["up"][0]["delta"] == 11
     assert [x["code"] for x in r["down"]] == ["L"] and r["down"][0]["delta"] == 9
+    ann = movers.annotate(prev, cur, cfg["movers"]["show_top"])
+    assert ann["K"]["kind"] == "new" and ann["K"]["prev"] == 11, "前回11位→今回2位はトップ10の新規ランクイン"
+    assert ann["N"]["kind"] == "new" and ann["N"]["prev"] is None, "前回圏外は prev=None"
+    assert ann["A"]["kind"] == "same" and ann["A"]["delta"] == 0 and ann["A"]["main_delta"] == 0
+    assert movers.annotate(mk({"A": 1}), mk({"A": 1}), 10)["A"]["kind"] == "same"
+    p2 = mk({"X": 5}); c2 = mk({"X": 2}); a2 = movers.annotate(p2, c2, 10)["X"]
+    assert a2["kind"] == "up" and a2["delta"] == 3 and movers.annotate(c2, p2, 10)["X"]["kind"] == "down"
+    assert movers.annotate([], cur, 10) == {}, "前回の記録がなければ何も出さない"
     cur2 = mk({"A": 1, "L": 9}); prev2 = mk({"A": 1, "L": 4})
     assert movers.compare(prev2, cur2, cfg["movers"])["down"][0]["code"] == "L"
     print("ok  保有銘柄（コード正規化・暗号化・推奨アクション・前回比較）")
@@ -443,6 +451,9 @@ def test_end_to_end():
     rec = json.loads(hist[-1].read_text(encoding="utf-8"))
     assert len(rec["ranking"]) == cfg["movers"]["save_top"]
     assert not any(f'"{c}"' in json.dumps(rec) for c in outside if c not in {x["code"] for x in rec["ranking"]}), "保有銘柄を履歴に書いてはいけない"
+    assert all("rank_change" in p for p in d["picks"])
+    if any(p["rank_change"] for p in d["picks"]):
+        assert "前回" in html and "rank-move" in html
     for word in ("① 本日の押し目候補", "急上昇・急下降", "保有銘柄管理・監視", 'id="holdings"', "holdings.js"):
         assert word in html, word
     if shutil.which("node"):

@@ -402,6 +402,10 @@ def run(demo: bool) -> None:
                for i, c in enumerate(kept[:mv["save_top"]], 1)]
     prev_date, prev_rank = movers.load_previous(hist_dir, data_date.strftime("%Y-%m-%d"), demo)
     mover = movers.compare(prev_rank, ranking, mv) if prev_rank else None
+    changes = movers.annotate(prev_rank, ranking, mv["show_top"])
+    for c in cards:
+        c["rank_change"] = changes.get(c["code"])
+    summary_changes = {k: sum(1 for c in cards if (c["rank_change"] or {}).get("kind") == k) for k in ("new", "up", "down", "same")} if changes else None
 
     # ③ 保有銘柄の監視（保存先から一覧を取得 → 順位に関係なく評価 → 暗号化して出力）
     hold_cards, hold_key = None, None
@@ -444,7 +448,7 @@ def run(demo: bool) -> None:
         "n_universe": len(universe), "n_scanned": len(snap), "n_fetched": fetched,
         "td": td_stats, "tdnet_warn": bool(client) and td_stats["checked"] > 0 and td_stats["unavailable"] > td_stats["checked"] / 2,
         "n_excluded_events": len(excluded_rows),
-        "movers": mover, "prev_date": prev_date, "mv": mv,
+        "movers": mover, "prev_date": prev_date, "mv": mv, "change_summary": summary_changes,
         "hold": {"endpoint": endpoint, "enabled": bool(endpoint), "demo": demo, "n": None if hold_cards is None else len(hold_cards)},
         "pb": pb, "w": cfg["weights"], "tdc": cfg["tdnet"], "ev": cfg["events"], "es": cfg["expected_score"],
         "top_n": cfg["top_n"], "min_turnover_oku": cfg["filters"]["min_turnover_yen"] / 1e8, "min_price": cfg["filters"]["min_price"],

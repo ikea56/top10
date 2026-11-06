@@ -53,8 +53,25 @@
   <div class="banner danger">⚠️ <b>TDnet（適時開示）を取得できていません。</b>TOB・下方修正などの有無が未確認の状態です。各銘柄の「注意事項」を確認してください。</div>
   {% endif %}
 
+  {% if change_summary %}
+  <div class="chg-summary" aria-label="前回からのランキング変化">
+    <b>前回（{{ prev_date }}）からの変化</b>
+    <span class="cs new">🆕 新規 {{ change_summary.new }}</span>
+    <span class="cs up">▲ 上昇 {{ change_summary.up }}</span>
+    <span class="cs down">▼ 下降 {{ change_summary.down }}</span>
+    <span class="cs same">＝ 変わらず {{ change_summary.same }}</span>
+    <a href="#movers">詳しく見る</a>
+  </div>
+  {% else %}
+  <p class="hint">前回のランキングとの比較は、記録がたまる明日以降の更新から表示されます。</p>
+  {% endif %}
+
   {% for c in cards %}
-  <article class="card stock {% if c.rank <= 3 %}top top{{ c.rank }}{% endif %}">
+  {% set rc = c.rank_change %}
+  <article class="card stock {% if c.rank <= 3 %}top top{{ c.rank }}{% endif %}{% if rc and rc.kind == 'new' %} is-new{% endif %}" id="rank-{{ c.rank }}">
+    {% if rc and rc.kind == 'new' %}
+    <div class="new-banner">🆕 新規ランクイン！<span>前回：{{ (rc.prev ~ '位') if rc.prev else '圏外（上位30位にも入っていませんでした）' }} → 今回 {{ c.rank }}位</span></div>
+    {% endif %}
     <header class="stock-head">
       <div class="rank r{{ c.rank }}">{{ c.rank }}</div>
       <div class="ident">
@@ -63,6 +80,14 @@
       </div>
       <span class="pill {{ c.css }}" title="{{ c.label_note }}">{{ c.label }}</span>
     </header>
+    {% if rc and rc.kind != 'new' %}
+    <p class="rank-move {{ rc.kind }}">
+      {% if rc.kind == 'up' %}▲ {{ rc.delta }}位上昇{% elif rc.kind == 'down' %}▼ {{ -rc.delta }}位下降{% else %}＝ 順位変わらず{% endif %}
+      <span>（前回 {{ rc.prev }}位 → 今回 {{ c.rank }}位{% if rc.main_delta is not none %}／総合点 {{ '%+d'|format(rc.main_delta) }}{% endif %}）</span>
+    </p>
+    {% elif rc and rc.main_delta is not none %}
+    <p class="rank-move new-sub">総合点 前回 {{ c.main - rc.main_delta }} → 今回 {{ c.main }}（{{ '%+d'|format(rc.main_delta) }}）</p>
+    {% endif %}
 
     <div class="kpis">
       <div class="kpi">

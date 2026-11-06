@@ -38,3 +38,23 @@ def compare(prev: list[dict], cur: list[dict], cfg: dict[str, Any]) -> dict[str,
     down = sorted((item(c, rank=cr[c], prev=pr[c], delta=cr[c] - pr[c]) for c in both if cr[c] - pr[c] >= jump), key=lambda x: -x["delta"])
     return {"new": sorted(new, key=lambda x: x["rank"])[:limit], "up": up[:limit], "down": down[:limit],
             "out": sorted(out, key=lambda x: x["prev"])[:limit]}
+
+
+def annotate(prev: list[dict], cur: list[dict], top: int) -> dict[str, dict]:
+    """各銘柄の「前回からの変化」。kind は new（新規ランクイン）/ up / down / same。
+    new は『前回のトップN（既定10）に入っていなかった』銘柄で、前回が圏外（記録の上位30にもない）なら prev=None。
+    prev が空（比較できる記録がない）なら空の辞書を返し、画面には何も出さない。"""
+    if not prev:
+        return {}
+    pr = {x["code"]: x for x in prev}
+    out: dict[str, dict] = {}
+    for x in cur:
+        p = pr.get(x["code"])
+        if p is None or p["rank"] > top:
+            kind, delta = "new", None
+        else:
+            delta = p["rank"] - x["rank"]
+            kind = "up" if delta > 0 else "down" if delta < 0 else "same"
+        out[x["code"]] = {"kind": kind, "prev": None if p is None else p["rank"], "delta": delta,
+                          "main_delta": None if p is None or "main" not in p or p["main"] is None else x["main"] - p["main"]}
+    return out
