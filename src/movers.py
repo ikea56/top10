@@ -36,8 +36,9 @@ def compare(prev: list[dict], cur: list[dict], cfg: dict[str, Any]) -> dict[str,
     both = [c for c in cr if c in pr and c not in skip]
     up = sorted((item(c, rank=cr[c], prev=pr[c], delta=pr[c] - cr[c]) for c in both if pr[c] - cr[c] >= jump), key=lambda x: -x["delta"])
     down = sorted((item(c, rank=cr[c], prev=pr[c], delta=cr[c] - pr[c]) for c in both if cr[c] - pr[c] >= jump), key=lambda x: -x["delta"])
-    return {"new": sorted(new, key=lambda x: x["rank"])[:limit], "up": up[:limit], "down": down[:limit],
-            "out": sorted(out, key=lambda x: x["prev"])[:limit]}
+    # 新規ランクイン・ランクアウトは、件数の見出し（上位N位の出入り）と食い違わないよう全件表示。急上昇・急下降だけ件数を絞る
+    return {"new": sorted(new, key=lambda x: x["rank"]), "up": up[:limit], "down": down[:limit],
+            "out": sorted(out, key=lambda x: x["prev"])}
 
 
 def annotate(prev: list[dict], cur: list[dict], top: int) -> dict[str, dict]:
