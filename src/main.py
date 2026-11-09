@@ -205,15 +205,16 @@ def make_cards(top: list[dict], f: features.Features, panel: features.Panel, the
         stren = explain.strengths(ev, td)
         parts = {"trend": (r["pb_trend"], pbw["trend"]), "drawdown": (r["pb_dd"], pbw["drawdown"]),
                  "ma50": (r["pb_ma50"], pbw["ma50"]), "volume": (r["pb_vol"], pbw["volume"]),
+                 "strength": (r["pb_rs"] + r["pb_bounce"], pbw["rs"] + pbw["bounce"]),
                  "quality": (x["quality"], pbw["quality"]), "market": (r["pb_market"], pbw["market"])}
         cards.append({
             "rank": rank, "code": r["code"], "name": r["name"], "market": r["market"], "sector": r["sector"],
             "themes": rankings.themes_of(r["code"], themes),
             "close": float(r["close"]), "ret1d": None if r["ret1d"] != r["ret1d"] else float(r["ret1d"]) * 100,
-            "main": round(main), "pb_total": round(x["pb_total"]), "td_score": round(td_score),
+            "main": round(main, 1), "pb_total": round(x["pb_total"], 1), "td_score": round(td_score),
             "penalty": round(float(r["pb_penalty"]) + x["earn_pen"]), "earn_pen": round(x["earn_pen"]),
             "down_pen": round(down_pen), "market_pts": round(float(r["pb_market"])),
-            "parts": {k: [round(float(a)), b] for k, (a, b) in parts.items()},
+            "parts": {k: [round(float(a), 1), b] for k, (a, b) in parts.items()},
             "label": label, "css": css, "label_note": note,
             "strengths": stren,
             "status": explain.pullback_status(r, cfg, regime, nikkei_ok),
@@ -321,7 +322,7 @@ def monitor_holdings(codes: list[str], snap_full: pd.DataFrame, snap: pd.DataFra
         out.append({
             "code": code, "name": r["name"], "found": True, "market": r["market"], "sector": r["sector"],
             "close": close, "ret1d": None if r["ret1d"] != r["ret1d"] else float(r["ret1d"]) * 100,
-            "pb_total": round(cand["pb_total"]), "td_score": round(td_score), "main": round(main),
+            "pb_total": round(cand["pb_total"], 1), "td_score": round(td_score), "main": round(main, 1),
             "down_pen": round(down_pen), "label": label, "css": css,
             "rank_main": rank_of.get(code), "rank_tech": tech_rank, "n_tech": int(len(snap)),
             "events": [flag("増配", has("dividend_increase")), flag("上方修正", has("upward_revision")),
@@ -390,7 +391,7 @@ def run(demo: bool) -> None:
 
     for c in kept:
         c["main"] = final_score(c, cfg)[0]
-    kept.sort(key=lambda c: (c["main"], c["legacy_expected"]), reverse=True)
+    kept.sort(key=lambda c: (c["main"], c["pb_total"], c["legacy_expected"]), reverse=True)   # 同点は押し目スコア→従来の期待値の順
     top = kept[:cfg["top_n"]]
     if not top:
         raise RuntimeError("ランキングが0件です（業績取得が全滅した可能性）。時間をおいて再実行してください")
@@ -398,7 +399,7 @@ def run(demo: bool) -> None:
 
     # ② 前回ランキングとの比較（上位30を記録）
     mv = cfg["movers"]
-    ranking = [{"rank": i, "code": c["row"]["code"], "name": c["row"]["name"], "main": round(c["main"])}
+    ranking = [{"rank": i, "code": c["row"]["code"], "name": c["row"]["name"], "main": round(c["main"], 1)}
                for i, c in enumerate(kept[:mv["save_top"]], 1)]
     prev_date, prev_rank = movers.load_previous(hist_dir, data_date.strftime("%Y-%m-%d"), demo)
     mover = movers.compare(prev_rank, ranking, mv) if prev_rank else None

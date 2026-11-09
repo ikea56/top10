@@ -282,3 +282,4 @@ details.legacy summary { font-size: .82rem; font-weight: 600; color: var(--sub);
 .new-banner span { display: block; font-weight: 600; font-size: .8rem; }
 @keyframes newpulse { 50% { filter: brightness(1.12); } }
 @media (prefers-reduced-motion: reduce) { .new-banner { animation: none; } }
+.scores .sc:last-child:nth-child(3n+1) { grid-column: 1 / -1; }

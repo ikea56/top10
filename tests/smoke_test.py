@@ -198,7 +198,7 @@ def test_pullback():
         "close": [100.0] * 3, "ma50": [100.0, 100.0, 100.0], "ma200": [80.0] * 3, "ma200_slope": [0.01] * 3,
         "gap50": [0.0, 0.0, 0.0], "dist52w": [-0.10, -0.10, -0.10], "vol_cont": [0.6, 0.6, 0.6],
         "ret5d": [0.0, 0.20, 0.0], "ret20d": [0.0, 0.0, 0.0], "ret1d": [0.0, 0.0, 0.0],
-        "vol_ratio": [1.0, 1.0, 1.0]}, index=idx)
+        "vol_ratio": [1.0, 1.0, 1.0], "rs60": [0.05] * 3, "ma5": [99.0] * 3, "ret3d": [0.01] * 3}, index=idx)
     snap.loc["C.T", "dist52w"] = -0.40
     try:
         t = pullback.score_technical(snap, "good", True, cfg)
@@ -209,6 +209,27 @@ def test_pullback():
     assert b["pb_penalty"] >= pb["penalties"]["surge_5d"]["pts"]
     assert a["pb_sum"] - a["pb_penalty"] > c["pb_sum"] - c["pb_penalty"], "高値から遠すぎる銘柄は低評価"
     assert pullback.total(80, 10, 5) == 85
+    # 連続採点：近い値の銘柄でも点数が分かれる（同点が並びにくい）／各項目は満点を超えない
+    xs = pd.DataFrame({"close": [100.0] * 5, "ma50": [100.0 / (1 + g) for g in (0.0, 0.01, 0.02, 0.03, 0.04)], "ma200": [80.0] * 5,
+                       "ma200_slope": [0.01] * 5, "dist52w": [-0.06, -0.08, -0.10, -0.12, -0.14], "vol_cont": [0.6, 0.7, 0.75, 0.8, 0.85],
+                       "ret5d": [0.0] * 5, "ret20d": [0.0] * 5, "ret1d": [0.0] * 5, "vol_ratio": [1.0] * 5,
+                       "rs60": [0.02, 0.04, 0.06, 0.08, 0.10], "ma5": [99.0] * 5, "ret3d": [0.01] * 5,
+                       "gap50": [0.0, 0.01, 0.02, 0.03, 0.04]}, index=[f"T{i}" for i in range(5)])
+    tx = pullback.score_technical(xs, "good", True, cfg)
+    assert tx["pb_sum"].nunique() == 5, tx["pb_sum"].tolist()
+    mx = pullback.max_points(cfg["pullback"])
+    for col, key in (("pb_trend", "trend"), ("pb_dd", "drawdown"), ("pb_ma50", "ma50"), ("pb_vol", "volume"),
+                     ("pb_rs", "rs"), ("pb_bounce", "bounce")):
+        assert (tx[col] <= mx[key] + 1e-9).all() and (tx[col] >= 0).all(), col
+    # 相対力：TOPIXを上回るほど高得点／反発確認：調整局面で5日線の上に戻っていれば加点、高値圏では評価しない
+    lo, hi = xs.iloc[[0]].copy(), xs.iloc[[0]].copy()
+    lo["rs60"], hi["rs60"] = -0.05, 0.10
+    assert pullback.score_technical(hi, "good", True, cfg)["pb_rs"].iloc[0] > pullback.score_technical(lo, "good", True, cfg)["pb_rs"].iloc[0]
+    up, dn, hv = xs.iloc[[0]].copy(), xs.iloc[[0]].copy(), xs.iloc[[0]].copy()
+    dn["ma5"], dn["ret3d"] = 101.0, -0.03
+    hv["dist52w"] = -0.01
+    assert pullback.score_technical(up, "good", True, cfg)["pb_bounce"].iloc[0] > pullback.score_technical(dn, "good", True, cfg)["pb_bounce"].iloc[0] == 0
+    assert pullback.score_technical(hv, "good", True, cfg)["pb_bounce"].iloc[0] == 0 == pullback.score_technical(hv, "good", True, cfg)["pb_vol"].iloc[0]
     lab = pullback.label(90, True, cfg)[0]
     assert lab == "様子見", "下方修正・減配があれば様子見"
     print("ok  押し目スコア（急騰・高値乖離の減点／悪材料でラベル降格）")
@@ -351,16 +372,17 @@ def test_holdings():
     assert act(unknown_rev=True)["key"] == "watch" and act(td_status="unavailable")["key"] == "watch"
     assert act(data_ok=False)["key"] == "watch"
     assert act(down_recent=["TDnet"], broken=["x"])["key"] == "sell", "売却検討が最優先"
-    # 前回比較
+    # 前回比較（判定のテストはトップ10基準で行う）
+    mc = {**cfg["movers"], "show_top": 10}
     mk = lambda ranks: [{"code": c, "name": f"N{c}", "rank": r, "main": 80} for c, r in ranks.items()]  # noqa: E731
     prev = mk({"A": 1, "B": 2, "C": 3, "D": 4, "E": 5, "F": 6, "G": 7, "H": 8, "I": 9, "J": 10, "K": 11, "L": 20, "M": 25})
     cur = mk({"A": 1, "K": 2, "C": 3, "D": 4, "E": 5, "F": 6, "G": 7, "H": 8, "I": 9, "N": 10, "B": 18, "M": 14, "L": 29, "J": 30})
-    r = movers.compare(prev, cur, cfg["movers"])
+    r = movers.compare(prev, cur, mc)
     assert [x["code"] for x in r["new"]] == ["K", "N"] and r["new"][1]["prev"] is None
     assert [x["code"] for x in r["out"]] == ["B", "J"] and r["out"][0]["rank"] == 18
     assert [x["code"] for x in r["up"]] == ["M"] and r["up"][0]["delta"] == 11
     assert [x["code"] for x in r["down"]] == ["L"] and r["down"][0]["delta"] == 9
-    ann = movers.annotate(prev, cur, cfg["movers"]["show_top"])
+    ann = movers.annotate(prev, cur, 10)
     assert ann["K"]["kind"] == "new" and ann["K"]["prev"] == 11, "前回11位→今回2位はトップ10の新規ランクイン"
     assert ann["N"]["kind"] == "new" and ann["N"]["prev"] is None, "前回圏外は prev=None"
     assert ann["A"]["kind"] == "same" and ann["A"]["delta"] == 0 and ann["A"]["main_delta"] == 0
@@ -369,7 +391,7 @@ def test_holdings():
     assert a2["kind"] == "up" and a2["delta"] == 3 and movers.annotate(c2, p2, 10)["X"]["kind"] == "down"
     assert movers.annotate([], cur, 10) == {}, "前回の記録がなければ何も出さない"
     cur2 = mk({"A": 1, "L": 9}); prev2 = mk({"A": 1, "L": 4})
-    assert movers.compare(prev2, cur2, cfg["movers"])["down"][0]["code"] == "L"
+    assert movers.compare(prev2, cur2, mc)["down"][0]["code"] == "L"
     print("ok  保有銘柄（コード正規化・暗号化・推奨アクション・前回比較）")
 
 
@@ -416,7 +438,7 @@ def test_end_to_end():
     for p in d["picks"]:
         assert 0 < len(p["explain"]) <= 100, p["name"]
         assert not any(w in p["explain"] for w in FORBIDDEN)
-        assert set(p["parts"]) == {"trend", "drawdown", "ma50", "volume", "quality", "market"}
+        assert set(p["parts"]) == {"trend", "drawdown", "ma50", "volume", "strength", "quality", "market"}
         assert p["main"] == p["pb_total"] + p["td_score"] or abs(p["main"] - p["pb_total"] - p["td_score"]) <= 1
         assert isinstance(p["cautions"], list) and "legacy" in p
     mains = [p["main"] for p in d["picks"]]

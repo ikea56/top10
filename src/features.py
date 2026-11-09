@@ -59,13 +59,18 @@ def compute_features(panel: Panel, topix_close: pd.Series | None, sc: dict) -> F
     f["ma200_slope"] = f["ma200"] / f["ma200"].shift(20) - 1
     f["gap50"] = c / f["ma50"] - 1
     f["ret5d"] = c.pct_change(5, fill_method=None)
+    f["ret3d"] = c.pct_change(3, fill_method=None)
+    f["ma5"] = c.rolling(5, min_periods=5).mean()
+    f["ret60"] = c.pct_change(60, fill_method=None)
     f["vol_cont"] = v.rolling(10, min_periods=8).mean() / v.rolling(50, min_periods=40).mean()   # 出来高の収縮率
 
     if topix_close is not None and len(topix_close.dropna()) > 21:
         tx = topix_close.reindex(c.index).ffill()
         f["rs20"] = f["ret20d"].sub(tx.pct_change(20, fill_method=None), axis=0)
+        f["rs60"] = f["ret60"].sub(tx.pct_change(60, fill_method=None), axis=0)
     else:
         f["rs20"] = f["ret20d"]
+        f["rs60"] = f["ret60"]
     return {k: _slim(df) for k, df in f.items()}
 
 

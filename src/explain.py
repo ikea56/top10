@@ -124,8 +124,13 @@ def pullback_status(r: Any, cfg: Config, regime: str, nikkei_ok: bool) -> list[s
     if -0.06 <= r["gap50"] <= 0.07:
         out.append(f"50日線付近（乖離{r['gap50'] * 100:+.1f}%）")
     vc = r["vol_cont"]
-    if vc == vc and vc <= pb["volume"]["tiers"][-1][0] and dd <= pb["volume"]["pullback_gate"]:
+    if vc == vc and vc <= pb["volume"]["status_ratio"] and dd <= pb["volume"]["pullback_gate"]:
         out.append(f"出来高縮小（直近10日が50日平均の{vc:.2f}倍）")
+    rs = r.get("rs60")
+    if rs is not None and rs == rs and rs >= 0.03:
+        out.append(f"相対力が強い（直近60日でTOPIXを{rs * 100:+.1f}%上回る）")
+    if dd <= pb["volume"]["pullback_gate"] and r.get("ma5") == r.get("ma5") and r["close"] > r["ma5"]:
+        out.append("短期の下げ止まり（株価が5日線の上）")
     if regime == "good" or nikkei_ok:
         out.append("地合いも良好（" + ("TOPIX追い風" if regime == "good" else "TOPIX中立") +
                    ("・日経平均は50日線の上）" if nikkei_ok else "）"))

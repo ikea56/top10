@@ -18,19 +18,20 @@ from .events import EventResult
 from .scoring import tier_points
 
 
-def _range_points(x: pd.Series, tiers: list[list[float]]) -> pd.Series:
-    """[[下限, 上限, 点数], ...] のうち、当てはまる最高点を返す。"""
-    out = pd.Series(0.0, index=x.index)
-    for lo, hi, pts in tiers:
-        out = out.mask((x >= lo) & (x <= hi) & (out < pts), float(pts))
-    return out
+def _curve(x: pd.Series, pts: list[list[float]]) -> pd.Series:
+    """折れ線 [[値, 点数], ...] で連続的に採点する（範囲外は両端の点数）。欠損値は0点。"""
+    xs, ys = [p[0] for p in pts], [p[1] for p in pts]
+    v = np.interp(x.astype(float).fillna(xs[0] if ys[0] == 0 else xs[-1]).to_numpy(), xs, ys)
+    return pd.Series(v, index=x.index).where(x.notna(), 0.0)
 
 
 def max_points(pb: dict) -> dict[str, float]:
-    return {"trend": sum(pb["trend"].values()),
-            "drawdown": max(t[2] for t in pb["drawdown_tiers"]),
-            "ma50": max(t[2] for t in pb["ma50_gap_tiers"]),
-            "volume": max(p for _, p in pb["volume"]["tiers"]),
+    t = pb["trend"]
+    top = lambda pts: max(p[1] for p in pts)  # noqa: E731
+    return {"trend": t["ma50_over_200"]["max"] + t["above_ma200"] + t["ma200_rising"]["max"],
+            "drawdown": top(pb["drawdown_curve"]), "ma50": top(pb["ma50_gap_curve"]),
+            "volume": top(pb["volume"]["curve"]), "rs": top(pb["rs"]["curve"]),
+            "bounce": pb["bounce"]["above_ma5"] + top(pb["bounce"]["ret3d_curve"]),
             "quality": pb["weights"]["quality"],
             "market": max(pb["market"]["topix"].values()) + max(pb["market"]["nikkei"].values())}
 
@@ -39,6 +40,8 @@ def validate_config(cfg: Config) -> None:
     pb = cfg["pullback"]
     got, want = max_points(pb), pb["weights"]
     for k in want:
+        if k not in got:
+            raise ConfigError(f"pullback.weights に未対応の項目があります: {k}")
         if abs(got[k] - want[k]) > 1e-9:
             raise ConfigError(f"押し目スコアの配点が合いません: {k} は weights で {want[k]}点ですが、"
                               f"各項目の最大合計は {got[k]}点です（config.yml の pullback）")
@@ -109,16 +112,21 @@ def score_technical(snap: pd.DataFrame, regime: str, nikkei_ok: bool, cfg: Confi
     dd = snap["dist52w"].astype(float)
 
     t = pb["trend"]
-    out["pb_trend"] = ((snap["ma50"] > snap["ma200"]) * t["ma50_over_200"]
-                       + (snap["close"] > snap["ma200"]) * t["above_ma200"]
-                       + (snap["ma200_slope"] > 0) * t["ma200_rising"]).astype(float)
-    out["pb_dd"] = _range_points(dd, pb["drawdown_tiers"])
-    out["pb_ma50"] = _range_points(snap["gap50"].astype(float), pb["ma50_gap_tiers"])
+    spread = (snap["ma50"] / snap["ma200"] - 1).astype(float)
+    out["pb_trend"] = (_curve(spread, t["ma50_over_200"]["curve"])
+                       + (snap["close"] > snap["ma200"]) * float(t["above_ma200"])
+                       + _curve(snap["ma200_slope"].astype(float), t["ma200_rising"]["curve"])).astype(float)
+    out["pb_dd"] = _curve(dd, pb["drawdown_curve"])
+    out["pb_ma50"] = _curve(snap["gap50"].astype(float), pb["ma50_gap_curve"])
 
     vol = pb["volume"]
     vc = snap["vol_cont"].astype(float)
-    vpts = tier_points(-vc, [[-th, p] for th, p in vol["tiers"]])          # 比率が小さいほど高得点
-    out["pb_vol"] = vpts.where(dd <= vol["pullback_gate"], 0.0)
+    gate = dd <= vol["pullback_gate"]                                   # 調整局面（高値から-3%以下）だけ評価
+    out["pb_vol"] = _curve(vc, vol["curve"]).where(gate, 0.0)
+    out["pb_rs"] = _curve(snap["rs60"].astype(float), pb["rs"]["curve"])
+    bn = pb["bounce"]
+    out["pb_bounce"] = ((snap["close"] > snap["ma5"]) * float(bn["above_ma5"])
+                        + _curve(snap["ret3d"].astype(float), bn["ret3d_curve"])).where(gate, 0.0).astype(float)
 
     out["pb_market"] = market_points(regime, nikkei_ok, topix_below200, cfg)
 
@@ -134,7 +142,7 @@ def score_technical(snap: pd.DataFrame, regime: str, nikkei_ok: bool, cfg: Confi
            "pen_spike": p["volume_spike"]["pts"], "pen_expand": p["volume_expansion"]["pts"]}
     out = out.join(flags)
     out["pb_penalty"] = sum(flags[k].astype(float) * v for k, v in pts.items())
-    out["pb_sum"] = out[["pb_trend", "pb_dd", "pb_ma50", "pb_vol", "pb_market"]].sum(axis=1)
+    out["pb_sum"] = out[["pb_trend", "pb_dd", "pb_ma50", "pb_vol", "pb_rs", "pb_bounce", "pb_market"]].sum(axis=1)
     out["pb_tech_scaled"] = ((out["pb_sum"] - out["pb_penalty"]).clip(lower=0) / tech_max(cfg) * 100)
     return out
 

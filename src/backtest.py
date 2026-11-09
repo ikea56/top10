@@ -208,7 +208,7 @@ def run_replay(panel: Panel, bench: dict[str, pd.DataFrame], sectors: pd.Series,
     table_recs = [r for r in records if r["date"] > end - pd.DateOffset(years=bt["table_years"])]
     summary: dict[str, Any] = {
         "generated": datetime.now(JST).isoformat(timespec="minutes"),
-        "years": bt["table_years"], "replay_years": bt["replay_years"],
+        "top_n": top_n, "years": bt["table_years"], "replay_years": bt["replay_years"],
         "period": {"start": str(records[0]["date"].date()), "end": str(records[-1]["date"].date())},
         "n_universe": int(c.shape[1]), "n_dates": len(table_recs), "cost_pct": bt["cost_pct"],
         "hold": bt["equity_horizon"],
@@ -279,9 +279,9 @@ def build_table(summary: dict | None, forward: dict | None, cfg: Config) -> dict
                          "caveats": CAVEATS, "period": None, "forward_note": None}
     if summary:
         t["period"] = f"{summary['period']['start']} 〜 {summary['period']['end']}（直近{summary['years']}年・{summary['n_dates']}週分）"
-        for key, label, note in (("pb_top10", "押し目トップ10（メイン）", "押し目スコアの技術80点分で再現"),
+        for key, label, note in (("pb_top10", f"押し目トップ{summary.get('top_n', 10)}（メイン）", "押し目スコアの技術80点分で再現"),
                                  ("pb_ok", "　うち地合いが「逆風」でない週", "TOPIXが75日線の上"),
-                                 ("top10", "従来の「今強い」トップ10（補助）", "過去再現"),
+                                 ("top10", f"従来の「今強い」トップ{summary.get('top_n', 10)}（補助）", "過去再現"),
                                  ("tech80", "テクニカル80点以上の全銘柄", "過去再現"),
                                  ("hi252", "252日高値を更新した全銘柄", "過去再現（モメンタム）")):
             if summary.get(key):
@@ -294,14 +294,14 @@ def build_table(summary: dict | None, forward: dict | None, cfg: Config) -> dict
         t["rows"].append({"label": "TOPIX（比較用）", "note": "同じ期間・同じ売買ルール", "cells": bench_cells})
         s1, s0 = (summary.get("pb_top10") or {}).get("1m"), (summary.get("top10") or {}).get("1m")
         if s1:
-            t["headline"] = (f"過去{summary['years']}年の再現検証では、毎週の押し目トップ10を買った場合の1か月後の平均騰落率は"
+            t["headline"] = (f"過去{summary['years']}年の再現検証では、毎週の押し目トップ{summary.get('top_n', 10)}を買った場合の1か月後の平均騰落率は"
                              f"{s1['avg'] * 100:+.1f}%（同期間のTOPIXは{s1['bench'] * 100:+.1f}%"
-                             + (f"、従来の「今強い」トップ10は{s0['avg'] * 100:+.1f}%" if s0 else "") + "）でした。")
+                             + (f"、従来の「今強い」トップ{summary.get('top_n', 10)}は{s0['avg'] * 100:+.1f}%" if s0 else "") + "）でした。")
     if forward is not None:
         n = forward["n_records"]
         if any(forward["stats"].values()):
             ready = n >= cfg["backtest"]["min_forward_samples"]
-            t["rows"].append({"label": "このサイトの実績（毎朝のトップ10）",
+            t["rows"].append({"label": f"このサイトの実績（毎朝のトップ{summary.get('top_n', 10)}）",
                               "note": f"{n}日分の記録" + ("" if ready else "・参考値"),
                               "cells": [_cell(forward["stats"].get(h), show_n=True) for h in hs]})
         else:
@@ -332,7 +332,7 @@ def build_period_table(summary: dict | None, key: str = "periods") -> dict[str, 
     rows = [{"label": label, "cells": [_fmt((periods[k] or {}).get(kcol), kind) for k in keys]}
             for label, kcol, kind in spec]
     return {"cols": [k.replace("y", "年") for k in keys], "rows": rows,
-            "note": f"毎週のトップ10を翌営業日の始値で買い、約1か月（{summary.get('hold', '1m')}）保有→入れ替え、を繰り返した場合。"
+            "note": f"毎週のトップ{summary.get('top_n', 10)}を翌営業日の始値で買い、約1か月（{summary.get('hold', '1m')}）保有→入れ替え、を繰り返した場合。"
                     "「—」は取得した株価の期間が足りない項目です。"}
 
 

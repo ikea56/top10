@@ -83,10 +83,10 @@
     {% if rc and rc.kind != 'new' %}
     <p class="rank-move {{ rc.kind }}">
       {% if rc.kind == 'up' %}▲ {{ rc.delta }}位上昇{% elif rc.kind == 'down' %}▼ {{ -rc.delta }}位下降{% else %}＝ 順位変わらず{% endif %}
-      <span>（前回 {{ rc.prev }}位 → 今回 {{ c.rank }}位{% if rc.main_delta is not none %}／総合点 {{ '%+d'|format(rc.main_delta) }}{% endif %}）</span>
+      <span>（前回 {{ rc.prev }}位 → 今回 {{ c.rank }}位{% if rc.main_delta is not none %}／総合点 {{ '%+.1f'|format(rc.main_delta) }}{% endif %}）</span>
     </p>
     {% elif rc and rc.main_delta is not none %}
-    <p class="rank-move new-sub">総合点 前回 {{ c.main - rc.main_delta }} → 今回 {{ c.main }}（{{ '%+d'|format(rc.main_delta) }}）</p>
+    <p class="rank-move new-sub">総合点 前回 {{ c.main - rc.main_delta }} → 今回 {{ c.main }}（{{ '%+.1f'|format(rc.main_delta) }}）</p>
     {% endif %}
 
     <div class="kpis">
@@ -107,7 +107,7 @@
     {% if c.label_note %}<p class="note">※ {{ c.label_note }}</p>{% endif %}
 
     <div class="scores" aria-label="押し目スコアの内訳">
-      {% for key, name in (('trend','長期トレンド'),('drawdown','高値からの調整'),('ma50','50日線に接近'),('volume','出来高の収縮'),('quality','業績・還元'),('market','地合い')) %}
+      {% for key, name in (('trend','長期トレンド'),('drawdown','高値からの調整'),('ma50','50日線に接近'),('volume','出来高の収縮'),('strength','相対力・反発'),('quality','業績・還元'),('market','地合い')) %}
       {% set v = c.parts[key] %}{% set ratio = ([v[0] / v[1], 0]|max) if v[1] else 0 %}
       <div class="sc"><span class="k">{{ name }}</span><span class="n">{{ v[0] }}<small>/{{ v[1] }}</small></span>
         <span class="bar mini"><i class="{{ 'bull' if ratio >= 0.7 else ('mild' if ratio >= 0.4 else 'neutral') }}" style="width: {{ (ratio * 100)|round|int }}%"></i></span></div>
@@ -251,9 +251,9 @@
       </tbody>
     </table>
     </div>
-    <p class="hint">{{ pt.note }}（押し目トップ10・技術80点分で再現）</p>
+    <p class="hint">{{ pt.note }}（押し目トップ{{ top_n }}・技術80点分で再現）</p>
     {% if pt_legacy %}
-    <details><summary>参考：従来の「今強い」トップ10の期間別成績</summary>
+    <details><summary>参考：従来の「今強い」トップ{{ top_n }}の期間別成績</summary>
       <div class="table-wrap"><table class="period">
         <thead><tr><th></th>{% for h in pt_legacy.cols %}<th>{{ h }}</th>{% endfor %}</tr></thead>
         <tbody>{% for row in pt_legacy.rows %}<tr><th scope="row">{{ row.label }}</th>{% for c in row.cells %}<td>{{ c }}</td>{% endfor %}</tr>{% endfor %}</tbody>
@@ -294,10 +294,12 @@
     <details open>
       <summary>総合点 ＝ 押し目スコア（100点）＋ イベント点（TDnet・−30〜＋20）</summary>
       <table class="guide">
-        <tr><th>長期トレンド {{ pb.weights.trend }}</th><td>50日線＞200日線 +{{ pb.trend.ma50_over_200 }}、株価＞200日線 +{{ pb.trend.above_ma200 }}、200日線が上向き +{{ pb.trend.ma200_rising }}</td></tr>
-        <tr><th>高値からの調整 {{ pb.weights.drawdown }}</th><td>52週高値から<b>−5%〜−15%が最高評価</b>。浅すぎ（高値圏）や深すぎ（−25%超）は低評価</td></tr>
-        <tr><th>50日線に接近 {{ pb.weights.ma50 }}</th><td>株価が50日線の付近（−3%〜＋4%）で最高評価</td></tr>
-        <tr><th>出来高の収縮 {{ pb.weights.volume }}</th><td>調整中に、直近10日の出来高が50日平均より減っている（0.7倍以下で最高）</td></tr>
+        <tr><th>長期トレンド {{ pb.weights.trend }}</th><td>50日線が200日線をどれだけ上回るか（最大10）、株価が200日線の上（+3）、200日線が上向き（最大2）。連続的に採点</td></tr>
+        <tr><th>高値からの調整 {{ pb.weights.drawdown }}</th><td>52週高値から<b>−10%が頂点</b>。−5%〜−15%は高評価で、浅すぎ（高値圏）や深すぎ（−25%超）は低評価。なめらかに点数が変わります</td></tr>
+        <tr><th>50日線に接近 {{ pb.weights.ma50 }}</th><td>株価が50日線に接した位置が頂点。上下に離れるほど減点</td></tr>
+        <tr><th>出来高の収縮 {{ pb.weights.volume }}</th><td>調整中に、直近10日の出来高が50日平均より減っている（0.7倍以下で満点、1.15倍以上で0点）</td></tr>
+        <tr><th>相対力 {{ pb.weights.rs }}</th><td>直近60日の騰落率がTOPIXをどれだけ上回ったか。市場より強かった銘柄の押し目を優先（+12%で満点）</td></tr>
+        <tr><th>反発確認 {{ pb.weights.bounce }}</th><td>調整中に、株価が5日線の上に戻っている（+2.5）、直近3日が上向き（最大+2.5）。「下げ止まり」の目安</td></tr>
         <tr><th>業績・還元 {{ pb.weights.quality }}</th><td>黒字で減益でない、黒字転換、最高益、増配、連続増配、自社株買い など（上限あり）</td></tr>
         <tr><th>地合い<br>{{ pb.market.floor }}〜+{{ pb.weights.market }}</th><td>加点：TOPIX（追い風 +{{ pb.market.topix.good }}／中立 +{{ pb.market.topix.neutral }}）＋日経平均が50日線の上 +{{ pb.market.nikkei.above_ma50 }}。
           <b>減点：TOPIXが75日線の下 {{ pb.market.topix_below_ma75 }}、200日線の下 {{ pb.market.topix_below_ma200 }}、日経平均が50日線の下 {{ pb.market.nikkei_below_ma50 }}</b>。逆風時は全銘柄の総合点が下がります</td></tr>
