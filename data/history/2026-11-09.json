@@ -42,6 +42,46 @@
    "main": 63.7,
    "pb_total": 60.5,
    "close": 3255.0
+  },
+  {
+   "rank": 6,
+   "code": "8037",
+   "name": "カメイ",
+   "main": 63.2,
+   "pb_total": 62.4,
+   "close": 4620.0
+  },
+  {
+   "rank": 7,
+   "code": "3176",
+   "name": "三洋貿易",
+   "main": 62.4,
+   "pb_total": 58.0,
+   "close": 1093.0
+  },
+  {
+   "rank": 8,
+   "code": "4180",
+   "name": "Ａｐｐｉｅｒ　Ｇｒｏｕｐ",
+   "main": 61.9,
+   "pb_total": 57.7,
+   "close": 1450.0
+  },
+  {
+   "rank": 9,
+   "code": "4377",
+   "name": "ワンキャリア",
+   "main": 61.6,
+   "pb_total": 57.2,
+   "close": 2392.0
+  },
+  {
+   "rank": 10,
+   "code": "9506",
+   "name": "東北電力",
+   "main": 61.3,
+   "pb_total": 50.3,
+   "close": 1259.0
   }
  ],
  "ranking": [
