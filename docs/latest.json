@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-10T07:42+09:00",
+ "generated_at": "2026-11-10T11:58+09:00",
  "data_date": "2026-11-09",
  "demo": false,
  "picks": [
@@ -88,8 +88,8 @@
     "total": 34,
     "base": 14,
     "events_pts": 20,
-    "expected": 33.9,
-    "win_rate": 0.5242921895997995,
+    "expected": 34.1,
+    "win_rate": 0.5272742969570018,
     "win_known": true,
     "liq": 0.95,
     "trend": [
@@ -201,8 +201,8 @@
     "total": 48,
     "base": 24,
     "events_pts": 24,
-    "expected": 42.8,
-    "win_rate": 0.5242921895997995,
+    "expected": 43.0,
+    "win_rate": 0.5272742969570018,
     "win_known": true,
     "liq": 0.85,
     "trend": [
@@ -307,8 +307,8 @@
     "total": 24,
     "base": 10,
     "events_pts": 14,
-    "expected": 17.6,
-    "win_rate": 0.5242921895997995,
+    "expected": 17.7,
+    "win_rate": 0.5272742969570018,
     "win_known": true,
     "liq": 0.7,
     "trend": [
@@ -424,8 +424,8 @@
     "total": 40,
     "base": 12,
     "events_pts": 28,
-    "expected": 39.8,
-    "win_rate": 0.5242921895997995,
+    "expected": 40.1,
+    "win_rate": 0.5272742969570018,
     "win_known": true,
     "liq": 0.95,
     "trend": [
@@ -530,8 +530,8 @@
     "total": 52,
     "base": 43,
     "events_pts": 9,
-    "expected": 46.3,
-    "win_rate": 0.5242921895997995,
+    "expected": 46.6,
+    "win_rate": 0.5272742969570018,
     "win_known": true,
     "liq": 0.85,
     "trend": [
@@ -643,8 +643,8 @@
     "total": 26,
     "base": 12,
     "events_pts": 14,
-    "expected": 19.1,
-    "win_rate": 0.5242921895997995,
+    "expected": 19.2,
+    "win_rate": 0.5272742969570018,
     "win_known": true,
     "liq": 0.7,
     "trend": [
@@ -755,8 +755,8 @@
     "total": 38,
     "base": 22,
     "events_pts": 16,
-    "expected": 33.9,
-    "win_rate": 0.5242921895997995,
+    "expected": 34.1,
+    "win_rate": 0.5272742969570018,
     "win_known": true,
     "liq": 0.85,
     "trend": [
@@ -864,8 +864,8 @@
     "total": 31,
     "base": 18,
     "events_pts": 13,
-    "expected": 27.6,
-    "win_rate": 0.5242921895997995,
+    "expected": 27.8,
+    "win_rate": 0.5272742969570018,
     "win_known": true,
     "liq": 0.85,
     "trend": [
@@ -974,8 +974,8 @@
     "total": 33,
     "base": 20,
     "events_pts": 13,
-    "expected": 24.2,
-    "win_rate": 0.5242921895997995,
+    "expected": 24.4,
+    "win_rate": 0.5272742969570018,
     "win_known": true,
     "liq": 0.7,
     "trend": [
@@ -1075,8 +1075,8 @@
     "total": 26,
     "base": 16,
     "events_pts": 10,
-    "expected": 25.9,
-    "win_rate": 0.5242921895997995,
+    "expected": 26.0,
+    "win_rate": 0.5272742969570018,
     "win_known": true,
     "liq": 0.95,
     "trend": [
