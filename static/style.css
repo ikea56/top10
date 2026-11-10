@@ -283,3 +283,10 @@ details.legacy summary { font-size: .82rem; font-weight: 600; color: var(--sub);
 @keyframes newpulse { 50% { filter: brightness(1.12); } }
 @media (prefers-reduced-motion: reduce) { .new-banner { animation: none; } }
 .scores .sc:last-child:nth-child(3n+1) { grid-column: 1 / -1; }
+
+.verdict{border-radius:10px;padding:12px 14px;margin:8px 0;border:1px solid var(--line,#ccc)}
+.verdict ul{margin:6px 0;padding-left:1.2em}
+.verdict.v-good{background:#e8f6ec}.verdict.v-weak{background:#fff6dc}.verdict.v-bad{background:#fdeaea}
+.verdict li.st-good::marker{content:"🟢 "}.verdict li.st-weak::marker{content:"🟡 "}.verdict li.st-bad::marker{content:"🔴 "}
+.validation details{margin:8px 0}.validation summary{font-weight:600}
+@media (prefers-color-scheme:dark){.verdict.v-good{background:#16301f}.verdict.v-weak{background:#3a3216}.verdict.v-bad{background:#3a1c1c}}

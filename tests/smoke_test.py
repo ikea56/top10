@@ -429,6 +429,60 @@ def test_data_fixes():
     print("ok  分割補正・取引時間中の未確定足の除外")
 
 
+def _fake_records(signal, n_dates=120, n=300, seed=1):
+    import numpy as np
+    import pandas as pd
+    from src import validation as V
+    rng = np.random.default_rng(seed)
+    recs = []
+    for d in range(n_dates):
+        idx = [f"{1000 + j}.T" for j in range(n)]
+        s = rng.uniform(0, 100, n)
+        r = signal * (s - 50) / 100 + rng.normal(0, 0.08, n)
+        x = pd.DataFrame({"s": s, "pen": 0.0, "r_1m": r, "rc_1m": r - 0.001}, index=idx)
+        for c in V.COMPONENTS:
+            x[c] = rng.uniform(0, 10, n)
+        top = list(x.sort_values("s", ascending=False).index[:10])
+        recs.append({"date": pd.Timestamp("2020-01-06") + pd.Timedelta(days=7 * d), "regime": ["good", "neutral", "bad"][d % 3],
+                     "bench": {"1m": 0.0}, "x": x, "pb_picks": top, "lg_picks": top, "stop": None, "sector": (5.0, 0.3)})
+    return recs
+
+
+def test_validation():
+    import numpy as np
+    from src import validation as V
+    hz = {"1w": 5, "1m": 20, "3m": 60}
+    # 点数と成績が結びつくデータ → 有効と判定、乱数データ → 有効と判定されない
+    good = V.analyze(_fake_records(0.3), cfg, pd.Timestamp("2022-12-31"), 5, hz)
+    assert good["ok"] and good["verdict"]["level"] in ("good", "weak"), good["verdict"]
+    assert good["ic"]["s"]["mean"] > 0.2 and good["top"]["excess"] > 0 and good["top"]["ci"][0] > 0
+    rows = [b["excess"] for b in good["bands"]["rows"] if b["excess"] is not None]
+    assert rows == sorted(rows), "点数帯が高いほど成績が良いはず"
+    assert good["quantiles"]["spread"] > 0
+    rnd = V.analyze(_fake_records(0.0, seed=7), cfg, pd.Timestamp("2022-12-31"), 5, hz)
+    assert rnd["verdict"]["level"] != "good", rnd["verdict"]
+    assert abs(rnd["ic"]["s"]["mean"]) < 0.05
+    # 同じ入力なら同じ結果（信頼区間の乱数固定）
+    again = V.analyze(_fake_records(0.0, seed=7), cfg, pd.Timestamp("2022-12-31"), 5, hz)
+    assert again["top"]["ci"] == rnd["top"]["ci"]
+    # 補助関数
+    a = np.arange(10.0)
+    assert len(V._indep(list(a), 4)) == 3 and V.tstat(np.array([1.0] * 10)) is None
+    assert V.spearman(np.arange(50.0), np.arange(50.0)) > 0.99 and V.spearman(np.arange(5.0), np.arange(5.0)) is None
+    r = [{"pb_picks": ["a", "b"]}, {"pb_picks": ["a", "c"]}]
+    assert abs(V.turnover(r, "pb_picks", 2)["retention"] - 0.5) < 1e-9
+    # 撤退ラインのシミュレーション：下落した銘柄だけ早く売られる
+    c = pd.DataFrame({"A": [100, 99, 90, 80, 70, 60], "B": [100, 101, 102, 103, 104, 105]}, index=range(6)).to_numpy(float)
+    ma = pd.Series({"A": 95.0, "B": 95.0}); atr = pd.Series({"A": 2.0, "B": 2.0})
+    st = backtest._simulate_stop(c, pd.Index(["A", "B"]), 0, 4, ["A", "B"], ma, ma, atr, cfg["pullback"]["atr"], 0.0,
+                                 pd.Series({"A": 70 / 99 - 1, "B": 104 / 101 - 1}))
+    assert st["hit"] == [1.0, 0.0] and st["st"][0] > st["ns"][0] and st["st"][1] == st["ns"][1], st
+    # 画面用の表に禁止語が無い
+    txt = json.dumps(good["tables"], ensure_ascii=False) + json.dumps(good["verdict"], ensure_ascii=False)
+    assert not any(w in txt for w in FORBIDDEN)
+    print("ok  有効性の検証（有意な点数と乱数の区別・信頼区間の再現性・撤退シミュレーション・回転率）")
+
+
 def test_end_to_end():
     for cmd in (["-m", "src.backtest", "--demo"], ["-m", "src.main", "--demo"]):
         res = subprocess.run([sys.executable, *cmd], cwd=ROOT, capture_output=True, text=True)
@@ -450,11 +504,12 @@ def test_end_to_end():
     summ = json.loads((ROOT / "data" / "demo" / "backtest_summary.json").read_text(encoding="utf-8"))
     assert set(summ["periods"]) == {"1y", "3y", "5y", "10y"} and all(summ["periods"].values())
     assert "periods_legacy" in summ
+    assert summ["validation"]["ok"] and len(summ["validation"]["tables"]) >= 10
     for k in ("win", "avg_win", "avg_loss", "pf", "max_dd", "sharpe", "ann_ret"):
         assert k in summ["periods"]["5y"], k
     html = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
     for word in ("【強み】", "【押し目状況】", "【注意事項】", "押し目スコア", "イベント点", "なぜ選ばれた",
-                 "補助指標", "期間別の成績", "excluded_events.csv", "推奨撤退ライン", "リスク幅", "ATR"):
+                 "補助指標", "期間別の成績", "excluded_events.csv", "推奨撤退ライン", "リスク幅", "ATR", "有効性の検証", "点数帯ごとの成績"):
         assert word in html, word
     # ㉒ 保有銘柄：暗号化ファイル・名前一覧・前回比較・3ブロック
     from src import holdings as H
@@ -488,6 +543,6 @@ def test_end_to_end():
 if __name__ == "__main__":
     for fn in (test_config_and_weights, test_momentum_points, test_no_lookahead, test_events,
                test_dividend_and_exclusion, test_expected_and_metrics, test_text, test_pullback, test_tdnet, test_accuracy_21, test_holdings,
-               test_excluded_csv, test_data_fixes, test_end_to_end):
+               test_excluded_csv, test_data_fixes, test_validation, test_end_to_end):
         fn()
     print("\nALL OK")

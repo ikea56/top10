@@ -79,6 +79,14 @@ def snapshot(f: Features, row: int) -> pd.DataFrame:
     return pd.DataFrame({k: df.iloc[row] for k, df in f.items()})
 
 
+def atr_frame(panel: Panel, period: int = 14) -> pd.DataFrame:
+    """ATR（平均的な1日の値幅・円）。ライブとバックテストで同じ式を使う。"""
+    h, lo, c = panel["high"], panel["low"], panel["close"]
+    pc = c.shift(1)
+    tr = np.maximum(np.maximum((h - lo).to_numpy(), (h - pc).abs().to_numpy()), (lo - pc).abs().to_numpy())
+    return pd.DataFrame(tr, index=c.index, columns=c.columns).ewm(alpha=1 / period, adjust=False, min_periods=period).mean()
+
+
 def add_live_extras(f: Features, panel: Panel | None = None, atr_period: int = 14) -> Features:
     """毎朝のランキング専用の指標（バックテストでは使わない＝メモリ節約）。"""
     c, r1 = f["close"], f["ret1d"]
@@ -86,9 +94,6 @@ def add_live_extras(f: Features, panel: Panel | None = None, atr_period: int = 1
     f["vol60"] = r1.rolling(60, min_periods=40).std()
     f["max_ret60"] = r1.rolling(60, min_periods=40).max()
     f["range10"] = c.rolling(10, min_periods=10).max() / c.rolling(10, min_periods=10).min() - 1
-    if panel is not None:                                    # ATR（平均的な1日の値幅・円）
-        h, lo, pc = panel["high"], panel["low"], c.shift(1)
-        tr = np.maximum(np.maximum((h - lo).to_numpy(), (h - pc).abs().to_numpy()), (lo - pc).abs().to_numpy())
-        f["atr"] = pd.DataFrame(tr, index=c.index, columns=c.columns).ewm(alpha=1 / atr_period, adjust=False,
-                                                                           min_periods=atr_period).mean()
+    if panel is not None:
+        f["atr"] = atr_frame(panel, atr_period)
     return {k: (v.astype("float32") if v.dtypes.iloc[0].kind == "f" else v) for k, v in f.items()}

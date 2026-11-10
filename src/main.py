@@ -444,6 +444,7 @@ def run(demo: bool) -> None:
         "data_date_iso": data_date.strftime("%Y-%m-%d"),
         "market": market, "nikkei_ok": nikkei_ok, "cards": cards,
         "bt": backtest.build_table(summary, forward, cfg),
+        "val": (summary or {}).get("validation"),
         "pt": backtest.build_period_table(summary, "periods"), "pt_legacy": backtest.build_period_table(summary, "periods_legacy"),
         "sectors": rankings.rank_sectors(snap), "themes": rankings.rank_themes(snap, themes),
         "n_universe": len(universe), "n_scanned": len(snap), "n_fetched": fetched,

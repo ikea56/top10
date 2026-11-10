@@ -18,9 +18,9 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from . import pullback, scoring
+from . import pullback, scoring, validation
 from .config import JST, ROOT, Config, load_config
-from .features import Panel, compute_features, snapshot
+from .features import Panel, atr_frame, compute_features, snapshot
 from .log import get_logger
 from .market import above_ma50_series, regime_series
 
@@ -158,6 +158,43 @@ def win_rate_lookup(summary: dict | None, scaled: float, es: dict) -> tuple[floa
 
 
 # ---------------------------------------------------------------- 1. 過去再現
+def _simulate_stop(carr: np.ndarray, cols: pd.Index, i: int, h: int, picks: list[str], ma50: pd.Series, ma200: pd.Series,
+                   atr: pd.Series, a: dict, cost: float, r_open: pd.Series) -> dict | None:
+    """撤退ライン（移動平均線−ATR）を、終値が割った日の終値で売る想定で、保有期間の成績を再現する。"""
+    if i + h + 1 >= carr.shape[0] or not picks:
+        return None
+    ns, st, hit = [], [], []
+    for t in picks:
+        j = cols.get_loc(t)
+        c0, at = carr[i, j], float(atr.get(t, np.nan))
+        if not (np.isfinite(c0) and np.isfinite(at) and at > 0):
+            continue
+        m5, m2 = float(ma50.get(t, np.nan)), float(ma200.get(t, np.nan))
+        if m5 == m5 and m5 < c0:
+            line = m5 - at * a["multiplier"]
+        elif m2 == m2 and m2 < c0:
+            line = m2 - at * a["multiplier"]
+        else:
+            line = c0 - at * a["fallback_multiplier"]
+        base = r_open.get(t, np.nan)
+        if not np.isfinite(base):
+            continue
+        path = carr[i + 1:i + h + 1, j]
+        below = np.where(path < line)[0]
+        if below.size:
+            ex = path[below[0]]
+            # 買値は翌日始値。始値は carr に無いので、売却値 ÷ 終値基準の比で近似せず、買値＝(1+base+cost)から復元
+            buy = carr[i + h, j] / (1 + base + cost)
+            ns.append(base)
+            st.append(ex / buy - 1 - cost)
+            hit.append(1.0)
+        else:
+            ns.append(base)
+            st.append(base)
+            hit.append(0.0)
+    return {"ns": ns, "st": st, "hit": hit} if ns else None
+
+
 def run_replay(panel: Panel, bench: dict[str, pd.DataFrame], sectors: pd.Series, cfg: Config) -> dict[str, Any]:
     bt, sc, flt = cfg["backtest"], cfg["scoring"], cfg["filters"]
     horizons: dict[str, int] = bt["horizons"]
@@ -178,6 +215,11 @@ def run_replay(panel: Panel, bench: dict[str, pd.DataFrame], sectors: pd.Series,
     entry = o.shift(-1).where(lambda x: x > 0)
     fwd = {k: (c.shift(-h) / entry - 1 - cost).iloc[idx] for k, h in horizons.items()}
     del entry
+    cfwd = {k: (c.shift(-h) / c.shift(-1) - 1 - cost).iloc[idx] for k, h in horizons.items()}   # 翌日終値で買う場合
+    atr_df = atr_frame(panel, int(cfg["pullback"]["atr"]["period"]))
+    sm = cfg["pullback"]["atr"]
+    vh = int(horizons[cfg["validation"]["horizon"]])
+    carr = c.to_numpy(dtype=float)
     bentry = topix["open"].shift(-1)
     bfwd = {k: (topix["close"].shift(-h) / bentry - 1 - cost).iloc[idx] for k, h in horizons.items()}
 
@@ -189,16 +231,29 @@ def run_replay(panel: Panel, bench: dict[str, pd.DataFrame], sectors: pd.Series,
             continue
         tech = scoring.score_technical(s, regime.iloc[i], scoring.sector_points(s["ret20d"], sectors, sc), sc)
         scaled = tech["tech_base"] / tmax * 100
-        pb = pullback.score_technical(s, regime.iloc[i], bool(nikkei.iloc[i]), cfg, bool(below200.iloc[i]))["pb_tech_scaled"]
+        pbr = pullback.score_technical(s, regime.iloc[i], bool(nikkei.iloc[i]), cfg, bool(below200.iloc[i]))
+        pb = pbr["pb_tech_scaled"]
         pb_order = pd.DataFrame({"s": pb, "vr": s["vol_cont"]}).query("s > 0").sort_values(["s", "vr"], ascending=[False, True])
         order = pd.DataFrame({"s": scaled, "vr": s["vol_ratio"]}).sort_values(["s", "vr"], ascending=False)
         pick = {"pb_top10": pb_order.index[:top_n], "top10": order.index[:top_n],
                 "tech80": scaled.index[scaled >= 80],
                 "hi252": s.index[s["hi252"].astype(bool)]}
+        x = pbr[list(validation.COMPONENTS)].copy()
+        x["pen"] = pbr["pb_penalty"]
+        x["s"] = pb
+        for k in horizons:
+            x[f"r_{k}"] = fwd[k].iloc[pos].reindex(x.index)
+            x[f"rc_{k}"] = cfwd[k].iloc[pos].reindex(x.index)
+        pb_picks = list(pb_order.index[:top_n])
+        stop = _simulate_stop(carr, c.columns, i, vh, pb_picks, f["ma50"].iloc[i], f["ma200"].iloc[i], atr_df.iloc[i],
+                              sm, cost, fwd[cfg["validation"]["horizon"]].iloc[pos])
+        sec = sectors.reindex(pb_picks).fillna("不明")
+        sect = (float(sec.nunique()), float(sec.value_counts().iloc[0] / len(sec))) if len(sec) else None
         groups = {g: {k: fwd[k].iloc[pos].reindex(ix).to_numpy(dtype=float) for k in horizons} for g, ix in pick.items()}
         records.append({"date": c.index[i], "regime": regime.iloc[i],
                         "bench": {k: float(bfwd[k].iloc[pos]) for k in horizons},
-                        "groups": groups,
+                        "groups": groups, "x": x, "pb_picks": pb_picks, "lg_picks": list(order.index[:top_n]),
+                        "stop": stop, "sector": sect,
                         "band": (scaled.to_numpy(dtype=float),
                                  fwd[cfg["expected_score"]["winrate_horizon"]].iloc[pos].reindex(scaled.index).to_numpy(dtype=float))})
     if not records:
@@ -218,6 +273,13 @@ def run_replay(panel: Panel, bench: dict[str, pd.DataFrame], sectors: pd.Series,
     }
     for g in GROUPS:
         summary[g] = group_stats(table_recs, g, horizons)
+    try:
+        summary["validation"] = validation.analyze(records, cfg, end, int(bt["step_days"]), horizons)
+    except Exception as e:  # 検証部分の失敗で、既存の成績表まで失わない
+        log.warning("有効性の検証に失敗しました: %s", e)
+        summary["validation"] = {"ok": False, "reason": f"検証の計算に失敗しました（{e}）"}
+    for r in records:           # メモリ解放
+        r.pop("x", None)
     return summary
 
 

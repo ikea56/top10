@@ -288,6 +288,35 @@
   </section>
   {% endif %}
 
+  {% if val %}
+  <section class="card validation" id="validation">
+    <h2>🔬 有効性の検証（売買判断に使えるか）</h2>
+    {% if val.ok %}
+    <div class="verdict v-{{ val.verdict.level }}">
+      <b>{% if val.verdict.level == 'good' %}🟢{% elif val.verdict.level == 'weak' %}🟡{% else %}🔴{% endif %} {{ val.verdict.headline }}</b>
+      <ul>{% for l in val.verdict.lines %}<li class="st-{{ l.status }}">{{ l.text }}</li>{% endfor %}</ul>
+      <p>{{ val.verdict.use }}</p>
+    </div>
+    <p class="hint">検証期間：{{ val.period.start }} 〜 {{ val.period.end }}（{{ val.n_dates }}週分）。点数は株価・出来高で決まる部分のみ。</p>
+    {% for tb in val.tables %}
+    <details{% if loop.index <= 3 %} open{% endif %}>
+      <summary>{{ tb.title }}</summary>
+      <div class="table-wrap"><table>
+        <thead><tr>{% for c in tb.cols %}<th>{{ c }}</th>{% endfor %}</tr></thead>
+        <tbody>{% for row in tb.rows %}<tr>{% for c in row %}<{{ 'th scope="row"' if loop.first else 'td' }}>{{ c }}</{{ 'th' if loop.first else 'td' }}>{% endfor %}</tr>{% endfor %}</tbody>
+      </table></div>
+      <p class="hint">{{ tb.note }}</p>
+    </details>
+    {% endfor %}
+    <details><summary>この検証の限界</summary>
+      <ul class="caveats">{% for c in bt.caveats %}<li>{{ c }}</li>{% endfor %}</ul>
+    </details>
+    {% else %}
+    <p class="hint">検証結果はまだありません（{{ val.reason or '週次のバックテストが未実行です' }}）。</p>
+    {% endif %}
+  </section>
+  {% endif %}
+
   <!-- 点数の見方 -->
   <section class="card" id="guide">
     <h2>📖 点数の見方</h2>
