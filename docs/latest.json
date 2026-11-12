@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-11-12T11:34+09:00",
- "data_date": "2026-11-11",
+ "generated_at": "2026-11-12T19:54+09:00",
+ "data_date": "2026-11-12",
  "demo": false,
  "stance": {
   "key": "neutral",
@@ -11,8 +11,8 @@
    "rank": 1,
    "code": "9824",
    "name": "泉州電業",
-   "main": 73.7,
-   "pb_total": 65.0,
+   "main": 76.3,
+   "pb_total": 67.6,
    "td_score": 9,
    "penalty": 0,
    "parts": {
@@ -21,15 +21,15 @@
      15
     ],
     "drawdown": [
-     18.1,
+     19.7,
      20
     ],
     "ma50": [
-     11.9,
+     10.0,
      12
     ],
     "volume": [
-     0.0,
+     2.9,
      8
     ],
     "strength": [
@@ -46,7 +46,7 @@
     ]
    },
    "label": "押し目良好",
-   "close": 7830.0,
+   "close": 7600.0,
    "strengths": [
     {
      "label": "最高益更新（今期予想EPSが過去最高）",
@@ -71,9 +71,9 @@
    ],
    "status": [
     "長期上昇トレンド（50日線＞200日線）",
-    "高値から-8%（52週高値比）",
-    "50日線付近（乖離+0.2%）",
-    "相対力が強い（直近60日でTOPIXを+21.8%上回る）",
+    "高値から-10%（52週高値比）",
+    "50日線付近（乖離-2.9%）",
+    "相対力が強い（直近60日でTOPIXを+19.9%上回る）",
     "短期の下げ止まり（株価が5日線の上）"
    ],
    "cautions": [
@@ -86,18 +86,18 @@
      "level": "low"
     }
    ],
-   "explain": "高値から-8%まで調整。50日線付近で推移。最高益更新・上方修正・増配など業績・株主還元も良好。長期の上昇トレンドは継続。",
+   "explain": "高値から-10%まで調整。50日線付近で推移。出来高は縮小。最高益更新・上方修正・増配など業績・株主還元も良好。長期の上昇トレンドは継続。",
    "legacy": {
-    "rank": 3,
-    "total": 43,
-    "base": 25,
+    "rank": 4,
+    "total": 39,
+    "base": 21,
     "events_pts": 18,
-    "expected": 42.8,
-    "win_rate": 0.5234531233629278,
+    "expected": 38.8,
+    "win_rate": 0.5234188516973087,
     "win_known": true,
     "liq": 0.95,
     "trend": [
-     4,
+     0,
      50
     ],
     "demand": [
@@ -114,12 +114,12 @@
     ]
    },
    "rank_change": {
-    "kind": "new",
-    "prev": null,
-    "delta": null,
-    "main_delta": null
+    "kind": "same",
+    "prev": 1,
+    "delta": 0,
+    "main_delta": 2.5999999999999943
    },
-   "main_base": 73.7,
+   "main_base": 76.3,
    "lead": null,
    "lead_pts": 0.0
   },
@@ -127,21 +127,21 @@
    "rank": 2,
    "code": "4373",
    "name": "シンプレクス・ホールディングス",
-   "main": 72.9,
-   "pb_total": 65.0,
+   "main": 74.5,
+   "pb_total": 66.6,
    "td_score": 6,
    "penalty": 0,
    "parts": {
     "trend": [
-     14.8,
+     14.9,
      15
     ],
     "drawdown": [
-     17.4,
+     18.3,
      20
     ],
     "ma50": [
-     11.3,
+     11.9,
      12
     ],
     "volume": [
@@ -149,7 +149,7 @@
      8
     ],
     "strength": [
-     14.1,
+     14.3,
      15
     ],
     "quality": [
@@ -162,7 +162,7 @@
     ]
    },
    "label": "押し目良好",
-   "close": 1195.0,
+   "close": 1181.0,
    "strengths": [
     {
      "label": "最高益更新（今期予想EPSが過去最高）",
@@ -187,9 +187,9 @@
    ],
    "status": [
     "長期上昇トレンド（50日線＞200日線）",
-    "高値から-7%（52週高値比）",
-    "50日線付近（乖離+1.3%）",
-    "相対力が強い（直近60日でTOPIXを+8.9%上回る）",
+    "高値から-8%（52週高値比）",
+    "50日線付近（乖離+0.2%）",
+    "相対力が強い（直近60日でTOPIXを+9.5%上回る）",
     "短期の下げ止まり（株価が5日線の上）"
    ],
    "cautions": [
@@ -202,14 +202,14 @@
      "level": "low"
     }
    ],
-   "explain": "高値から-7%まで調整。50日線付近で推移。出来高は縮小。最高益更新・上方修正など業績・株主還元も良好。長期の上昇トレンドは継続。",
+   "explain": "高値から-8%まで調整。50日線付近で推移。出来高は縮小。最高益更新・上方修正など業績・株主還元も良好。長期の上昇トレンドは継続。",
    "legacy": {
     "rank": 5,
     "total": 38,
     "base": 18,
     "events_pts": 20,
     "expected": 37.8,
-    "win_rate": 0.5234531233629278,
+    "win_rate": 0.5234188516973087,
     "win_known": true,
     "liq": 0.95,
     "trend": [
@@ -230,12 +230,12 @@
     ]
    },
    "rank_change": {
-    "kind": "down",
-    "prev": 1,
-    "delta": -1,
-    "main_delta": -1.5
+    "kind": "same",
+    "prev": 2,
+    "delta": 0,
+    "main_delta": 1.5999999999999943
    },
-   "main_base": 71.0,
+   "main_base": 72.6,
    "lead": {
     "key": "tech_service",
     "group": "情報・ソフトウェア",
@@ -264,10 +264,136 @@
   },
   {
    "rank": 3,
+   "code": "9507",
+   "name": "四国電力",
+   "main": 70.8,
+   "pb_total": 63.7,
+   "td_score": 6,
+   "penalty": 0,
+   "parts": {
+    "trend": [
+     15.0,
+     15
+    ],
+    "drawdown": [
+     19.9,
+     20
+    ],
+    "ma50": [
+     8.7,
+     12
+    ],
+    "volume": [
+     6.1,
+     8
+    ],
+    "strength": [
+     15.0,
+     15
+    ],
+    "quality": [
+     14.0,
+     20
+    ],
+    "market": [
+     -15.0,
+     10
+    ]
+   },
+   "label": "押し目良好",
+   "close": 2020.5,
+   "strengths": [
+    {
+     "label": "上方修正（TDnet 10/30）",
+     "src": "TDnet"
+    },
+    {
+     "label": "増配（+5%）",
+     "src": "予想"
+    },
+    {
+     "label": "自社株買い（時価総額の0.8%）（TDnet 07/31）",
+     "src": "TDnet"
+    }
+   ],
+   "status": [
+    "長期上昇トレンド（50日線＞200日線）",
+    "高値から-10%（52週高値比）",
+    "50日線付近（乖離-4.0%）",
+    "出来高縮小（直近10日が50日平均の0.82倍）",
+    "相対力が強い（直近60日でTOPIXを+19.7%上回る）",
+    "短期の下げ止まり（株価が5日線の上）"
+   ],
+   "cautions": [
+    {
+     "label": "市場全体が下落基調（地合い減点で総合点が下がっています）",
+     "level": "mid"
+    },
+    {
+     "label": "強みの一部は会社・アナリストの予想に基づく（外れることがあります）",
+     "level": "low"
+    }
+   ],
+   "explain": "高値から-10%まで調整。50日線付近で推移。出来高は縮小。上方修正・増配・自社株買いなど業績・株主還元も良好。長期の上昇トレンドは継続。",
+   "legacy": {
+    "rank": 8,
+    "total": 22,
+    "base": 11,
+    "events_pts": 11,
+    "expected": 21.9,
+    "win_rate": 0.5234188516973087,
+    "win_known": true,
+    "liq": 0.95,
+    "trend": [
+     0,
+     50
+    ],
+    "demand": [
+     4,
+     25
+    ],
+    "earnings": [
+     3,
+     15
+    ],
+    "market": [
+     4,
+     10
+    ]
+   },
+   "rank_change": {
+    "kind": "up",
+    "prev": 8,
+    "delta": 5,
+    "main_delta": 1.8999999999999915
+   },
+   "main_base": 70.1,
+   "lead": {
+    "key": "utility",
+    "group": "電力・ガス",
+    "score": 1.5,
+    "items": [
+     {
+      "label": "WTI原油（燃料コスト）",
+      "mark": "✅",
+      "state": "good",
+      "text": "WTI原油（燃料コスト）下落（-0.9%）"
+     }
+    ],
+    "verdict": "flat",
+    "headline": "電力・ガスへの影響は小さめ",
+    "icon": "🟡",
+    "available": 1,
+    "total": 1
+   },
+   "lead_pts": 0.8
+  },
+  {
+   "rank": 4,
    "code": "6638",
    "name": "ミマキエンジニアリング",
-   "main": 71.4,
-   "pb_total": 58.4,
+   "main": 70.5,
+   "pb_total": 58.1,
    "td_score": 11,
    "penalty": 0,
    "parts": {
@@ -276,11 +402,11 @@
      15
     ],
     "drawdown": [
-     16.6,
+     16.5,
      20
     ],
     "ma50": [
-     10.8,
+     10.6,
      12
     ],
     "volume": [
@@ -301,7 +427,7 @@
     ]
    },
    "label": "押し目候補",
-   "close": 2092.0,
+   "close": 2089.0,
    "strengths": [
     {
      "label": "最高益更新（今期予想EPSが過去最高）",
@@ -323,8 +449,8 @@
    "status": [
     "長期上昇トレンド（50日線＞200日線）",
     "高値から-14%（52週高値比）",
-    "50日線付近（乖離-1.8%）",
-    "相対力が強い（直近60日でTOPIXを+15.7%上回る）",
+    "50日線付近（乖離-2.0%）",
+    "相対力が強い（直近60日でTOPIXを+14.5%上回る）",
     "短期の下げ止まり（株価が5日線の上）"
    ],
    "cautions": [
@@ -344,7 +470,7 @@
     "base": 11,
     "events_pts": 9,
     "expected": 17.8,
-    "win_rate": 0.5234531233629278,
+    "win_rate": 0.5234188516973087,
     "win_known": true,
     "liq": 0.85,
     "trend": [
@@ -365,16 +491,16 @@
     ]
    },
    "rank_change": {
-    "kind": "new",
-    "prev": null,
-    "delta": null,
-    "main_delta": null
+    "kind": "down",
+    "prev": 3,
+    "delta": -1,
+    "main_delta": -0.9000000000000057
    },
-   "main_base": 69.4,
+   "main_base": 69.1,
    "lead": {
     "key": "electronics",
     "group": "電機・精密・機械",
-    "score": 3.9,
+    "score": 2.7,
     "items": [
      {
       "label": "SOX指数",
@@ -390,9 +516,9 @@
      },
      {
       "label": "ドル円",
-      "mark": "✅",
-      "state": "good",
-      "text": "ドル円上昇（+0.5%）"
+      "mark": "➖",
+      "state": "flat",
+      "text": "ドル円横ばい（-0.2%）"
      }
     ],
     "verdict": "good",
@@ -401,14 +527,14 @@
     "available": 3,
     "total": 3
    },
-   "lead_pts": 2.0
+   "lead_pts": 1.3
   },
   {
-   "rank": 4,
+   "rank": 5,
    "code": "7189",
    "name": "西日本フィナンシャルホールディングス",
-   "main": 70.6,
-   "pb_total": 54.1,
+   "main": 69.5,
+   "pb_total": 53.0,
    "td_score": 16,
    "penalty": 0,
    "parts": {
@@ -417,11 +543,11 @@
      15
     ],
     "drawdown": [
-     17.7,
+     19.0,
      20
     ],
     "ma50": [
-     11.7,
+     11.2,
      12
     ],
     "volume": [
@@ -429,7 +555,7 @@
      8
     ],
     "strength": [
-     13.7,
+     11.9,
      15
     ],
     "quality": [
@@ -441,8 +567,8 @@
      10
     ]
    },
-   "label": "押し目良好",
-   "close": 4719.0,
+   "label": "押し目候補",
+   "close": 4633.0,
    "strengths": [
     {
      "label": "最高益更新（今期予想EPSが過去最高）",
@@ -471,9 +597,9 @@
    ],
    "status": [
     "長期上昇トレンド（50日線＞200日線）",
-    "高値から-7%（52週高値比）",
-    "50日線付近（乖離+0.5%）",
-    "相対力が強い（直近60日でTOPIXを+7.3%上回る）",
+    "高値から-9%（52週高値比）",
+    "50日線付近（乖離-1.3%）",
+    "相対力が強い（直近60日でTOPIXを+3.1%上回る）",
     "短期の下げ止まり（株価が5日線の上）"
    ],
    "cautions": [
@@ -490,22 +616,22 @@
      "level": "low"
     }
    ],
-   "explain": "高値から-7%まで調整。50日線付近で推移。最高益更新・上方修正・増配など業績・株主還元も良好。長期の上昇トレンドは継続。",
+   "explain": "高値から-9%まで調整。50日線付近で推移。最高益更新・上方修正・増配など業績・株主還元も良好。長期の上昇トレンドは継続。",
    "legacy": {
-    "rank": 2,
-    "total": 53,
-    "base": 40,
+    "rank": 6,
+    "total": 38,
+    "base": 25,
     "events_pts": 13,
-    "expected": 50.2,
-    "win_rate": 0.49855096741770666,
+    "expected": 37.8,
+    "win_rate": 0.5234188516973087,
     "win_known": true,
     "liq": 0.95,
     "trend": [
-     24,
+     16,
      50
     ],
     "demand": [
-     13,
+     4,
      25
     ],
     "earnings": [
@@ -513,17 +639,17 @@
      15
     ],
     "market": [
-     0,
+     2,
      10
     ]
    },
    "rank_change": {
-    "kind": "new",
-    "prev": null,
-    "delta": null,
-    "main_delta": null
+    "kind": "down",
+    "prev": 4,
+    "delta": -1,
+    "main_delta": -1.0999999999999943
    },
-   "main_base": 70.1,
+   "main_base": 69.0,
    "lead": {
     "key": "bank",
     "group": "銀行",
@@ -549,689 +675,13 @@
     "total": 2
    },
    "lead_pts": 0.5
-  },
-  {
-   "rank": 5,
-   "code": "6098",
-   "name": "リクルートホールディングス",
-   "main": 69.9,
-   "pb_total": 63.0,
-   "td_score": 5,
-   "penalty": 0,
-   "parts": {
-    "trend": [
-     15.0,
-     15
-    ],
-    "drawdown": [
-     18.2,
-     20
-    ],
-    "ma50": [
-     11.2,
-     12
-    ],
-    "volume": [
-     0.0,
-     8
-    ],
-    "strength": [
-     14.6,
-     15
-    ],
-    "quality": [
-     19.0,
-     20
-    ],
-    "market": [
-     -15.0,
-     10
-    ]
-   },
-   "label": "押し目候補",
-   "close": 17705.0,
-   "strengths": [
-    {
-     "label": "最高益更新（今期予想EPSが過去最高）",
-     "src": "予想"
-    },
-    {
-     "label": "増配（+2%）",
-     "src": "予想"
-    },
-    {
-     "label": "4年連続増配",
-     "src": "実績"
-    },
-    {
-     "label": "自社株買い（時価総額の3.3%）（TDnet 10/14）",
-     "src": "TDnet"
-    }
-   ],
-   "status": [
-    "長期上昇トレンド（50日線＞200日線）",
-    "高値から-8%（52週高値比）",
-    "50日線付近（乖離+1.7%）",
-    "相対力が強い（直近60日でTOPIXを+10.5%上回る）",
-    "短期の下げ止まり（株価が5日線の上）"
-   ],
-   "cautions": [
-    {
-     "label": "市場全体が下落基調（地合い減点で総合点が下がっています）",
-     "level": "mid"
-    },
-    {
-     "label": "強みの一部は会社・アナリストの予想に基づく（外れることがあります）",
-     "level": "low"
-    }
-   ],
-   "explain": "高値から-8%まで調整。50日線付近で推移。最高益更新・増配・自社株買いなど業績・株主還元も良好。長期の上昇トレンドは継続。",
-   "legacy": {
-    "rank": 4,
-    "total": 38,
-    "base": 26,
-    "events_pts": 12,
-    "expected": 39.8,
-    "win_rate": 0.5234531233629278,
-    "win_known": true,
-    "liq": 1.0,
-    "trend": [
-     5,
-     50
-    ],
-    "demand": [
-     4,
-     25
-    ],
-    "earnings": [
-     15,
-     15
-    ],
-    "market": [
-     2,
-     10
-    ]
-   },
-   "rank_change": {
-    "kind": "new",
-    "prev": null,
-    "delta": null,
-    "main_delta": null
-   },
-   "main_base": 68.0,
-   "lead": {
-    "key": "tech_service",
-    "group": "情報・ソフトウェア",
-    "score": 3.9,
-    "items": [
-     {
-      "label": "NASDAQ",
-      "mark": "✅",
-      "state": "good",
-      "text": "NASDAQ上昇（+1.6%）"
-     },
-     {
-      "label": "IGV（米ソフトウェア）",
-      "mark": "✅",
-      "state": "good",
-      "text": "IGV（米ソフトウェア）上昇（+1.9%）"
-     }
-    ],
-    "verdict": "good",
-    "headline": "情報・ソフトウェアに追い風",
-    "icon": "🟢",
-    "available": 2,
-    "total": 2
-   },
-   "lead_pts": 2.0
   },
   {
    "rank": 6,
-   "code": "4674",
-   "name": "クレスコ",
-   "main": 69.6,
-   "pb_total": 65.7,
-   "td_score": 2,
-   "penalty": 0,
-   "parts": {
-    "trend": [
-     15.0,
-     15
-    ],
-    "drawdown": [
-     19.5,
-     20
-    ],
-    "ma50": [
-     11.3,
-     12
-    ],
-    "volume": [
-     4.8,
-     8
-    ],
-    "strength": [
-     15.0,
-     15
-    ],
-    "quality": [
-     15.0,
-     20
-    ],
-    "market": [
-     -15.0,
-     10
-    ]
-   },
-   "label": "押し目候補",
-   "close": 1959.0,
-   "strengths": [
-    {
-     "label": "最高益更新（直近12か月の営業利益が過去最高）",
-     "src": "実績"
-    },
-    {
-     "label": "6年連続増配",
-     "src": "実績"
-    },
-    {
-     "label": "自社株買いを実施（時価総額の2.0%）",
-     "src": "実績"
-    },
-    {
-     "label": "増配（TDnet 07/31）",
-     "src": "TDnet"
-    }
-   ],
-   "status": [
-    "長期上昇トレンド（50日線＞200日線）",
-    "高値から-9%（52週高値比）",
-    "50日線付近（乖離+1.3%）",
-    "相対力が強い（直近60日でTOPIXを+12.4%上回る）",
-    "短期の下げ止まり（株価が5日線の上）"
-   ],
-   "cautions": [
-    {
-     "label": "市場全体が下落基調（地合い減点で総合点が下がっています）",
-     "level": "mid"
-    }
-   ],
-   "explain": "高値から-9%まで調整。50日線付近で推移。出来高は縮小。最高益更新・増配など業績・株主還元も良好。長期の上昇トレンドは継続。",
-   "legacy": {
-    "rank": 10,
-    "total": 24,
-    "base": 10,
-    "events_pts": 14,
-    "expected": 17.6,
-    "win_rate": 0.5234531233629278,
-    "win_known": true,
-    "liq": 0.7,
-    "trend": [
-     5,
-     50
-    ],
-    "demand": [
-     0,
-     25
-    ],
-    "earnings": [
-     3,
-     15
-    ],
-    "market": [
-     2,
-     10
-    ]
-   },
-   "rank_change": {
-    "kind": "same",
-    "prev": 6,
-    "delta": 0,
-    "main_delta": 1.0999999999999943
-   },
-   "main_base": 67.7,
-   "lead": {
-    "key": "tech_service",
-    "group": "情報・ソフトウェア",
-    "score": 3.9,
-    "items": [
-     {
-      "label": "NASDAQ",
-      "mark": "✅",
-      "state": "good",
-      "text": "NASDAQ上昇（+1.6%）"
-     },
-     {
-      "label": "IGV（米ソフトウェア）",
-      "mark": "✅",
-      "state": "good",
-      "text": "IGV（米ソフトウェア）上昇（+1.9%）"
-     }
-    ],
-    "verdict": "good",
-    "headline": "情報・ソフトウェアに追い風",
-    "icon": "🟢",
-    "available": 2,
-    "total": 2
-   },
-   "lead_pts": 2.0
-  },
-  {
-   "rank": 7,
-   "code": "7337",
-   "name": "ひろぎんホールディングス",
-   "main": 69.0,
-   "pb_total": 57.5,
-   "td_score": 11,
-   "penalty": 0,
-   "parts": {
-    "trend": [
-     15.0,
-     15
-    ],
-    "drawdown": [
-     19.1,
-     20
-    ],
-    "ma50": [
-     10.3,
-     12
-    ],
-    "volume": [
-     1.2,
-     8
-    ],
-    "strength": [
-     11.9,
-     15
-    ],
-    "quality": [
-     15.0,
-     20
-    ],
-    "market": [
-     -15.0,
-     10
-    ]
-   },
-   "label": "押し目候補",
-   "close": 2228.0,
-   "strengths": [
-    {
-     "label": "最高益更新（今期予想EPSが過去最高）",
-     "src": "予想"
-    },
-    {
-     "label": "増配（TDnet 11/10）",
-     "src": "TDnet"
-    },
-    {
-     "label": "4年連続増配",
-     "src": "実績"
-    },
-    {
-     "label": "自社株買いを実施（時価総額の0.8%）",
-     "src": "実績"
-    },
-    {
-     "label": "上方修正（TDnet 11/10）",
-     "src": "TDnet"
-    }
-   ],
-   "status": [
-    "長期上昇トレンド（50日線＞200日線）",
-    "高値から-9%（52週高値比）",
-    "50日線付近（乖離-2.5%）",
-    "相対力が強い（直近60日でTOPIXを+3.2%上回る）",
-    "短期の下げ止まり（株価が5日線の上）"
-   ],
-   "cautions": [
-    {
-     "label": "市場全体が下落基調（地合い減点で総合点が下がっています）",
-     "level": "mid"
-    },
-    {
-     "label": "強みの一部は会社・アナリストの予想に基づく（外れることがあります）",
-     "level": "low"
-    },
-    {
-     "label": "営業利益データを取得できず業績面は未確認",
-     "level": "low"
-    }
-   ],
-   "explain": "高値から-9%まで調整。50日線付近で推移。最高益更新・増配・上方修正など業績・株主還元も良好。長期の上昇トレンドは継続。",
-   "legacy": {
-    "rank": 6,
-    "total": 34,
-    "base": 18,
-    "events_pts": 16,
-    "expected": 33.8,
-    "win_rate": 0.5234531233629278,
-    "win_known": true,
-    "liq": 0.95,
-    "trend": [
-     11,
-     50
-    ],
-    "demand": [
-     4,
-     25
-    ],
-    "earnings": [
-     3,
-     15
-    ],
-    "market": [
-     0,
-     10
-    ]
-   },
-   "rank_change": {
-    "kind": "new",
-    "prev": null,
-    "delta": null,
-    "main_delta": null
-   },
-   "main_base": 68.5,
-   "lead": {
-    "key": "bank",
-    "group": "銀行",
-    "score": 1.0,
-    "items": [
-     {
-      "label": "米10年債利回り",
-      "mark": "➖",
-      "state": "flat",
-      "text": "米10年債利回り横ばい（+2bp）"
-     },
-     {
-      "label": "XLF（米金融）",
-      "mark": "✅",
-      "state": "good",
-      "text": "XLF（米金融）上昇（+0.6%）"
-     }
-    ],
-    "verdict": "flat",
-    "headline": "銀行への影響は小さめ",
-    "icon": "🟡",
-    "available": 2,
-    "total": 2
-   },
-   "lead_pts": 0.5
-  },
-  {
-   "rank": 8,
-   "code": "9507",
-   "name": "四国電力",
-   "main": 68.9,
-   "pb_total": 62.4,
-   "td_score": 6,
-   "penalty": 0,
-   "parts": {
-    "trend": [
-     15.0,
-     15
-    ],
-    "drawdown": [
-     19.5,
-     20
-    ],
-    "ma50": [
-     8.1,
-     12
-    ],
-    "volume": [
-     5.9,
-     8
-    ],
-    "strength": [
-     15.0,
-     15
-    ],
-    "quality": [
-     14.0,
-     20
-    ],
-    "market": [
-     -15.0,
-     10
-    ]
-   },
-   "label": "押し目候補",
-   "close": 2008.0,
-   "strengths": [
-    {
-     "label": "上方修正（TDnet 10/30）",
-     "src": "TDnet"
-    },
-    {
-     "label": "増配（+5%）",
-     "src": "予想"
-    },
-    {
-     "label": "自社株買い（時価総額の0.8%）（TDnet 07/31）",
-     "src": "TDnet"
-    }
-   ],
-   "status": [
-    "長期上昇トレンド（50日線＞200日線）",
-    "高値から-11%（52週高値比）",
-    "50日線付近（乖離-4.5%）",
-    "出来高縮小（直近10日が50日平均の0.83倍）",
-    "相対力が強い（直近60日でTOPIXを+20.5%上回る）",
-    "短期の下げ止まり（株価が5日線の上）"
-   ],
-   "cautions": [
-    {
-     "label": "市場全体が下落基調（地合い減点で総合点が下がっています）",
-     "level": "mid"
-    },
-    {
-     "label": "強みの一部は会社・アナリストの予想に基づく（外れることがあります）",
-     "level": "low"
-    }
-   ],
-   "explain": "高値から-11%まで調整。50日線付近で推移。出来高は縮小。上方修正・増配・自社株買いなど業績・株主還元も良好。長期の上昇トレンドは継続。",
-   "legacy": {
-    "rank": 8,
-    "total": 20,
-    "base": 9,
-    "events_pts": 11,
-    "expected": 19.9,
-    "win_rate": 0.5234531233629278,
-    "win_known": true,
-    "liq": 0.95,
-    "trend": [
-     0,
-     50
-    ],
-    "demand": [
-     4,
-     25
-    ],
-    "earnings": [
-     3,
-     15
-    ],
-    "market": [
-     2,
-     10
-    ]
-   },
-   "rank_change": {
-    "kind": "new",
-    "prev": 13,
-    "delta": null,
-    "main_delta": 4.0
-   },
-   "main_base": 68.8,
-   "lead": {
-    "key": "utility",
-    "group": "電力・ガス",
-    "score": 0.1,
-    "items": [
-     {
-      "label": "WTI原油（燃料コスト）",
-      "mark": "➖",
-      "state": "flat",
-      "text": "WTI原油（燃料コスト）横ばい（-0.1%）"
-     }
-    ],
-    "verdict": "flat",
-    "headline": "電力・ガスへの影響は小さめ",
-    "icon": "🟡",
-    "available": 1,
-    "total": 1
-   },
-   "lead_pts": 0.0
-  },
-  {
-   "rank": 9,
-   "code": "6448",
-   "name": "ブラザー工業",
-   "main": 68.1,
-   "pb_total": 61.1,
-   "td_score": 5,
-   "penalty": 0,
-   "parts": {
-    "trend": [
-     15.0,
-     15
-    ],
-    "drawdown": [
-     18.2,
-     20
-    ],
-    "ma50": [
-     11.7,
-     12
-    ],
-    "volume": [
-     0.0,
-     8
-    ],
-    "strength": [
-     12.2,
-     15
-    ],
-    "quality": [
-     19.0,
-     20
-    ],
-    "market": [
-     -15.0,
-     10
-    ]
-   },
-   "label": "押し目候補",
-   "close": 4603.0,
-   "strengths": [
-    {
-     "label": "最高益更新（今期予想EPSが過去最高）",
-     "src": "予想"
-    },
-    {
-     "label": "上方修正（予想EPSが30日前より+7%）",
-     "src": "予想"
-    },
-    {
-     "label": "増配（TDnet 11/09）",
-     "src": "TDnet"
-    },
-    {
-     "label": "自社株買いを実施（時価総額の1.9%）",
-     "src": "実績"
-    }
-   ],
-   "status": [
-    "長期上昇トレンド（50日線＞200日線）",
-    "高値から-8%（52週高値比）",
-    "50日線付近（乖離-0.4%）",
-    "相対力が強い（直近60日でTOPIXを+3.7%上回る）",
-    "短期の下げ止まり（株価が5日線の上）"
-   ],
-   "cautions": [
-    {
-     "label": "市場全体が下落基調（地合い減点で総合点が下がっています）",
-     "level": "mid"
-    },
-    {
-     "label": "強みの一部は会社・アナリストの予想に基づく（外れることがあります）",
-     "level": "low"
-    }
-   ],
-   "explain": "高値から-8%まで調整。50日線付近で推移。最高益更新・上方修正・増配など業績・株主還元も良好。長期の上昇トレンドは継続。",
-   "legacy": {
-    "rank": 7,
-    "total": 30,
-    "base": 16,
-    "events_pts": 14,
-    "expected": 31.4,
-    "win_rate": 0.5234531233629278,
-    "win_known": true,
-    "liq": 1.0,
-    "trend": [
-     9,
-     50
-    ],
-    "demand": [
-     4,
-     25
-    ],
-    "earnings": [
-     3,
-     15
-    ],
-    "market": [
-     0,
-     10
-    ]
-   },
-   "rank_change": {
-    "kind": "same",
-    "prev": 9,
-    "delta": 0,
-    "main_delta": 1.2999999999999972
-   },
-   "main_base": 66.1,
-   "lead": {
-    "key": "electronics",
-    "group": "電機・精密・機械",
-    "score": 3.9,
-    "items": [
-     {
-      "label": "SOX指数",
-      "mark": "✅",
-      "state": "good",
-      "text": "SOX指数上昇（+5.7%）"
-     },
-     {
-      "label": "NASDAQ",
-      "mark": "✅",
-      "state": "good",
-      "text": "NASDAQ上昇（+1.6%）"
-     },
-     {
-      "label": "ドル円",
-      "mark": "✅",
-      "state": "good",
-      "text": "ドル円上昇（+0.5%）"
-     }
-    ],
-    "verdict": "good",
-    "headline": "電機・精密・機械に追い風",
-    "icon": "🟢",
-    "available": 3,
-    "total": 3
-   },
-   "lead_pts": 2.0
-  },
-  {
-   "rank": 10,
    "code": "4088",
    "name": "エア・ウォーター",
-   "main": 67.8,
-   "pb_total": 66.7,
+   "main": 68.7,
+   "pb_total": 68.0,
    "td_score": 0,
    "penalty": 0,
    "parts": {
@@ -1240,15 +690,15 @@
      15
     ],
     "drawdown": [
-     15.1,
+     16.3,
      20
     ],
     "ma50": [
-     10.8,
+     11.4,
      12
     ],
     "volume": [
-     5.8,
+     5.2,
      8
     ],
     "strength": [
@@ -1265,7 +715,7 @@
     ]
    },
    "label": "押し目候補",
-   "close": 2897.0,
+   "close": 2875.0,
    "strengths": [
     {
      "label": "黒字化が2期連続で定着",
@@ -1295,9 +745,8 @@
    "status": [
     "長期上昇トレンド（50日線＞200日線）",
     "高値から-5%（52週高値比）",
-    "50日線付近（乖離+2.2%）",
-    "出来高縮小（直近10日が50日平均の0.84倍）",
-    "相対力が強い（直近60日でTOPIXを+17.8%上回る）",
+    "50日線付近（乖離+1.1%）",
+    "相対力が強い（直近60日でTOPIXを+19.0%上回る）",
     "短期の下げ止まり（株価が5日線の上）"
    ],
    "cautions": [
@@ -1313,15 +762,15 @@
    "explain": "高値から-5%まで調整。50日線付近で推移。出来高は縮小。最高益更新・上方修正など業績・株主還元も良好。長期の上昇トレンドは継続。",
    "legacy": {
     "rank": 1,
-    "total": 73,
-    "base": 45,
+    "total": 65,
+    "base": 37,
     "events_pts": 28,
-    "expected": 69.1,
-    "win_rate": 0.49855096741770666,
+    "expected": 61.6,
+    "win_rate": 0.49855082175945314,
     "win_known": true,
     "liq": 0.95,
     "trend": [
-     36,
+     28,
      50
     ],
     "demand": [
@@ -1338,16 +787,16 @@
     ]
    },
    "rank_change": {
-    "kind": "down",
-    "prev": 3,
-    "delta": -7,
-    "main_delta": -2.5
+    "kind": "up",
+    "prev": 10,
+    "delta": 4,
+    "main_delta": 0.9000000000000057
    },
-   "main_base": 66.7,
+   "main_base": 68.0,
    "lead": {
     "key": "chemical",
     "group": "化学",
-    "score": 2.1,
+    "score": 1.4,
     "items": [
      {
       "label": "S&P500",
@@ -1357,18 +806,552 @@
      },
      {
       "label": "WTI原油",
-      "mark": "➖",
-      "state": "flat",
-      "text": "WTI原油横ばい（-0.1%）"
+      "mark": "⚠",
+      "state": "bad",
+      "text": "WTI原油下落（-0.9%）"
+     }
+    ],
+    "verdict": "flat",
+    "headline": "化学への影響は小さめ",
+    "icon": "🟡",
+    "available": 2,
+    "total": 2
+   },
+   "lead_pts": 0.7
+  },
+  {
+   "rank": 7,
+   "code": "9560",
+   "name": "プログリット",
+   "main": 68.4,
+   "pb_total": 57.6,
+   "td_score": 9,
+   "penalty": 0,
+   "parts": {
+    "trend": [
+     14.5,
+     15
+    ],
+    "drawdown": [
+     18.7,
+     20
+    ],
+    "ma50": [
+     9.7,
+     12
+    ],
+    "volume": [
+     0.0,
+     8
+    ],
+    "strength": [
+     13.7,
+     15
+    ],
+    "quality": [
+     16.0,
+     20
+    ],
+    "market": [
+     -15.0,
+     10
+    ]
+   },
+   "label": "押し目候補",
+   "close": 994.0,
+   "strengths": [
+    {
+     "label": "最高益更新（直近12か月の営業利益が過去最高）",
+     "src": "実績"
+    },
+    {
+     "label": "増配（TDnet 08/31）",
+     "src": "TDnet"
+    },
+    {
+     "label": "自社株買い（時価総額の2.8%）（TDnet 07/09）",
+     "src": "TDnet"
+    },
+    {
+     "label": "上方修正（TDnet 08/31）",
+     "src": "TDnet"
+    }
+   ],
+   "status": [
+    "長期上昇トレンド（50日線＞200日線）",
+    "高値から-12%（52週高値比）",
+    "50日線付近（乖離+3.3%）",
+    "相対力が強い（直近60日でTOPIXを+26.1%上回る）",
+    "短期の下げ止まり（株価が5日線の上）"
+   ],
+   "cautions": [
+    {
+     "label": "市場全体が下落基調（地合い減点で総合点が下がっています）",
+     "level": "mid"
+    },
+    {
+     "label": "時価総額が小さく値動きが荒くなりやすい",
+     "level": "low"
+    },
+    {
+     "label": "グロース市場は値動きが大きい傾向",
+     "level": "low"
+    },
+    {
+     "label": "強みの一部は会社・アナリストの予想に基づく（外れることがあります）",
+     "level": "low"
+    }
+   ],
+   "explain": "高値から-12%まで調整。50日線付近で推移。最高益更新・増配・自社株買いなど業績・株主還元も良好。長期の上昇トレンドは継続。",
+   "legacy": {
+    "rank": 7,
+    "total": 32,
+    "base": 16,
+    "events_pts": 16,
+    "expected": 23.4,
+    "win_rate": 0.5234188516973087,
+    "win_known": true,
+    "liq": 0.7,
+    "trend": [
+     5,
+     50
+    ],
+    "demand": [
+     0,
+     25
+    ],
+    "earnings": [
+     9,
+     15
+    ],
+    "market": [
+     2,
+     10
+    ]
+   },
+   "rank_change": {
+    "kind": "new",
+    "prev": null,
+    "delta": null,
+    "main_delta": null
+   },
+   "main_base": 66.5,
+   "lead": {
+    "key": "tech_service",
+    "group": "情報・ソフトウェア",
+    "score": 3.9,
+    "items": [
+     {
+      "label": "NASDAQ",
+      "mark": "✅",
+      "state": "good",
+      "text": "NASDAQ上昇（+1.6%）"
+     },
+     {
+      "label": "IGV（米ソフトウェア）",
+      "mark": "✅",
+      "state": "good",
+      "text": "IGV（米ソフトウェア）上昇（+1.9%）"
      }
     ],
     "verdict": "good",
-    "headline": "化学に追い風",
+    "headline": "情報・ソフトウェアに追い風",
     "icon": "🟢",
     "available": 2,
     "total": 2
    },
-   "lead_pts": 1.0
+   "lead_pts": 2.0
+  },
+  {
+   "rank": 8,
+   "code": "9506",
+   "name": "東北電力",
+   "main": 67.1,
+   "pb_total": 55.3,
+   "td_score": 11,
+   "penalty": 0,
+   "parts": {
+    "trend": [
+     14.4,
+     15
+    ],
+    "drawdown": [
+     18.8,
+     20
+    ],
+    "ma50": [
+     11.9,
+     12
+    ],
+    "volume": [
+     3.2,
+     8
+    ],
+    "strength": [
+     15.0,
+     15
+    ],
+    "quality": [
+     7.0,
+     20
+    ],
+    "market": [
+     -15.0,
+     10
+    ]
+   },
+   "label": "押し目候補",
+   "close": 1312.0,
+   "strengths": [
+    {
+     "label": "上方修正（TDnet 10/30）",
+     "src": "TDnet"
+    },
+    {
+     "label": "増配（TDnet 10/30）",
+     "src": "TDnet"
+    }
+   ],
+   "status": [
+    "長期上昇トレンド（50日線＞200日線）",
+    "高値から-8%（52週高値比）",
+    "50日線付近（乖離+0.2%）",
+    "相対力が強い（直近60日でTOPIXを+12.4%上回る）",
+    "短期の下げ止まり（株価が5日線の上）"
+   ],
+   "cautions": [
+    {
+     "label": "市場全体が下落基調（地合い減点で総合点が下がっています）",
+     "level": "mid"
+    },
+    {
+     "label": "強みの一部は会社・アナリストの予想に基づく（外れることがあります）",
+     "level": "low"
+    }
+   ],
+   "explain": "高値から-8%まで調整。50日線付近で推移。出来高は縮小。上方修正・増配など業績・株主還元も良好。長期の上昇トレンドは継続。",
+   "legacy": {
+    "rank": 3,
+    "total": 45,
+    "base": 35,
+    "events_pts": 10,
+    "expected": 44.8,
+    "win_rate": 0.5234188516973087,
+    "win_known": true,
+    "liq": 0.95,
+    "trend": [
+     24,
+     50
+    ],
+    "demand": [
+     4,
+     25
+    ],
+    "earnings": [
+     3,
+     15
+    ],
+    "market": [
+     4,
+     10
+    ]
+   },
+   "rank_change": {
+    "kind": "new",
+    "prev": 13,
+    "delta": null,
+    "main_delta": 0.6999999999999886
+   },
+   "main_base": 66.3,
+   "lead": {
+    "key": "utility",
+    "group": "電力・ガス",
+    "score": 1.5,
+    "items": [
+     {
+      "label": "WTI原油（燃料コスト）",
+      "mark": "✅",
+      "state": "good",
+      "text": "WTI原油（燃料コスト）下落（-0.9%）"
+     }
+    ],
+    "verdict": "flat",
+    "headline": "電力・ガスへの影響は小さめ",
+    "icon": "🟡",
+    "available": 1,
+    "total": 1
+   },
+   "lead_pts": 0.8
+  },
+  {
+   "rank": 9,
+   "code": "4674",
+   "name": "クレスコ",
+   "main": 67.1,
+   "pb_total": 63.7,
+   "td_score": 2,
+   "penalty": 0,
+   "parts": {
+    "trend": [
+     15.0,
+     15
+    ],
+    "drawdown": [
+     19.0,
+     20
+    ],
+    "ma50": [
+     10.9,
+     12
+    ],
+    "volume": [
+     4.5,
+     8
+    ],
+    "strength": [
+     14.4,
+     15
+    ],
+    "quality": [
+     15.0,
+     20
+    ],
+    "market": [
+     -15.0,
+     10
+    ]
+   },
+   "label": "押し目候補",
+   "close": 1974.0,
+   "strengths": [
+    {
+     "label": "最高益更新（直近12か月の営業利益が過去最高）",
+     "src": "実績"
+    },
+    {
+     "label": "6年連続増配",
+     "src": "実績"
+    },
+    {
+     "label": "自社株買いを実施（時価総額の2.0%）",
+     "src": "実績"
+    },
+    {
+     "label": "増配（TDnet 07/31）",
+     "src": "TDnet"
+    }
+   ],
+   "status": [
+    "長期上昇トレンド（50日線＞200日線）",
+    "高値から-9%（52週高値比）",
+    "50日線付近（乖離+2.1%）",
+    "相対力が強い（直近60日でTOPIXを+11.4%上回る）",
+    "短期の下げ止まり（株価が5日線の上）"
+   ],
+   "cautions": [
+    {
+     "label": "市場全体が下落基調（地合い減点で総合点が下がっています）",
+     "level": "mid"
+    }
+   ],
+   "explain": "高値から-9%まで調整。50日線付近で推移。出来高は縮小。最高益更新・増配など業績・株主還元も良好。長期の上昇トレンドは継続。",
+   "legacy": {
+    "rank": 10,
+    "total": 24,
+    "base": 10,
+    "events_pts": 14,
+    "expected": 17.6,
+    "win_rate": 0.5234188516973087,
+    "win_known": true,
+    "liq": 0.7,
+    "trend": [
+     5,
+     50
+    ],
+    "demand": [
+     0,
+     25
+    ],
+    "earnings": [
+     3,
+     15
+    ],
+    "market": [
+     2,
+     10
+    ]
+   },
+   "rank_change": {
+    "kind": "down",
+    "prev": 6,
+    "delta": -3,
+    "main_delta": -2.5
+   },
+   "main_base": 65.7,
+   "lead": {
+    "key": "tech_service",
+    "group": "情報・ソフトウェア",
+    "score": 3.9,
+    "items": [
+     {
+      "label": "NASDAQ",
+      "mark": "✅",
+      "state": "good",
+      "text": "NASDAQ上昇（+1.6%）"
+     },
+     {
+      "label": "IGV（米ソフトウェア）",
+      "mark": "✅",
+      "state": "good",
+      "text": "IGV（米ソフトウェア）上昇（+1.9%）"
+     }
+    ],
+    "verdict": "good",
+    "headline": "情報・ソフトウェアに追い風",
+    "icon": "🟢",
+    "available": 2,
+    "total": 2
+   },
+   "lead_pts": 1.3
+  },
+  {
+   "rank": 10,
+   "code": "5832",
+   "name": "ちゅうぎんフィナンシャルグループ",
+   "main": 67.0,
+   "pb_total": 55.5,
+   "td_score": 11,
+   "penalty": 0,
+   "parts": {
+    "trend": [
+     15.0,
+     15
+    ],
+    "drawdown": [
+     18.2,
+     20
+    ],
+    "ma50": [
+     11.7,
+     12
+    ],
+    "volume": [
+     0.0,
+     8
+    ],
+    "strength": [
+     13.5,
+     15
+    ],
+    "quality": [
+     12.0,
+     20
+    ],
+    "market": [
+     -15.0,
+     10
+    ]
+   },
+   "label": "押し目候補",
+   "close": 3557.0,
+   "strengths": [
+    {
+     "label": "最高益更新（今期予想EPSが過去最高）",
+     "src": "予想"
+    },
+    {
+     "label": "増配（TDnet 10/29）",
+     "src": "TDnet"
+    },
+    {
+     "label": "自社株買いを実施（時価総額の0.5%）",
+     "src": "実績"
+    },
+    {
+     "label": "上方修正（TDnet 10/29）",
+     "src": "TDnet"
+    }
+   ],
+   "status": [
+    "長期上昇トレンド（50日線＞200日線）",
+    "高値から-8%（52週高値比）",
+    "50日線付近（乖離+0.5%）",
+    "相対力が強い（直近60日でTOPIXを+6.8%上回る）",
+    "短期の下げ止まり（株価が5日線の上）"
+   ],
+   "cautions": [
+    {
+     "label": "市場全体が下落基調（地合い減点で総合点が下がっています）",
+     "level": "mid"
+    },
+    {
+     "label": "強みの一部は会社・アナリストの予想に基づく（外れることがあります）",
+     "level": "low"
+    },
+    {
+     "label": "営業利益データを取得できず業績面は未確認",
+     "level": "low"
+    }
+   ],
+   "explain": "高値から-8%まで調整。50日線付近で推移。最高益更新・増配・上方修正など業績・株主還元も良好。長期の上昇トレンドは継続。",
+   "legacy": {
+    "rank": 2,
+    "total": 49,
+    "base": 33,
+    "events_pts": 16,
+    "expected": 48.7,
+    "win_rate": 0.5234188516973087,
+    "win_known": true,
+    "liq": 0.95,
+    "trend": [
+     24,
+     50
+    ],
+    "demand": [
+     4,
+     25
+    ],
+    "earnings": [
+     3,
+     15
+    ],
+    "market": [
+     2,
+     10
+    ]
+   },
+   "rank_change": {
+    "kind": "new",
+    "prev": 11,
+    "delta": null,
+    "main_delta": -0.20000000000000284
+   },
+   "main_base": 66.5,
+   "lead": {
+    "key": "bank",
+    "group": "銀行",
+    "score": 1.0,
+    "items": [
+     {
+      "label": "米10年債利回り",
+      "mark": "➖",
+      "state": "flat",
+      "text": "米10年債利回り横ばい（+2bp）"
+     },
+     {
+      "label": "XLF（米金融）",
+      "mark": "✅",
+      "state": "good",
+      "text": "XLF（米金融）上昇（+0.6%）"
+     }
+    ],
+    "verdict": "flat",
+    "headline": "銀行への影響は小さめ",
+    "icon": "🟡",
+    "available": 2,
+    "total": 2
+   },
+   "lead_pts": 0.5
   }
  ]
 }
