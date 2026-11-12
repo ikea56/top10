@@ -483,6 +483,32 @@ def test_validation():
     print("ok  有効性の検証（有意な点数と乱数の区別・信頼区間の再現性・撤退シミュレーション・回転率）")
 
 
+def test_stance():
+    from src import market as M, pullback as PB
+    n = 260
+    idx = pd.bdate_range(end="2026-11-10", periods=n)
+    up = pd.Series(np.linspace(100, 150, n), index=idx)
+    down = pd.Series(np.linspace(150, 100, n), index=idx)
+    mk = lambda **k: {key: pd.DataFrame({"close": v}) for key, v in k.items()}  # noqa: E731
+    assert M.market_stance(mk(topix=up, n225=up, growth=up), cfg)["key"] == "buy"
+    assert M.market_stance(mk(topix=up, n225=up), cfg)["key"] == "buy"                 # グロース無しでも判定できる
+    assert M.market_stance(mk(topix=up, n225=up, growth=down), cfg)["key"] == "neutral"
+    assert M.market_stance(mk(topix=up, n225=down, growth=up), cfg)["key"] == "neutral"
+    d = M.market_stance(mk(topix=down, n225=down, growth=down), cfg)
+    assert d["key"] == "defense" and d["label"] == "防御優先" and len(d["reasons"]) == 4 and d["growth_weak"]
+    assert "新規買いは慎重に" in d["guide"] and "現金比率を高める" in d["guide"]
+    assert M.market_stance(mk(topix=down, n225=up, growth=up), cfg)["key"] == "neutral"
+    short = M.market_stance(mk(topix=up.iloc[:30]), cfg)
+    assert short["key"] == "neutral"
+    # 地合い点：グロースが弱いと減点、下限は-15
+    base = PB.market_points("good", True, False, cfg)
+    assert PB.market_points("good", True, False, cfg, True) == base + cfg["pullback"]["market"]["growth_below_ma75"]
+    assert PB.market_points("bad", False, True, cfg, True) == cfg["pullback"]["market"]["floor"]
+    txt = json.dumps(M.STANCE, ensure_ascii=False)
+    assert "売り優勢" not in txt and not any(w in txt for w in FORBIDDEN)
+    print("ok  相場環境の判定（買い優勢/中立/防御優先・グロース欠損時・地合い点の減点）")
+
+
 def test_end_to_end():
     for cmd in (["-m", "src.backtest", "--demo"], ["-m", "src.main", "--demo"]):
         res = subprocess.run([sys.executable, *cmd], cwd=ROOT, capture_output=True, text=True)
@@ -509,7 +535,7 @@ def test_end_to_end():
         assert k in summ["periods"]["5y"], k
     html = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
     for word in ("【強み】", "【押し目状況】", "【注意事項】", "押し目スコア", "イベント点", "なぜ選ばれた",
-                 "補助指標", "期間別の成績", "excluded_events.csv", "推奨撤退ライン", "リスク幅", "ATR", "有効性の検証", "点数帯ごとの成績"):
+                 "補助指標", "期間別の成績", "excluded_events.csv", "推奨撤退ライン", "リスク幅", "ATR", "有効性の検証", "点数帯ごとの成績", "現在の相場判定", "運用ガイド"):
         assert word in html, word
     # ㉒ 保有銘柄：暗号化ファイル・名前一覧・前回比較・3ブロック
     from src import holdings as H
@@ -543,6 +569,6 @@ def test_end_to_end():
 if __name__ == "__main__":
     for fn in (test_config_and_weights, test_momentum_points, test_no_lookahead, test_events,
                test_dividend_and_exclusion, test_expected_and_metrics, test_text, test_pullback, test_tdnet, test_accuracy_21, test_holdings,
-               test_excluded_csv, test_data_fixes, test_validation, test_end_to_end):
+               test_excluded_csv, test_data_fixes, test_validation, test_stance, test_end_to_end):
         fn()
     print("\nALL OK")

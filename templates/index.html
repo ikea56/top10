@@ -36,6 +36,22 @@
     ⚠️ <b>自動更新が止まっている可能性があります。</b>表示中の内容は古いので、売買の判断に使わないでください（GitHubのActions画面を確認）。
   </div>
 
+  <!-- 相場環境の判定 -->
+  {% set st = market.stance %}
+  <section class="card stance stance-{{ st.key }}" id="stance">
+    <h2>🧭 現在の相場判定</h2>
+    <p class="stance-main"><span class="pill {{ st.cls }}">{{ st.emoji }} {{ st.label }}</span></p>
+    <p class="stance-sub"><b>{% if st.key == 'defense' %}理由{% else %}判定の根拠{% endif %}</b></p>
+    <ul class="stance-reasons">
+      {% for r in st.reasons %}<li>{{ r }}</li>{% endfor %}
+    </ul>
+    <p class="stance-msg">{{ st.message }}</p>
+    <p class="stance-sub"><b>運用ガイド</b></p>
+    <ul class="stance-guide">{% for g in st.guide %}<li>{{ g }}</li>{% endfor %}</ul>
+    {% if st.note %}<p class="hint">{{ st.note }}</p>{% endif %}
+    <p class="hint">これは市場全体の状態です。{% if st.key == 'defense' %}防御優先でも、押し目ランキングは下に表示します（地合い点がマイナスになり、全体の点数が下がっています）。{% endif %}売りを勧めるものではなく、新規買いの積極度の目安です。</p>
+  </section>
+
   <!-- 市場状況 -->
   <section class="card market regime-{{ market.regime }}">
     <div class="market-head">
@@ -331,7 +347,7 @@
         <tr><th>反発確認 {{ pb.weights.bounce }}</th><td>調整中に、株価が5日線の上に戻っている（+2.5）、直近3日が上向き（最大+2.5）。「下げ止まり」の目安</td></tr>
         <tr><th>業績・還元 {{ pb.weights.quality }}</th><td>黒字で減益でない、黒字転換、最高益、増配、連続増配、自社株買い など（上限あり）</td></tr>
         <tr><th>地合い<br>{{ pb.market.floor }}〜+{{ pb.weights.market }}</th><td>加点：TOPIX（追い風 +{{ pb.market.topix.good }}／中立 +{{ pb.market.topix.neutral }}）＋日経平均が50日線の上 +{{ pb.market.nikkei.above_ma50 }}。
-          <b>減点：TOPIXが75日線の下 {{ pb.market.topix_below_ma75 }}、200日線の下 {{ pb.market.topix_below_ma200 }}、日経平均が50日線の下 {{ pb.market.nikkei_below_ma50 }}</b>。逆風時は全銘柄の総合点が下がります</td></tr>
+          <b>減点：TOPIXが75日線の下 {{ pb.market.topix_below_ma75 }}、200日線の下 {{ pb.market.topix_below_ma200 }}、日経平均が50日線の下 {{ pb.market.nikkei_below_ma50 }}、東証グロース250が75日線の下 {{ pb.market.growth_below_ma75 }}</b>。逆風時は全銘柄の総合点が下がります</td></tr>
         <tr><th>減点</th><td>直近5日で+{{ '%.0f'|format(pb.penalties.surge_5d.ret * 100) }}%以上の急騰 −{{ pb.penalties.surge_5d.pts }}、20日で+{{ '%.0f'|format(pb.penalties.surge_20d.ret * 100) }}%以上 −{{ pb.penalties.surge_20d.pts }}、
           高値から{{ '%.0f'|format(pb.penalties.far_from_high.dd * 100) }}%以上 −{{ pb.penalties.far_from_high.pts }}、出来高急騰だけの上昇 −{{ pb.penalties.volume_spike.pts }}、調整中の出来高膨張 −{{ pb.penalties.volume_expansion.pts }}、
           <b>決算まで3営業日以内 −{{ pb.earnings_penalty[0].pts }}／5営業日以内 −{{ pb.earnings_penalty[1].pts }}</b>（発表後の窓開けリスク）</td></tr>

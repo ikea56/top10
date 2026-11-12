@@ -100,7 +100,7 @@ def apply_exclusions(snap: pd.DataFrame, cfg: Config, demo: bool, today: date) -
 
 # ---------------------------------------------------------------- 3. スコア（従来＝補助 ＋ 押し目＝メイン）
 def attach_scores(snap: pd.DataFrame, regime: str, nikkei_ok: bool, cfg: Config, summary: dict | None,
-                  topix_below200: bool = False) -> pd.DataFrame:
+                  topix_below200: bool = False, growth_weak: bool = False) -> pd.DataFrame:
     sc, es = cfg["scoring"], cfg["expected_score"]
     tech = scoring.score_technical(snap, regime, scoring.sector_points(snap["ret20d"], snap["sector"], sc), sc)
     out = snap.join(tech)
@@ -108,7 +108,7 @@ def attach_scores(snap: pd.DataFrame, regime: str, nikkei_ok: bool, cfg: Config,
     wr = out["tech_scaled"].map(lambda s: backtest.win_rate_lookup(summary, s, es))
     out["win_rate"], out["win_n"], out["win_known"] = (wr.map(lambda t: t[i]) for i in range(3))
     out["liq"] = scoring.liquidity_factor(out["turnover20"], es)
-    return out.join(pullback.score_technical(snap, regime, nikkei_ok, cfg, topix_below200))
+    return out.join(pullback.score_technical(snap, regime, nikkei_ok, cfg, topix_below200, growth_weak))
 
 
 # ---------------------------------------------------------------- 4. 候補の評価（業績・配当 → 押し目スコア確定）
@@ -235,7 +235,7 @@ def make_cards(top: list[dict], f: features.Features, panel: features.Panel, the
 def save_history(hist_dir, data_date: pd.Timestamp, cards: list[dict], market: dict, demo: bool,
                  ranking: list[dict] | None = None) -> None:
     hist_dir.mkdir(parents=True, exist_ok=True)
-    rec = {"date": data_date.strftime("%Y-%m-%d"), "demo": demo, "regime": market["regime"],
+    rec = {"date": data_date.strftime("%Y-%m-%d"), "demo": demo, "regime": market["regime"], "stance": market["stance"]["key"],
            "picks": [{"rank": c["rank"], "code": c["code"], "name": c["name"], "main": c["main"],
                       "pb_total": c["pb_total"], "close": c["close"]} for c in cards],
            "ranking": ranking or []}            # 上位30（前回比較用）。保有銘柄は記録しない（公開リポジトリのため）
@@ -245,7 +245,7 @@ def save_history(hist_dir, data_date: pd.Timestamp, cards: list[dict], market: d
 # ---------------------------------------------------------------- 7. 保有銘柄の監視（ランキング順位に関係なく常に評価）
 def monitor_holdings(codes: list[str], snap_full: pd.DataFrame, snap: pd.DataFrame, rank_of: dict[str, int],
                      regime: str, nikkei_ok: bool, topix_below200: bool, fund_fn: FundFn, client: Any,
-                     cfg: Config, today: date, demo: bool) -> list[dict]:
+                     cfg: Config, today: date, demo: bool, growth_weak: bool = False) -> list[dict]:
     """保有銘柄ごとに、押し目スコア・イベント点・順位・開示・注意事項・推奨アクション（🟢🟡🔴）を作る。
     売買代金などの除外条件は掛けない（流動性が低くても、TOBでも、監視を続ける）。"""
     hc, flt = cfg["holdings"], cfg["filters"]
@@ -270,7 +270,7 @@ def monitor_holdings(codes: list[str], snap_full: pd.DataFrame, snap: pd.DataFra
             continue
         tk, r0 = by_code[code]
         r = r0.copy()
-        for k, v in pullback.score_technical(snap_full.loc[[tk]], regime, nikkei_ok, cfg, topix_below200).iloc[0].items():
+        for k, v in pullback.score_technical(snap_full.loc[[tk]], regime, nikkei_ok, cfg, topix_below200, growth_weak).iloc[0].items():
             r[k] = v
         fund = fund_fn(code)
         ev = events.evaluate_events(r, fund, cfg)
@@ -363,7 +363,8 @@ def run(demo: bool) -> None:
     if snap.empty:
         raise RuntimeError("条件を満たす銘柄が0件です。データ取得に問題がある可能性があります")
 
-    market = build_market(bench, float((snap["close"] > snap["ma25"]).mean()), int(snap["hi60"].sum()), int(snap["hi252"].sum()))
+    market = build_market(bench, float((snap["close"] > snap["ma25"]).mean()), int(snap["hi60"].sum()), int(snap["hi252"].sum()), cfg)
+    growth_weak = bool(market["stance"]["growth_weak"])
     nikkei_ok = bool(above_ma50_series(bench["n225"]["close"]).iloc[-1]) if "n225" in bench else False
     tc = bench["topix"]["close"].dropna()
     topix_below200 = bool(len(tc) >= 200 and tc.iloc[-1] < tc.rolling(200).mean().iloc[-1])
@@ -374,7 +375,7 @@ def run(demo: bool) -> None:
         except (OSError, ValueError) as e:
             log.warning("バックテスト結果を読めません（従来スコアの勝率は仮置きになります）: %s", e)
 
-    snap = attach_scores(snap, market["regime"], nikkei_ok, cfg, summary, topix_below200)
+    snap = attach_scores(snap, market["regime"], nikkei_ok, cfg, summary, topix_below200, growth_weak)
     cands, fetched, excl = evaluate_candidates(snap, fund_fn, cfg, today)
     log.info("業績を確認した銘柄: %d（除外: %s） 押し目候補: %d", fetched, dict(excl) or "なし", len(cands))
     if store:
@@ -429,7 +430,7 @@ def run(demo: bool) -> None:
     if hold_key:
         rank_of = {c["row"]["code"]: i for i, c in enumerate(kept, 1)}
         hold_cards = monitor_holdings(hold_codes, snap_full, snap, rank_of, market["regime"], nikkei_ok,
-                                      topix_below200, fund_fn, client, cfg, today, demo)
+                                      topix_below200, fund_fn, client, cfg, today, demo, growth_weak)
         cnt = Counter(h["action"]["text"] for h in hold_cards)
         log.info("保有銘柄の監視: %d銘柄（%s）", len(hold_cards), " / ".join(f"{k}{v}" for k, v in cnt.items()) or "なし")
 

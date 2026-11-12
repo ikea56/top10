@@ -57,7 +57,7 @@ def tech_max(cfg: Config) -> float:
     return float(100 - w["quality"])
 
 
-def market_points(regime: str, nikkei_ok: bool, topix_below200: bool, cfg: Config) -> float:
+def market_points(regime: str, nikkei_ok: bool, topix_below200: bool, cfg: Config, growth_weak: bool = False) -> float:
     """地合い点（-15〜+10）。良い時は加点、TOPIX・日経平均が弱い時は減点して順位全体を押し下げる。"""
     m = cfg["pullback"]["market"]
     pts = float(m["topix"][regime]) + float(m["nikkei"]["above_ma50" if nikkei_ok else "below"])
@@ -67,6 +67,8 @@ def market_points(regime: str, nikkei_ok: bool, topix_below200: bool, cfg: Confi
         pts += float(m["topix_below_ma200"])
     if not nikkei_ok:
         pts += float(m["nikkei_below_ma50"])
+    if growth_weak:
+        pts += float(m.get("growth_below_ma75", 0))
     return max(float(m["floor"]), min(pts, float(cfg["pullback"]["weights"]["market"])))
 
 
@@ -105,7 +107,7 @@ def stop_line(r: Any, cfg: Config) -> dict | None:
 
 
 def score_technical(snap: pd.DataFrame, regime: str, nikkei_ok: bool, cfg: Config,
-                    topix_below200: bool = False) -> pd.DataFrame:
+                    topix_below200: bool = False, growth_weak: bool = False) -> pd.DataFrame:
     """断面（snapshot）から押し目スコアのテクニカル部分と減点を計算する。"""
     pb = cfg["pullback"]
     out = pd.DataFrame(index=snap.index)
@@ -128,7 +130,7 @@ def score_technical(snap: pd.DataFrame, regime: str, nikkei_ok: bool, cfg: Confi
     out["pb_bounce"] = ((snap["close"] > snap["ma5"]) * float(bn["above_ma5"])
                         + _curve(snap["ret3d"].astype(float), bn["ret3d_curve"])).where(gate, 0.0).astype(float)
 
-    out["pb_market"] = market_points(regime, nikkei_ok, topix_below200, cfg)
+    out["pb_market"] = market_points(regime, nikkei_ok, topix_below200, cfg, growth_weak)
 
     p = pb["penalties"]
     flags = pd.DataFrame({

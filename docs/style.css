@@ -290,3 +290,9 @@ details.legacy summary { font-size: .82rem; font-weight: 600; color: var(--sub);
 .verdict li.st-good::marker{content:"🟢 "}.verdict li.st-weak::marker{content:"🟡 "}.verdict li.st-bad::marker{content:"🔴 "}
 .validation details{margin:8px 0}.validation summary{font-weight:600}
 @media (prefers-color-scheme:dark){.verdict.v-good{background:#16301f}.verdict.v-weak{background:#3a3216}.verdict.v-bad{background:#3a1c1c}}
+
+.stance{border-left:6px solid var(--gray)}
+.stance-buy{border-left-color:var(--green)}.stance-neutral{border-left-color:var(--yellow)}.stance-defense{border-left-color:var(--red)}
+.stance .pill{font-size:1.1rem;padding:5px 16px}
+.stance-sub{margin:10px 0 2px}.stance ul{margin:2px 0 6px;padding-left:1.3em}
+.stance-msg{font-weight:700;margin:8px 0}

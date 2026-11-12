@@ -53,7 +53,7 @@ def make_demo(seed: int = 7, n: int = 180, days: int = 2900
 
     mkt = rng.normal(0.0004, 0.009, days)
     bench: dict[str, pd.DataFrame] = {}
-    for key, base, beta in (("topix", 2700.0, 1.0), ("n225", 39000.0, 1.1)):
+    for key, base, beta in (("topix", 2700.0, 1.0), ("n225", 39000.0, 1.1), ("growth", 650.0, 1.3)):
         cl = base * np.exp(np.cumsum(mkt * beta))
         op = np.r_[cl[0], cl[:-1]] * (1 + rng.normal(0, 0.002, days))
         bench[key] = pd.DataFrame({"open": op, "high": np.maximum(op, cl) * 1.003,

@@ -89,11 +89,11 @@ def fix_splits(df: pd.DataFrame, name: str = "") -> pd.DataFrame:
 
 
 def download_benchmarks(period: str = "3y", start: str | None = None) -> dict[str, pd.DataFrame]:
-    """TOPIX連動ETF(1306)と日経平均。"""
+    """TOPIX連動ETF(1306)・日経平均・東証グロース250連動ETF(2516)。グロースは無くても動く。"""
     import yfinance as yf
 
     out = {}
-    for key, tk in (("topix", "1306.T"), ("n225", "^N225")):
+    for key, tk in (("topix", "1306.T"), ("n225", "^N225"), ("growth", "2516.T")):
         try:
             span = {"start": start} if start else {"period": period}
             raw = yf.download(tk, interval="1d", auto_adjust=True, progress=False, **span)

@@ -74,6 +74,12 @@ scoring:
     sector: {top: 4, mid: 2, bottom: 0}           # 業種の勢い（20日騰落率の順位）
     sector_min_members: 5
 
+# ---- 相場環境の判定（🟢買い優勢 / 🟡中立 / 🔴防御優先）。個別銘柄ではなく市場全体の状態 ----
+stance:
+  ma_mid: 75                   # 中期線（TOPIX・日経平均・グロース）
+  ma_long: 200                 # 長期線（TOPIX）
+  growth_ticker: "2516.T"      # 東証グロース市場250連動ETF（指数そのものは無料データに無いため）
+
 # ---- 評価イベント（基本点に上乗せ。業績イベント＋株主還元＋同時発生ボーナス）----
 events:
   cap: 30                      # イベント点の上限
@@ -177,6 +183,7 @@ pullback:
     topix_below_ma75: -10      # TOPIXが75日線の下
     topix_below_ma200: -5      # TOPIXが200日線の下（上と重ねて減点）
     nikkei_below_ma50: -3      # 日経平均が50日線の下
+    growth_below_ma75: -3      # 東証グロース250（ETF 2516）が75日線の下。取得できない場合は適用しない
     floor: -15                 # 合計の下限（上限は weights.market の10点）
   penalties:                   # 減点（すでに急騰した銘柄を優遇しない）
     surge_5d: {ret: 0.12, pts: 10}            # 直近5日で+12%以上
