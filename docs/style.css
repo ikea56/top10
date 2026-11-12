@@ -308,3 +308,14 @@ details.legacy summary { font-size: .82rem; font-weight: 600; color: var(--sub);
 .block.lead li.ld-good{color:inherit}.block.lead li.ld-bad{color:var(--red);font-weight:600}
 .block.lead li.ld-flat,.block.lead li.ld-none{opacity:.65}
 .block.lead .lead-head{font-weight:700;margin-left:.5em;font-size:.95rem}
+
+.refresh .rf-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.refresh .rf-label{opacity:.7;margin-right:.4em}.refresh .rf-time{font-size:1.1rem}
+.rf-status{display:inline-block;padding:3px 12px;border-radius:999px;font-weight:700;font-size:.85rem;border:1px solid var(--gray);color:var(--gray)}
+.rf-status.rf-run{border-color:var(--yellow);color:var(--yellow);background:var(--yellow-bg)}
+.rf-status.rf-ok{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+.rf-status.rf-err{border-color:var(--red);color:var(--red);background:var(--red-bg)}
+.rf-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.rf-actions .btn{min-height:44px}.rf-actions button:disabled{opacity:.55}
+.rf-msg.err{color:var(--red);font-weight:600}.rf-msg.ok{color:var(--green)}
+.rf-actions [hidden]{display:none!important}

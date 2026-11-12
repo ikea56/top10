@@ -49,6 +49,7 @@
   const pct = function (v) { return v == null ? '—' : (v >= 0 ? '+' : '') + v.toFixed(1) + '%'; };
 
   let pass = null, codes = [], status = null, names = {};
+  g.HoldingsLib.getPass = function () { return pass; };      // 手動更新ボタンが、開いている間だけ同じ合言葉を使えるように（メモリのみ）
   const box = h('div', { class: 'h-body' });
   root.appendChild(box);
 

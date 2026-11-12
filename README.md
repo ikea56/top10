@@ -315,3 +315,13 @@ Apps Scriptのスクリプトプロパティに `GITHUB_REPO`（例 `ikea56/top1
 
 ランキングの各銘柄に【外部環境】を表示します（`src/lead.py`、設定は `config.yml` の `lead:`）。業種（または証券コード）ごとに参照先（米国株・指数・為替・金利・商品）を設定ファイルで管理しています（普段は触る必要はなく、画面には🟢追い風／🟡影響は小さめ／🔴逆風だけを表示します）。
 業種リードスコアは−5〜+5点。総合点への反映は `rank_effect`（既定0.5＝最大±2.5点）倍で、順位の動きは `max_rank_shift`（既定3位）までです。押し目・業績・増配・自社株買いの評価が主役で、これは最後の微調整です。`rank_effect: 0` にすると表示だけになります。
+
+## 手動更新ボタン（ランキング再生成）の設定
+
+画面上部の「ランキング再生成」を押すと、定時を待たずに daily-update が走ります（二重起動はしません）。GitHubのトークンはWebページには置かず、Google側（Apps Script）にだけ保存します。**最初に1回だけ**次の設定が必要です（設定前は押すと「設定がまだ完了していません」と表示されます）。
+
+1. **トークンを作る**：GitHub右上のアイコン → Settings → 一番下の Developer settings → Personal access tokens → Fine-grained tokens → Generate new token。
+   Repository access は「Only select repositories」で top10 だけを選び、Permissions → Repository permissions → **Actions を「Read and write」**にして作成。表示された文字列（github_pat_…）をコピー（有効期限が切れたら作り直し）。
+2. **Apps Script を更新**：スプレッドシートの 拡張機能 → Apps Script で、Code.gs の中身を今回のファイルに置き換えて保存。左の歯車（プロジェクトの設定）→ スクリプト プロパティ に **GITHUB_TOKEN**（コピーした文字列）と **GITHUB_REPO**（例 ikea56/top10）を追加。
+3. **再デプロイ**：デプロイ → デプロイを管理 → 鉛筆アイコン → バージョン「新バージョン」→ デプロイ（URLは変わりません）。許可を求められたら承認。
+4. サイトを開き「ランキング再生成」→ 合言葉（保有銘柄と同じ）を入力。状態が「処理中...」→「更新完了」と変わり、自動で最新の画面に切り替わります。失敗すると「エラー」と表示されます。

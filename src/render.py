@@ -31,6 +31,7 @@ def render_site(ctx: dict[str, Any], out_dir: Path | None = None) -> Path:
     (out / "index.html").write_text(env.get_template("index.html").render(**ctx), encoding="utf-8")
     shutil.copy(ROOT / "static" / "style.css", out / "style.css")
     shutil.copy(ROOT / "static" / "holdings.js", out / "holdings.js")
+    shutil.copy(ROOT / "static" / "refresh.js", out / "refresh.js")
     (out / ".nojekyll").write_text("", encoding="utf-8")
 
     keys = ("rank", "code", "name", "main", "pb_total", "td_score", "penalty", "parts", "label", "close",

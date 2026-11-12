@@ -21,7 +21,7 @@
       <button id="themeBtn" class="icon-btn" type="button" aria-label="ライト／ダーク表示を切り替え">🌓</button>
     </div>
     <p class="meta">
-      <span>更新：{{ generated_at }}</span>
+      <span>最終更新：{{ generated_hm }}</span>
       <span>データ基準日：{{ data_date_label }} 終値</span>
     </p>
   </div>
@@ -32,6 +32,23 @@
   {% if demo %}
   <div class="banner warn">⚠️ <b>デモ表示です。</b>架空のデータで、実在の銘柄・株価ではありません。</div>
   {% endif %}
+  <!-- 最終更新・手動更新 -->
+  <section class="card refresh" id="refresh">
+    <div class="rf-row">
+      <div><span class="rf-label">最終更新</span> <b class="rf-time">{{ generated_hm }}</b>
+        <small>（データ基準日 {{ data_date_label }} 終値）</small></div>
+      <span id="rfStatus" class="rf-status rf-idle">最新</span>
+    </div>
+    <div class="rf-actions">
+      <button id="rfBtn" class="btn" type="button"{% if not hold.enabled %} hidden{% endif %}>ランキング再生成</button>
+      <form id="rfPass" class="h-form" hidden>
+        <input id="rfInput" class="h-input" type="password" name="passphrase" autocomplete="current-password" placeholder="合言葉" aria-label="合言葉">
+        <button class="btn" type="submit">実行</button>
+      </form>
+    </div>
+    <p id="rfMsg" class="hint rf-msg"></p>
+  </section>
+
   <div id="staleBanner" class="banner danger" hidden>
     ⚠️ <b>自動更新が止まっている可能性があります。</b>表示中の内容は古いので、売買の判断に使わないでください（GitHubのActions画面を確認）。
   </div>
@@ -46,7 +63,7 @@
   <section class="card stance stance-{{ st.key }}" id="stance">
     <h2>🧭 現在の相場判定</h2>
     <p class="stance-main"><span class="pill {{ st.cls }}">{{ st.emoji }} {{ st.label }}</span></p>
-    <p class="stance-sub"><b>{% if st.key == 'defense' %}理由{% else %}判定の根拠{% endif %}</b></p>
+    <p class="stance-sub"><b>{% if st.key == 'defense' and not st.pm_note %}理由{% else %}判定の根拠{% endif %}</b></p>
     <ul class="stance-reasons">
       {% for r in st.reasons %}<li>{{ r }}</li>{% endfor %}
     </ul>
@@ -445,6 +462,8 @@ function toggleTV(b){
   if(!isNaN(gen)&&Date.now()-gen.getTime()>84*3600*1000){document.getElementById('staleBanner').hidden=false;}})();
 </script>
 <script>window.HOLDINGS_CFG = {{ {'endpoint': hold.endpoint, 'statusUrl': 'holdings_status.enc.json', 'namesUrl': 'names.json'}|tojson }};</script>
+<script>window.REFRESH_CFG = {{ {'endpoint': hold.endpoint, 'enabled': hold.enabled, 'repo': refresh.repo, 'workflow': refresh.workflow, 'generated': generated_iso}|tojson }};</script>
 <script src="holdings.js" defer></script>
+<script src="refresh.js" defer></script>
 </body>
 </html>

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
 import os
 from collections import Counter
 from datetime import date, datetime
@@ -25,6 +26,26 @@ from .render import render_site, write_excluded_csv, write_holdings_files
 log = get_logger(__name__)
 WEEKDAY = "月火水木金土日"
 FundFn = Callable[[str], dict]
+
+
+class Stages:
+    """処理ごとの所要時間を測る。lap(名前)を呼ぶたび、前回からの経過時間をその名前に足す（同じ名前は合算）。"""
+
+    def __init__(self) -> None:
+        self.t0 = self.last = time.perf_counter()
+        self.sec: dict[str, float] = {}
+
+    def lap(self, name: str) -> None:
+        now = time.perf_counter()
+        self.sec[name] = self.sec.get(name, 0.0) + (now - self.last)
+        self.last = now
+
+    def report(self) -> dict[str, float]:
+        total = time.perf_counter() - self.t0
+        log.info("処理時間の内訳（合計 %.1f分）", total / 60)
+        for k, v in sorted(self.sec.items(), key=lambda kv: -kv[1]):
+            log.info("  %-14s %6.1f分 (%2.0f%%)", k, v / 60, v / total * 100 if total else 0)
+        return {**{k: round(v, 1) for k, v in self.sec.items()}, "合計": round(total, 1)}
 
 
 # ---------------------------------------------------------------- 1. データ取得
@@ -348,7 +369,9 @@ def run(demo: bool) -> None:
     themes, today = load_themes(), datetime.now(JST).date()
     hist_dir, summary_path = backtest.paths(demo)
 
+    st = Stages()
     universe, panel, bench, fund_fn, store = load_data(cfg, demo)
+    st.lap("株価取得")
     panel = trim_to_valid_last(panel)
     if not demo:
         panel = drop_unfinished_bar(panel, datetime.now(JST))
@@ -378,10 +401,12 @@ def run(demo: bool) -> None:
             log.warning("バックテスト結果を読めません（従来スコアの勝率は仮置きになります）: %s", e)
 
     snap = attach_scores(snap, market["regime"], nikkei_ok, cfg, summary, topix_below200, growth_weak)
+    st.lap("ランキング計算")
     cands, fetched, excl = evaluate_candidates(snap, fund_fn, cfg, today)
     log.info("業績を確認した銘柄: %d（除外: %s） 押し目候補: %d", fetched, dict(excl) or "なし", len(cands))
     if store:
         store.save()
+    st.lap("財務取得")
 
     client = tdnet.make_client(cfg, demo)
     if isinstance(client, tdnet.TdnetClient):
@@ -391,6 +416,7 @@ def run(demo: bool) -> None:
         client.save()
     log.info("TDnet解析: %d銘柄（企業再編などで除外 %d／取得失敗 %d）", td_stats["checked"], td_stats["excluded"], td_stats["unavailable"])
     excluded_rows += td_rows
+    st.lap("TDnet取得")
 
     for c in kept:
         c["main_base"] = final_score(c, cfg)[0]          # 本質的な評価（押し目・業績・還元・開示）。ラベルはこの点で決める
@@ -410,6 +436,7 @@ def run(demo: bool) -> None:
             log.warning("業種リード指標の処理に失敗しました（外部環境なしで表示します）: %s", e)
             for c in kept:
                 c["lead"], c["lead_pts"] = None, 0.0
+    st.lap("外部指標取得（業種）")
     before = [c["row"]["code"] for c in sorted(kept, key=lambda c: (c["main_base"], c["pb_total"], c["legacy_expected"]), reverse=True)[:cfg["top_n"]]]
     kept = lead.finalize(kept, cfg)                      # 総合点＝本質的な評価＋業種リード（少し）。同点は押し目スコア→従来の期待値の順
     top = kept[:cfg["top_n"]]
@@ -433,6 +460,7 @@ def run(demo: bool) -> None:
         c["rank_change"] = changes.get(c["code"])
     summary_changes = {k: sum(1 for c in cards if (c["rank_change"] or {}).get("kind") == k) for k in ("new", "up", "down", "same")} if changes else None
 
+    st.lap("ランキング計算")
     # ③ 保有銘柄の監視（保存先から一覧を取得 → 順位に関係なく評価 → 暗号化して出力）
     hold_cards, hold_key = None, None
     hc = cfg["holdings"]
@@ -458,6 +486,7 @@ def run(demo: bool) -> None:
         cnt = Counter(h["action"]["text"] for h in hold_cards)
         log.info("保有銘柄の監視: %d銘柄（%s）", len(hold_cards), " / ".join(f"{k}{v}" for k, v in cnt.items()) or "なし")
 
+    st.lap("保有銘柄の監視")
     # ④ 寄り付き前の指標（先物・為替・米国株）。朝に動くものなので、取得は最後にする。判定と注意喚起にだけ使い、順位は変えない
     if cfg["premarket"]["enabled"]:
         pm_now = datetime.now(JST)
@@ -471,13 +500,14 @@ def run(demo: bool) -> None:
         market["stance"] = premarket.apply_to_stance(market["stance"], pm, cfg)
         log.info("寄り付き前の指標: %d/%d件取得 評価点%s ギャップダウン注意=%s 相場判定=%s", pm["available"], pm["total"],
                  "—" if pm["score"] is None else f"{pm['score']:+.2f}", pm["gap_down"], market["stance"]["label"])
+    st.lap("外部指標取得（先物など）")
     save_history(hist_dir, data_date, cards, market, demo, ranking)
     forward = backtest.forward_stats(panel, bench["topix"], cfg, hist_dir)
     now = datetime.now(JST)
     pb = cfg["pullback"]
     ctx = {
         "title": cfg["site_title"], "demo": demo,
-        "generated_at": f"{now:%Y年%m月%d日} {now:%H:%M}", "generated_iso": now.isoformat(timespec="minutes"),
+        "generated_at": f"{now:%Y年%m月%d日} {now:%H:%M}", "generated_hm": f"{now:%Y-%m-%d %H:%M}", "refresh": cfg["refresh"], "generated_iso": now.isoformat(timespec="minutes"),
         "data_date_label": f"{data_date.month}/{data_date.day}（{WEEKDAY[data_date.weekday()]}）",
         "data_date_iso": data_date.strftime("%Y-%m-%d"),
         "market": market, "nikkei_ok": nikkei_ok, "cards": cards,
@@ -497,6 +527,9 @@ def run(demo: bool) -> None:
     write_excluded_csv(excluded_rows, out.parent / "excluded_events.csv")
     write_holdings_files(out.parent, universe, hold_cards, hold_key, data_date, today, hc["pbkdf2_iterations"])
     log.info("生成しました: %s（除外イベント %d件 → excluded_events.csv）", out, len(excluded_rows))
+    st.lap("HTML生成・保存")
+    timings = st.report()
+    (out.parent / "timings.json").write_text(json.dumps({"generated_at": ctx["generated_iso"], "seconds": timings}, ensure_ascii=False, indent=1), encoding="utf-8")
     for c in cards[:3]:
         log.info("  %d位 %s(%s) 総合%d（押し目%d＋イベント%+d） %s", c["rank"], c["name"], c["code"], c["main"],
                  c["pb_total"], c["td_score"], c["label"])

@@ -7,6 +7,9 @@
  * ・GitHubのトークンはフロントエンド（Webページ）には一切置きません。
  *   （任意）保有銘柄を変更した直後にサイトを再生成したい場合だけ、スクリプトプロパティに
  *   GITHUB_TOKEN（Actions の書き込み権限だけの細かい権限のトークン）と GITHUB_REPO（例: ikea56/top10）を入れます。
+ *
+ * ・「ランキング再生成」ボタン（action: refresh）も、同じ GITHUB_TOKEN / GITHUB_REPO を使います。
+ *   すでに実行中なら二重に起動せず、短時間の連打も防ぎます。トークンはこのスクリプトの中（Google側）にだけあります。
  */
 var SHEET_NAME = 'holdings';
 var MAX_HOLDINGS = 50;
@@ -66,6 +69,40 @@ function triggerRebuild_() {              // 任意機能：サイトの再生�
   }
 }
 
+function activeRuns_(repo, token, workflow) {   // 実行中・待機中の更新があるか（GitHubに問い合わせる）
+  var url = 'https://api.github.com/repos/' + repo + '/actions/workflows/' + workflow + '/runs?per_page=10';
+  var res = UrlFetchApp.fetch(url, {
+    headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' }, muteHttpExceptions: true
+  });
+  if (res.getResponseCode() !== 200) throw new Error('runs_' + res.getResponseCode());
+  var ACTIVE = { queued: 1, in_progress: 1, waiting: 1, requested: 1, pending: 1 };
+  return (JSON.parse(res.getContentText()).workflow_runs || []).filter(function (r) { return ACTIVE[r.status]; });
+}
+
+function refresh_() {                     // 手動更新：daily-update を起動（実行中なら起動しない）
+  var p = PropertiesService.getScriptProperties();
+  var token = p.getProperty('GITHUB_TOKEN'), repo = p.getProperty('GITHUB_REPO');
+  var workflow = p.getProperty('GITHUB_WORKFLOW') || 'daily.yml';
+  if (!token || !repo) return { ok: false, error: 'github_not_configured' };
+  var cache = CacheService.getScriptCache();
+  var requestedAt = new Date(Date.now() - 10000).toISOString();     // 時計のずれの余裕として10秒前
+  try {
+    var active = activeRuns_(repo, token, workflow);
+    if (active.length) return { ok: true, state: 'already_running', requested_at: active[0].created_at, run_url: active[0].html_url };
+    if (cache.get('refresh_last')) return { ok: true, state: 'too_soon' };    // 連打防止（直前の起動から2分間）
+    var res = UrlFetchApp.fetch('https://api.github.com/repos/' + repo + '/actions/workflows/' + workflow + '/dispatches', {
+      method: 'post', contentType: 'application/json',
+      headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' },
+      payload: JSON.stringify({ ref: p.getProperty('GITHUB_BRANCH') || 'main' }), muteHttpExceptions: true
+    });
+    if (res.getResponseCode() !== 204) return { ok: false, error: 'dispatch_failed', status: res.getResponseCode() };
+    cache.put('refresh_last', '1', 120);
+    return { ok: true, state: 'started', requested_at: requestedAt };
+  } catch (e) {
+    return { ok: false, error: 'github_error', detail: String(e).slice(0, 80) };
+  }
+}
+
 function doGet() {                        // ブラウザで直接開いたとき（動作確認用。データは返さない）
   return out_({ ok: true, service: 'holdings', note: 'POSTで利用します' });
 }
@@ -89,6 +126,12 @@ function doPost(e) {
     return out_({ ok: false, error: 'unauthorized' });
   }
   cache.remove('fails');
+
+  if (String(req.action || '') === 'refresh') {      // 保有銘柄のシートには触れない。二重起動は排他ロックでも防ぐ
+    var rl = LockService.getScriptLock();
+    rl.waitLock(10000);
+    try { return out_(refresh_()); } finally { rl.releaseLock(); }
+  }
 
   var lock = LockService.getScriptLock();
   lock.waitLock(10000);
