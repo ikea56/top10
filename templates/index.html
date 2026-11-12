@@ -38,6 +38,11 @@
 
   <!-- 相場環境の判定 -->
   {% set st = market.stance %}
+  {% set pm = st.premarket %}
+  {% if pm and pm.gap_down %}
+  <div class="banner danger gap-warn" role="alert">⚠ <b>本日はギャップダウンリスクあり</b>
+    <span>（{{ pm.gap_detail|join('、') }}／東証の前日引け比）。寄り付き直後は値動きが荒れやすいので、焦って新規で買わないでください。</span></div>
+  {% endif %}
   <section class="card stance stance-{{ st.key }}" id="stance">
     <h2>🧭 現在の相場判定</h2>
     <p class="stance-main"><span class="pill {{ st.cls }}">{{ st.emoji }} {{ st.label }}</span></p>
@@ -48,15 +53,30 @@
     <p class="stance-msg">{{ st.message }}</p>
     <p class="stance-sub"><b>運用ガイド</b></p>
     <ul class="stance-guide">{% for g in st.guide %}<li>{{ g }}</li>{% endfor %}</ul>
+    {% if st.pm_note %}<p class="pm-note">{{ st.pm_note }}</p>{% endif %}
     {% if st.note %}<p class="hint">{{ st.note }}</p>{% endif %}
-    <p class="hint">これは市場全体の状態です。{% if st.key == 'defense' %}防御優先でも、押し目ランキングは下に表示します（地合い点がマイナスになり、全体の点数が下がっています）。{% endif %}売りを勧めるものではなく、新規買いの積極度の目安です。</p>
+    {% if st.pm_warn %}<p class="hint">{{ st.pm_warn }}</p>{% endif %}
+    {% if pm and pm.items %}
+    <details class="pm-table"{% if pm.gap_down or pm.weak_hit %} open{% endif %}>
+      <summary>寄り付き前の指標（{{ pm.fetched_at }}時点・{{ pm.available }}/{{ pm.total }}件取得）</summary>
+      <div class="table-wrap"><table>
+        <thead><tr><th>指標</th><th>変化</th><th>見立て</th></tr></thead>
+        <tbody>{% for i in pm['items'] %}<tr class="pm-{{ i.status }}">
+          <th scope="row">{{ i.label }}{% if i.futures %}<small>重視</small>{% endif %}</th>
+          <td>{% if i.pct is not none %}{{ '%+.2f'|format(i.pct) }}%{% else %}—{% endif %}</td>
+          <td>{{ i.status_label }}{% if i.why and i.pct is none %}<small>{{ i.why }}</small>{% endif %}</td></tr>{% endfor %}</tbody>
+      </table></div>
+      <p class="hint">先物・ドル円は東証の前営業日の引け（15:30）から今朝まで、米国の指数は直近の取引日の前日比です。先物を重視して判定に反映しますが、<b>個別銘柄の順位・点数は変えていません</b>。</p>
+    </details>
+    {% endif %}
+    <p class="hint">これは市場全体の状態です。{% if st.key == 'defense' %}防御優先でも、押し目ランキングは下に表示します（寄り付き前の指標は順位・点数に反映していません。点数には過去の株価による地合い点だけが入っています）。{% endif %}売りを勧めるものではなく、新規買いの積極度の目安です。</p>
   </section>
 
   <!-- 市場状況 -->
   <section class="card market regime-{{ market.regime }}">
     <div class="market-head">
-      <h2>🌏 市場の状況</h2>
-      <span class="pill {{ {'good':'bull','neutral':'mild','bad':'bear'}[market.regime] }}">{{ market.label }}</span>
+      <h2>📈 TOPIX・日経平均の動き</h2>
+      <span class="pill {{ {'good':'bull','neutral':'mild','bad':'bear'}[market.regime] }}">TOPIXの地合い：{{ market.label }}</span>
     </div>
     <p>{{ market.comment }}</p>
   </section>
@@ -147,6 +167,18 @@
         {% for t in c.status %}<li>✅ {{ t }}</li>{% else %}<li class="none">押し目の条件を満たす項目は多くありません</li>{% endfor %}
       </ul>
     </section>
+
+    {% if c.lead %}
+    <section class="block lead lead-{{ c.lead.verdict }}">
+      <h4>【外部環境】<span class="lead-head">{{ c.lead.icon }} {{ c.lead.headline }}</span></h4>
+      {% if c.lead.available %}
+      <ul>
+        {% for i in c.lead['items'] if i.state != 'none' %}<li class="ld-{{ i.state }}">{{ i.mark }} {{ i.text }}</li>{% endfor %}
+      </ul>
+      <p class="hint">直近の米国市場などの動きです。順位への影響はごく小さく、押し目・業績・開示の評価が主役です。</p>
+      {% endif %}
+    </section>
+    {% endif %}
 
     <section class="block risk">
       <h4>【注意事項】</h4>
@@ -363,6 +395,11 @@
         TDnetは<b>補助レイヤー</b>で、押し目スコア上位{{ tdc.top_k }}銘柄だけを解析して加点・減点・除外を行います（TDnetから銘柄を探すものではありません）。
         {% if td.enabled %}今回の解析：{{ td.checked }}銘柄（除外 {{ td.excluded }}、取得失敗 {{ td.unavailable }}）。{% endif %}
         「予想」バッジの項目は会社・アナリストの公表予想に基づきます。</p>
+    </details>
+    <details>
+      <summary>【外部環境】とは</summary>
+      <p class="hint">その銘柄の業種に関係する、米国株・為替・金利・原油などの直近の動きです（例：半導体ならSOX指数やNVIDIA、自動車ならTeslaやドル円、銀行なら米国の金利）。🟢追い風・🟡影響は小さめ・🔴逆風で表示します。
+        <b>順位への影響はごく小さく</b>（総合点で最大±{{ '%.1f'|format(lead_max * pb_lead_effect) }}点、順位は上下{{ pb_lead_shift }}位まで）、押し目・業績・増配・自社株買いの評価が主役です。業種との対応はシステムが自動で決めるので、設定は不要です。</p>
     </details>
     <details>
       <summary>用語のかんたん解説</summary>

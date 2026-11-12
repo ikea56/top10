@@ -34,9 +34,10 @@ def render_site(ctx: dict[str, Any], out_dir: Path | None = None) -> Path:
     (out / ".nojekyll").write_text("", encoding="utf-8")
 
     keys = ("rank", "code", "name", "main", "pb_total", "td_score", "penalty", "parts", "label", "close",
-            "strengths", "status", "cautions", "explain", "legacy", "rank_change")
+            "strengths", "status", "cautions", "explain", "legacy", "rank_change", "main_base", "lead", "lead_pts")
     (out / "latest.json").write_text(json.dumps(
         {"generated_at": ctx["generated_iso"], "data_date": ctx["data_date_iso"], "demo": ctx["demo"],
+         "stance": {"key": ctx["market"]["stance"]["key"], "label": ctx["market"]["stance"]["label"]},
          "picks": [{k: c[k] for k in keys} for c in ctx["cards"]]}, ensure_ascii=False, indent=1), encoding="utf-8")
     return out / "index.html"
 

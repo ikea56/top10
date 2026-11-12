@@ -80,6 +80,110 @@ stance:
   ma_long: 200                 # 長期線（TOPIX）
   growth_ticker: "2516.T"      # 東証グロース市場250連動ETF（指数そのものは無料データに無いため）
 
+# ---- 寄り付き前の指標（先物・為替・米国株）。相場判定と「ギャップダウン注意」にだけ使い、個別銘柄の順位は変えません ----
+premarket:
+  enabled: true
+  max_age_hours: 14            # 最後の値がこれより古い指標は「古い」として判定に使わない
+  gap_down: -1.5               # 先物（日経225・TOPIX）が東証の前日引けからこの%以下 → 「ギャップダウンリスクあり」
+  downgrade_score: -0.35       # 加重平均の評価点（−1〜+1）がこれ以下なら、相場判定を一段階弱める
+  indicators:                  # weight：先物は3、その他は1（先物を重視）。weak/strong：変化率（%）の境目
+    - {key: n225f,  label: 日経225先物, ticker: "NIY=F",  mode: tokyo_close, weight: 3, weak: -1.0, strong: 0.5, futures: true, note: "CME・円建て"}
+    - {key: topixf, label: TOPIX先物,   ticker: "TPY=F",  mode: tokyo_close, weight: 3, weak: -1.0, strong: 0.5, futures: true, note: "CME・円建て（取引が少なく取得できない日があります）"}
+    - {key: usdjpy, label: ドル円,      ticker: "JPY=X",  mode: tokyo_close, weight: 1, weak: -1.0, strong: 0.7, note: "円高が弱材料"}
+    - {key: sp500,  label: S&P500,      ticker: "^GSPC",  mode: daily,       weight: 1, weak: -1.5, strong: 0.7}
+    - {key: nasdaq, label: NASDAQ,      ticker: "^IXIC",  mode: daily,       weight: 1, weak: -2.0, strong: 1.0}
+    - {key: sox,    label: SOX指数,     ticker: "^SOX",   mode: daily,       weight: 1, weak: -3.0, strong: 1.5}
+
+# ---- 業種別リード指標（外部環境）。直近で終了した米国市場・為替・商品などの動きから、業種ごとの追い風・逆風を ±5点で評価 ----
+# 企業の本質的な評価（押し目・業績・増配・自社株買い）が主役です。この点数は最後の微調整で、順位への反映は rank_effect 倍までです。
+# 業種ごとの参照先はここで自由に変更・追加できます（groups の上から順に、最初に合致したグループを使います）。
+lead:
+  enabled: true
+  max_points: 5                # 業種リードスコアの範囲（−5〜+5）
+  rank_effect: 0.5             # 総合点に足す割合（0.5なら最大±2.5点）。0にすると表示だけで順位は変えません
+  max_rank_shift: 3            # 業種リードで動く順位の上限（押し目・業績・開示だけで並べた順位から、上下この順位まで）
+  verdict_points: 1.5          # 画面の「追い風／逆風」の判定に使う点数の境目（±この点以上）
+  flat_band: 0.25              # 追い風・逆風とみなす強さの境目（0〜1）。これ未満は「横ばい」
+  max_age_days: 6              # 最後の値がこれより古い参照先は使わない（休日をまたぐ余裕）
+  # refs の項目：ticker（Yahoo）/ label / weight（重み）/ full（この変化率%で最大評価）/ invert（Trueなら上昇が逆風）
+  #            / kind（pct＝変化率、diff＝差分。金利のように%でなく差で見るもの）/ mode（daily＝直近の取引日の前日比、tokyo_close＝東証の前日引けから）
+  groups:
+    - key: semiconductor
+      label: 半導体
+      codes: ["8035", "6857", "6146", "6920", "7735", "6723", "6963", "3436", "6525", "4063", "7741"]  # 東エレク・アドバンテスト・ディスコ・レーザーテック・SCREEN・ルネサス・ローム・SUMCO・KOKUSAI・信越化学・HOYA（コードで指定）
+      refs:
+        - {ticker: "^SOX",  label: SOX指数,  weight: 2, full: 3.0}
+        - {ticker: "MU",    label: Micron,   weight: 1, full: 5.0}
+        - {ticker: "NVDA",  label: NVIDIA,   weight: 1, full: 5.0}
+        - {ticker: "AMD",   label: AMD,      weight: 1, full: 5.0}
+    - key: electronics
+      label: 電機・精密・機械
+      sectors: [電気機器, 精密機器, 機械]
+      refs:
+        - {ticker: "^SOX",  label: SOX指数,  weight: 1, full: 3.0}
+        - {ticker: "^IXIC", label: NASDAQ,   weight: 1, full: 2.0}
+        - {ticker: "JPY=X", label: ドル円,    weight: 1, full: 1.0, mode: tokyo_close}
+    - key: auto
+      label: 自動車
+      sectors: [輸送用機器]
+      refs:
+        - {ticker: "TSLA",  label: Tesla,    weight: 1, full: 5.0}
+        - {ticker: "GM",    label: GM,       weight: 1, full: 3.0}
+        - {ticker: "F",     label: Ford,     weight: 1, full: 3.0}
+        - {ticker: "JPY=X", label: ドル円,    weight: 2, full: 1.0, mode: tokyo_close}
+    - key: bank
+      label: 銀行
+      sectors: [銀行業]
+      refs:
+        - {ticker: "^TNX",  label: 米10年債利回り, weight: 2, full: 0.10, kind: diff}
+        - {ticker: "XLF",   label: XLF（米金融）,   weight: 1, full: 2.0}
+    - key: finance
+      label: 保険・証券・その他金融
+      sectors: [保険業, 証券、商品先物取引業, その他金融業]
+      refs:
+        - {ticker: "XLF",   label: XLF（米金融）,   weight: 1, full: 2.0}
+        - {ticker: "^TNX",  label: 米10年債利回り, weight: 1, full: 0.10, kind: diff}
+    - key: resources
+      label: 資源
+      sectors: [鉱業, 石油・石炭製品]
+      refs:
+        - {ticker: "CL=F",  label: WTI原油,   weight: 1, full: 3.0}
+        - {ticker: "BZ=F",  label: Brent原油, weight: 1, full: 3.0}
+    - key: utility
+      label: 電力・ガス
+      sectors: [電気・ガス業]
+      refs:
+        - {ticker: "CL=F",  label: WTI原油（燃料コスト）, weight: 1, full: 3.0, invert: true}
+    - key: metals
+      label: 鉄鋼・非鉄
+      sectors: [鉄鋼, 非鉄金属, 金属製品]
+      refs:
+        - {ticker: "HG=F",  label: 銅,       weight: 2, full: 2.5}
+        - {ticker: "^GSPC", label: S&P500,   weight: 1, full: 1.5}
+    - key: tech_service
+      label: 情報・ソフトウェア
+      sectors: [情報・通信業, サービス業]
+      refs:
+        - {ticker: "^IXIC", label: NASDAQ,   weight: 1, full: 2.0}
+        - {ticker: "IGV",   label: IGV（米ソフトウェア）, weight: 1, full: 2.5}
+    - key: pharma
+      label: 医薬品
+      sectors: [医薬品]
+      refs:
+        - {ticker: "XLV",   label: XLV（米ヘルスケア）, weight: 1, full: 1.5}
+    - key: realestate
+      label: 不動産・建設
+      sectors: [不動産業, 建設業]
+      refs:
+        - {ticker: "^TNX",  label: 米10年債利回り, weight: 2, full: 0.10, kind: diff, invert: true}
+        - {ticker: "VNQ",   label: VNQ（米不動産）,  weight: 1, full: 2.0}
+    - key: chemical
+      label: 化学
+      sectors: [化学]
+      refs:
+        - {ticker: "^GSPC", label: S&P500,   weight: 1, full: 1.5}
+        - {ticker: "CL=F",  label: WTI原油,   weight: 1, full: 3.0}
+
 # ---- 評価イベント（基本点に上乗せ。業績イベント＋株主還元＋同時発生ボーナス）----
 events:
   cap: 30                      # イベント点の上限

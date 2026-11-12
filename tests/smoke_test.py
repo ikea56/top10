@@ -509,6 +509,121 @@ def test_stance():
     print("ok  相場環境の判定（買い優勢/中立/防御優先・グロース欠損時・地合い点の減点）")
 
 
+def test_premarket():
+    from datetime import datetime, timedelta
+    from src import market as M, premarket as P
+    from src.config import JST
+    now = datetime(2026, 11, 13, 7, 10, tzinfo=JST)
+    ref = datetime(2026, 11, 12, 15, 30, tzinfo=JST)
+    idx = pd.date_range("2026-11-12 14:00", "2026-11-13 07:00", freq="15min", tz=JST)
+    s = pd.Series(100.0, index=idx); s[s.index > ref] = 97.0
+    r = P.change_since_tokyo_close(s, ref, now, 14)
+    assert r["status"] == "ok" and abs(r["pct"] + 3.0) < 1e-6, r
+    assert P.change_since_tokyo_close(s.iloc[:8], ref, now, 14)["status"] == "stale"        # 値が古い
+    assert P.change_since_tokyo_close(pd.Series(dtype=float), ref, now, 14)["status"] == "missing"
+    late = pd.Series(1.0, index=pd.date_range("2026-11-13 05:00", "2026-11-13 07:00", freq="15min", tz=JST))
+    assert P.change_since_tokyo_close(late, ref, now, 14)["status"] == "missing"             # 引け時点の値が無い
+    d = pd.Series([100.0, 98.0], index=pd.to_datetime(["2026-11-11", "2026-11-12"]).tz_localize(JST))
+    assert abs(P.change_daily(d, now, 14)["pct"] + 2.0) < 1e-6
+    ok = lambda p: {"status": "ok", "pct": p, "asof": "t"}  # noqa: E731
+    keys = ("n225f", "topixf", "usdjpy", "sp500", "nasdaq", "sox")
+    calm = P.evaluate({k: ok(0.1) for k in keys}, cfg, now)
+    assert not calm["gap_down"] and not calm["weak_hit"] and calm["available"] == 6
+    gap = P.evaluate({**{k: ok(0.0) for k in keys}, "n225f": ok(-1.6)}, cfg, now)
+    assert gap["gap_down"] and "日経225先物" in gap["gap_detail"][0]
+    # 先物は重み3：先物だけが弱い場合と、米国3指数だけが弱い場合で評価点が違う
+    only_f = P.evaluate({**{k: ok(0.0) for k in keys}, "n225f": ok(-1.2), "topixf": ok(-1.2)}, cfg, now)
+    only_us = P.evaluate({**{k: ok(0.0) for k in keys}, "sp500": ok(-2.0), "nasdaq": ok(-3.0), "sox": ok(-4.0)}, cfg, now)
+    assert only_f["score"] < only_us["score"] and only_f["weak_hit"] and not only_us["gap_down"]
+    miss = P.evaluate({}, cfg, now)
+    assert miss["score"] is None and miss["available"] == 0 and not miss["gap_down"]
+    # 判定への反映：弱める方向だけ
+    mk = lambda key: {"key": key, **M.STANCE[key], "reasons": [], "guide": list(M.STANCE[key]["guide"]), "label": M.STANCE[key]["label"]}  # noqa: E731
+    assert P.apply_to_stance(mk("buy"), gap, cfg)["key"] == "neutral"
+    assert P.apply_to_stance(mk("neutral"), gap, cfg)["key"] == "defense"
+    assert P.apply_to_stance(mk("defense"), gap, cfg)["key"] == "defense"
+    assert P.apply_to_stance(mk("buy"), only_f, cfg)["key"] == "neutral" and P.apply_to_stance(mk("neutral"), only_f, cfg)["key"] == "neutral"
+    strong = P.evaluate({k: ok(2.0) for k in keys}, cfg, now)
+    assert P.apply_to_stance(mk("defense"), strong, cfg)["key"] == "defense" and P.apply_to_stance(mk("neutral"), strong, cfg)["key"] == "neutral"
+    assert "先物による判定は行っていません" in P.apply_to_stance(mk("buy"), miss, cfg)["pm_warn"]
+    # 取得関数：一部が失敗しても他は使う
+    def dl(tk, period, interval):
+        if tk == "TPY=F":
+            raise RuntimeError("boom")
+        if interval == "15m":
+            return s
+        return d
+    got = P.fetch(cfg, pd.Timestamp("2026-11-12"), now, dl)
+    by = {i["key"]: i for i in got["items"]}
+    assert by["topixf"]["status"] == "missing" and by["n225f"]["status"] == "weak" and got["gap_down"]
+    print("ok  寄り付き前の指標（変化率・古い/欠損の扱い・先物重視・弱める方向のみ・一部失敗）")
+
+
+def test_lead():
+    from datetime import datetime
+    from src import lead as L
+    from src.config import JST
+    now = datetime(2026, 11, 13, 7, 10, tzinfo=JST)
+    mk = lambda code, sector: {"row": {"code": code, "sector": sector}}  # noqa: E731
+    # グループの選び方：コード指定が業種より優先（半導体は電気機器の中でも別扱い）
+    assert L.match_group("8035", "電気機器", cfg)["key"] == "semiconductor"
+    assert L.match_group("6501", "電気機器", cfg)["key"] == "electronics"
+    assert L.match_group("7203", "輸送用機器", cfg)["key"] == "auto" and L.match_group("8306", "銀行業", cfg)["key"] == "bank"
+    assert L.match_group("9999", "水産・農林業", cfg) is None
+    # 設定の点検：実在しない業種名・重複・必須項目の抜けを見つける
+    sectors33 = set("水産・農林業 鉱業 建設業 食料品 繊維製品 パルプ・紙 化学 医薬品 石油・石炭製品 ゴム製品 ガラス・土石製品 鉄鋼 非鉄金属 金属製品 機械 電気機器 輸送用機器 精密機器 その他製品 電気・ガス業 陸運業 海運業 空運業 倉庫・運輸関連業 情報・通信業 卸売業 小売業 銀行業 証券、商品先物取引業 保険業 その他金融業 不動産業 サービス業".split())
+    assert L.check_config(cfg, sectors33) == [], L.check_config(cfg, sectors33)
+    bad = {**cfg, "lead": {**cfg["lead"], "groups": cfg["lead"]["groups"] + [{"key": "auto", "label": "x", "sectors": ["存在しない業"], "refs": [{"ticker": "A"}]}]}}
+    assert len(L.check_config(bad, sectors33)) >= 3
+    # スコア：上昇は追い風、下落は逆風、invert は反対、金利は差（bp）、欠損は無視して小さく
+    ok = lambda **k: {"status": "ok", **k}  # noqa: E731
+    semi = L.match_group("8035", "電気機器", cfg)
+    up = {(r["ticker"], r.get("mode", "daily")): ok(pct=10.0) for r in semi["refs"]}
+    ev = L.evaluate(semi, up, cfg)
+    assert ev["score"] == cfg["lead"]["max_points"] and all(i["state"] == "good" for i in ev["items"]) and "上昇" in ev["items"][0]["text"]
+    down = {k: ok(pct=-10.0) for k in up}
+    assert L.evaluate(semi, down, cfg)["score"] == -cfg["lead"]["max_points"]
+    dv = L.evaluate(semi, down, cfg)["items"][0]
+    assert dv["mark"] == "⚠" and "下落" in dv["text"]
+    part = {k: v for k, v in list(up.items())[:1]}                               # 重み2/5だけ取得できた場合
+    ev2 = L.evaluate(semi, part, cfg)
+    assert 0 < ev2["score"] < cfg["lead"]["max_points"] and ev2["available"] == 1 and ev2["items"][1]["text"] == "取得できず"
+    assert L.evaluate(semi, {}, cfg)["score"] == 0.0 and L.evaluate(semi, {}, cfg)["verdict"] == "none"
+    assert ev["verdict"] == "good" and "追い風" in ev["headline"] and L.evaluate(semi, down, cfg)["verdict"] == "bad" and "逆風" in L.evaluate(semi, down, cfg)["headline"]
+    util = L.match_group("9501", "電気・ガス業", cfg)                              # 原油上昇は電力の逆風
+    assert L.evaluate(util, {("CL=F", "daily"): ok(pct=6.0)}, cfg)["score"] < 0
+    bank = L.match_group("8306", "銀行業", cfg)
+    e = L.evaluate(bank, {("^TNX", "daily"): ok(pct=1.0, diff=0.10), ("XLF", "daily"): ok(pct=0.0)}, cfg)
+    assert e["score"] > 0 and "bp" in e["items"][0]["text"]
+    # 取得：一部が失敗しても他は使う
+    refs = L.needed_refs([mk("8035", "電気機器"), mk("8306", "銀行業"), mk("9999", "水産・農林業")], cfg)
+    assert ("^SOX", "daily") in refs and ("^TNX", "daily") in refs and len(refs) == len(semi["refs"]) + len(bank["refs"])
+    def dl(tk, period, interval):
+        if tk == "NVDA":
+            raise RuntimeError("boom")
+        return L.demo_download(tk, period, interval)
+    rd = L.fetch_readings(refs, cfg, pd.Timestamp(now.date()) - pd.Timedelta(days=1), datetime.now(JST), dl)
+    assert rd[("NVDA", "daily")]["status"] == "missing" and rd[("^SOX", "daily")]["status"] == "ok"
+    # 順位への影響は補助的：本質的な評価の順から、動くのは max_rank_shift まで。総合点は順位と矛盾しない
+    import random
+    rnd = random.Random(3)
+    items = [{"row": {"code": str(i)}, "main_base": 80 - i * 0.3, "pb_total": 80 - i * 0.3, "legacy_expected": 0.0,
+              "lead_pts": rnd.uniform(-2.5, 2.5)} for i in range(40)]
+    base_pos = {c["row"]["code"]: i for i, c in enumerate(items)}
+    s = cfg["lead"]["max_rank_shift"]
+    order = L.finalize(items, cfg)
+    assert sorted(c["row"]["code"] for c in order) == sorted(base_pos)
+    assert all(abs(i - base_pos[c["row"]["code"]]) <= s for i, c in enumerate(order)), "順位が動きすぎ"
+    mains = [c["main"] for c in order]
+    assert mains == sorted(mains, reverse=True), "総合点が順位と矛盾"
+    assert all(abs(c["lead_pts"]) <= 2.5 + 1e-9 for c in order)
+    zero = [dict(c, lead_pts=0.0) for c in items]
+    assert [c["row"]["code"] for c in L.finalize(zero, cfg)] == [c["row"]["code"] for c in items]      # 影響0なら並びは変わらない
+    txt = json.dumps(cfg["lead"], ensure_ascii=False)
+    assert not any(w in txt for w in FORBIDDEN)
+    print("ok  業種リード指標（グループ選定・スコア・欠損・順位の上限・設定の点検）")
+
+
 def test_end_to_end():
     for cmd in (["-m", "src.backtest", "--demo"], ["-m", "src.main", "--demo"]):
         res = subprocess.run([sys.executable, *cmd], cwd=ROOT, capture_output=True, text=True)
@@ -519,7 +634,7 @@ def test_end_to_end():
         assert 0 < len(p["explain"]) <= 100, p["name"]
         assert not any(w in p["explain"] for w in FORBIDDEN)
         assert set(p["parts"]) == {"trend", "drawdown", "ma50", "volume", "strength", "quality", "market"}
-        assert p["main"] == p["pb_total"] + p["td_score"] or abs(p["main"] - p["pb_total"] - p["td_score"]) <= 1
+        assert abs(p["main"] - p["lead_pts"] - p["main_base"]) <= 0.11 and abs(p["lead_pts"]) <= cfg["lead"]["max_points"] * cfg["lead"]["rank_effect"] + 1e-6
         assert isinstance(p["cautions"], list) and "legacy" in p
     mains = [p["main"] for p in d["picks"]]
     assert mains == sorted(mains, reverse=True), "総合点の順になっていない"
@@ -535,7 +650,7 @@ def test_end_to_end():
         assert k in summ["periods"]["5y"], k
     html = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
     for word in ("【強み】", "【押し目状況】", "【注意事項】", "押し目スコア", "イベント点", "なぜ選ばれた",
-                 "補助指標", "期間別の成績", "excluded_events.csv", "推奨撤退ライン", "リスク幅", "ATR", "有効性の検証", "点数帯ごとの成績", "現在の相場判定", "運用ガイド"):
+                 "補助指標", "期間別の成績", "excluded_events.csv", "推奨撤退ライン", "リスク幅", "ATR", "有効性の検証", "点数帯ごとの成績", "現在の相場判定", "運用ガイド", "本日はギャップダウンリスクあり", "寄り付き前の指標", "【外部環境】", "順位への影響はごく小さく"):
         assert word in html, word
     # ㉒ 保有銘柄：暗号化ファイル・名前一覧・前回比較・3ブロック
     from src import holdings as H
@@ -569,6 +684,6 @@ def test_end_to_end():
 if __name__ == "__main__":
     for fn in (test_config_and_weights, test_momentum_points, test_no_lookahead, test_events,
                test_dividend_and_exclusion, test_expected_and_metrics, test_text, test_pullback, test_tdnet, test_accuracy_21, test_holdings,
-               test_excluded_csv, test_data_fixes, test_validation, test_stance, test_end_to_end):
+               test_excluded_csv, test_data_fixes, test_validation, test_stance, test_premarket, test_lead, test_end_to_end):
         fn()
     print("\nALL OK")

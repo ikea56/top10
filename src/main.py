@@ -15,7 +15,7 @@ from typing import Any, Callable
 
 import pandas as pd
 
-from . import (backtest, charts, events, explain, features, fundamentals, holdings, movers, pullback, rankings,
+from . import (lead, premarket, backtest, charts, events, explain, features, fundamentals, holdings, movers, pullback, rankings,
                scoring, tdnet, tdnet_events)
 from .config import JST, Config, ConfigError, load_config, load_exclude_codes, load_themes
 from .log import get_logger
@@ -195,7 +195,8 @@ def make_cards(top: list[dict], f: features.Features, panel: features.Panel, the
     cards: list[dict] = []
     for rank, x in enumerate(top, 1):
         r, fund, ev, td, tk = x["row"], x["fund"], x["ev"], x["td"], x["ticker"]
-        main, td_score, down_pen, down_src = final_score(x, cfg)
+        main, td_score, down_pen, down_src = final_score(x, cfg)        # 業種リードを含まない（本質的な評価）
+        lead_pts = float(x.get("lead_pts", 0.0))
         label, css, note = pullback.label(main, tdnet_events.serious_negative(td, fund, cfg), cfg)
         if note:
             note = "直近30日以内に下方修正があるため" if down_src else "減配の開示があるため"
@@ -211,7 +212,8 @@ def make_cards(top: list[dict], f: features.Features, panel: features.Panel, the
             "rank": rank, "code": r["code"], "name": r["name"], "market": r["market"], "sector": r["sector"],
             "themes": rankings.themes_of(r["code"], themes),
             "close": float(r["close"]), "ret1d": None if r["ret1d"] != r["ret1d"] else float(r["ret1d"]) * 100,
-            "main": round(main, 1), "pb_total": round(x["pb_total"], 1), "td_score": round(td_score),
+            "main": round(main + lead_pts, 1), "main_base": round(main, 1), "lead": x.get("lead"), "lead_pts": round(lead_pts, 1),
+            "pb_total": round(x["pb_total"], 1), "td_score": round(td_score),
             "penalty": round(float(r["pb_penalty"]) + x["earn_pen"]), "earn_pen": round(x["earn_pen"]),
             "down_pen": round(down_pen), "market_pts": round(float(r["pb_market"])),
             "parts": {k: [round(float(a), 1), b] for k, (a, b) in parts.items()},
@@ -391,9 +393,31 @@ def run(demo: bool) -> None:
     excluded_rows += td_rows
 
     for c in kept:
-        c["main"] = final_score(c, cfg)[0]
-    kept.sort(key=lambda c: (c["main"], c["pb_total"], c["legacy_expected"]), reverse=True)   # 同点は押し目スコア→従来の期待値の順
+        c["main_base"] = final_score(c, cfg)[0]          # 本質的な評価（押し目・業績・還元・開示）。ラベルはこの点で決める
+        c["lead"], c["lead_pts"] = None, 0.0
+    for msg in (lead.check_config(cfg, set(universe["sector"])) if cfg["lead"]["enabled"] and not demo else []):
+        log.warning("lead設定: %s", msg)
+    if cfg["lead"]["enabled"] and kept:                   # 業種リード指標（外部環境）。最後の微調整として少しだけ足す
+        try:
+            refs = lead.needed_refs(kept, cfg)
+            lead_now = datetime.now(JST)
+            readings = (lead.fetch_readings(refs, cfg, data_date, lead_now, lead.demo_download) if demo
+                        else lead.fetch_readings(refs, cfg, data_date, lead_now))
+            lead.apply(kept, readings, cfg)
+            got = sum(1 for r in readings.values() if r.get("status") == "ok")
+            log.info("業種リード指標: 参照先%d件中%d件取得、対象%d銘柄", len(readings), got, sum(1 for c in kept if c["lead"]))
+        except Exception as e:  # noqa: BLE001 外部指標が取れなくても、ランキングは出す
+            log.warning("業種リード指標の処理に失敗しました（外部環境なしで表示します）: %s", e)
+            for c in kept:
+                c["lead"], c["lead_pts"] = None, 0.0
+    before = [c["row"]["code"] for c in sorted(kept, key=lambda c: (c["main_base"], c["pb_total"], c["legacy_expected"]), reverse=True)[:cfg["top_n"]]]
+    kept = lead.finalize(kept, cfg)                      # 総合点＝本質的な評価＋業種リード（少し）。同点は押し目スコア→従来の期待値の順
     top = kept[:cfg["top_n"]]
+    after = [c["row"]["code"] for c in top]
+    if any(c["lead_pts"] for c in kept):
+        log.info("業種リードによる順位変動: 入れ替え%d銘柄／位置が変わった銘柄%d（総合点への反映は最大±%.1f点）",
+                 len(set(after) - set(before)), sum(1 for a, b in zip(after, before) if a != b),
+                 cfg["lead"]["max_points"] * cfg["lead"]["rank_effect"])
     if not top:
         raise RuntimeError("ランキングが0件です（業績取得が全滅した可能性）。時間をおいて再実行してください")
     cards = make_cards(top, f, panel, themes, market["regime"], nikkei_ok, cfg, today)
@@ -434,6 +458,19 @@ def run(demo: bool) -> None:
         cnt = Counter(h["action"]["text"] for h in hold_cards)
         log.info("保有銘柄の監視: %d銘柄（%s）", len(hold_cards), " / ".join(f"{k}{v}" for k, v in cnt.items()) or "なし")
 
+    # ④ 寄り付き前の指標（先物・為替・米国株）。朝に動くものなので、取得は最後にする。判定と注意喚起にだけ使い、順位は変えない
+    if cfg["premarket"]["enabled"]:
+        pm_now = datetime.now(JST)
+        pm = {"items": [], "score": None, "gap_down": False, "gap_detail": [], "available": 0, "total": 0, "futures_available": 0,
+              "fetched_at": None, "weak_hit": False}
+        try:
+            pm = (premarket.evaluate(premarket.demo_readings("gapdown"), cfg, pm_now) if demo
+                  else premarket.fetch(cfg, data_date, pm_now))
+        except Exception as e:  # noqa: BLE001 寄り前の指標が取れなくても、ランキングは出す
+            log.warning("寄り付き前の指標の処理に失敗しました（過去データの判定のまま表示します）: %s", e)
+        market["stance"] = premarket.apply_to_stance(market["stance"], pm, cfg)
+        log.info("寄り付き前の指標: %d/%d件取得 評価点%s ギャップダウン注意=%s 相場判定=%s", pm["available"], pm["total"],
+                 "—" if pm["score"] is None else f"{pm['score']:+.2f}", pm["gap_down"], market["stance"]["label"])
     save_history(hist_dir, data_date, cards, market, demo, ranking)
     forward = backtest.forward_stats(panel, bench["topix"], cfg, hist_dir)
     now = datetime.now(JST)
@@ -454,7 +491,7 @@ def run(demo: bool) -> None:
         "movers": mover, "prev_date": prev_date, "mv": mv, "change_summary": summary_changes,
         "hold": {"endpoint": endpoint, "enabled": bool(endpoint), "demo": demo, "n": None if hold_cards is None else len(hold_cards)},
         "pb": pb, "w": cfg["weights"], "tdc": cfg["tdnet"], "ev": cfg["events"], "es": cfg["expected_score"],
-        "top_n": cfg["top_n"], "min_turnover_oku": cfg["filters"]["min_turnover_yen"] / 1e8, "min_price": cfg["filters"]["min_price"],
+        "lead_max": cfg["lead"]["max_points"], "pb_lead_effect": cfg["lead"]["rank_effect"], "pb_lead_shift": cfg["lead"]["max_rank_shift"], "top_n": cfg["top_n"], "min_turnover_oku": cfg["filters"]["min_turnover_yen"] / 1e8, "min_price": cfg["filters"]["min_price"],
     }
     out = render_site(ctx)
     write_excluded_csv(excluded_rows, out.parent / "excluded_events.csv")

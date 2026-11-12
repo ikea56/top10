@@ -296,3 +296,15 @@ details.legacy summary { font-size: .82rem; font-weight: 600; color: var(--sub);
 .stance .pill{font-size:1.1rem;padding:5px 16px}
 .stance-sub{margin:10px 0 2px}.stance ul{margin:2px 0 6px;padding-left:1.3em}
 .stance-msg{font-weight:700;margin:8px 0}
+
+.gap-warn{font-size:1rem;border-width:2px}.gap-warn span{display:block;font-size:.9rem;margin-top:2px}
+.pm-note{margin:8px 0;padding:8px 10px;border-radius:8px;background:var(--yellow-bg);border:1px solid var(--yellow)}
+.pm-table small{display:block;opacity:.75;font-size:.75rem}
+.pm-table tr.pm-weak td:nth-child(2),.pm-table tr.pm-weak td:nth-child(3){color:var(--red);font-weight:700}
+.pm-table tr.pm-strong td:nth-child(2){color:var(--green);font-weight:700}
+.pm-table tr.pm-missing,.pm-table tr.pm-stale{opacity:.6}
+
+.block.lead h4 small{font-weight:400;margin-left:.5em;opacity:.7}
+.block.lead li.ld-good{color:inherit}.block.lead li.ld-bad{color:var(--red);font-weight:600}
+.block.lead li.ld-flat,.block.lead li.ld-none{opacity:.65}
+.block.lead .lead-head{font-weight:700;margin-left:.5em;font-size:.95rem}
