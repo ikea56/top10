@@ -8,9 +8,11 @@
  *   （任意）保有銘柄を変更した直後にサイトを再生成したい場合だけ、スクリプトプロパティに
  *   GITHUB_TOKEN（Actions の書き込み権限だけの細かい権限のトークン）と GITHUB_REPO（例: ikea56/top10）を入れます。
  *
- * ・「ランキング再生成」ボタン（action: refresh）も、同じ GITHUB_TOKEN / GITHUB_REPO を使います。
- *   すでに実行中なら二重に起動せず、短時間の連打も防ぎます。トークンはこのスクリプトの中（Google側）にだけあります。
+ * ・「ランキング再生成」ボタン（action: refresh）は合言葉なしで使えます（個人用）。同じ GITHUB_TOKEN / GITHUB_REPO を使い、
+ *   すでに実行中なら二重に起動せず、2分以内の連打も防ぎます。トークンはこのスクリプトの中（Google側）にだけあります。
+ *   ※保有銘柄の操作（list/add/remove）は、従来どおり合言葉が必要です。
  */
+var VERSION = 3;                         // Code.gs の版（ブラウザで /exec を開いたときに表示。更新できているかの確認用）
 var SHEET_NAME = 'holdings';
 var MAX_HOLDINGS = 50;
 var CODE_RE = /^[0-9]{3}[0-9A-Z]$/;      // 4桁の証券コード（新コード 285A 形式を含む）
@@ -99,12 +101,14 @@ function refresh_() {                     // 手動更新：daily-update を起�
     cache.put('refresh_last', '1', 120);
     return { ok: true, state: 'started', requested_at: requestedAt };
   } catch (e) {
-    return { ok: false, error: 'github_error', detail: String(e).slice(0, 80) };
+    return { ok: false, error: 'github_error', detail: String(e).slice(0, 120) };
   }
 }
 
-function doGet() {                        // ブラウザで直接開いたとき（動作確認用。データは返さない）
-  return out_({ ok: true, service: 'holdings', note: 'POSTで利用します' });
+function doGet() {                        // ブラウザで直接開いたとき（動作確認用。保有銘柄などのデータは返さない）
+  var p = PropertiesService.getScriptProperties();
+  return out_({ ok: true, service: 'holdings', version: VERSION, refresh_ready: !!(p.getProperty('GITHUB_TOKEN') && p.getProperty('GITHUB_REPO')),
+                note: 'POSTで利用します' });
 }
 
 function doPost(e) {
@@ -113,6 +117,15 @@ function doPost(e) {
     req = JSON.parse(e.postData.contents);
   } catch (err) {
     return out_({ ok: false, error: 'bad_request' });
+  }
+  if (String(req.action || '') === 'refresh') {      // 手動更新：合言葉は不要。保有銘柄のシートには触れない。二重起動は排他ロックでも防ぐ
+    try {
+      var rl = LockService.getScriptLock();
+      rl.waitLock(10000);
+      try { return out_(refresh_()); } finally { rl.releaseLock(); }
+    } catch (err) {
+      return out_({ ok: false, error: 'script_error', detail: String(err).slice(0, 120) });
+    }
   }
   var props = PropertiesService.getScriptProperties();
   var secret = props.getProperty('PASSPHRASE');
@@ -126,12 +139,6 @@ function doPost(e) {
     return out_({ ok: false, error: 'unauthorized' });
   }
   cache.remove('fails');
-
-  if (String(req.action || '') === 'refresh') {      // 保有銘柄のシートには触れない。二重起動は排他ロックでも防ぐ
-    var rl = LockService.getScriptLock();
-    rl.waitLock(10000);
-    try { return out_(refresh_()); } finally { rl.releaseLock(); }
-  }
 
   var lock = LockService.getScriptLock();
   lock.waitLock(10000);
