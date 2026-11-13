@@ -1,5 +1,5 @@
 /* 手動更新（「ランキング再生成」ボタン）。
- * ・GitHubのトークンはブラウザに持ちません。更新の起動は Apps Script（保有銘柄と同じ保存先スクリプト）に依頼し、トークンはそちらにだけあります。
+ * ・GitHubのトークンはブラウザに持ちません。更新の起動は Apps Script（保有銘柄と同じ保存先スクリプト）に依頼し、トークンはそちらにだけあります。合言葉は不要です（個人用）。
  * ・更新の進み具合は、GitHubの公開情報（認証なし）を読んで表示します。
  * ・すでに実行中なら二重に起動しません（Apps Script側でも確認し、GitHub Actionsも同時に1つしか走らせません）。 */
 (function (g) {
@@ -26,15 +26,34 @@
   const root = document.getElementById('refresh');
   if (!root) return;
   const $ = function (id) { return document.getElementById(id); };
-  const btn = $('rfBtn'), stat = $('rfStatus'), msgEl = $('rfMsg'), form = $('rfPass'), input = $('rfInput');
-  const ERR = {
-    unauthorized: '合言葉が違います', locked: '失敗が続いたため15分ほどロックされています',
-    not_configured: 'サーバー側の合言葉が未設定です（README参照）',
-    github_not_configured: '手動更新の設定がまだ完了していません（README「手動更新ボタンの設定」を確認）',
-    dispatch_failed: '更新を開始できませんでした（トークンの権限を確認してください）',
-    github_error: 'GitHubに接続できませんでした。少し待ってからもう一度お試しください', bad_request: '送信内容が正しくありません'
-  };
-  let pass = null, running = false, timer = null, startedAt = 0, sinceMs = 0, watching = false;
+  const btn = $('rfBtn'), stat = $('rfStatus'), msgEl = $('rfMsg');
+  // 失敗の理由を、原因と直し方が分かる文にする（res.status は GitHub の応答番号、res.detail は詳細）
+  function explain(res) {
+    const d = res.detail ? '（' + res.detail + '）' : '';
+    switch (res.error) {
+      case 'network': return '更新用のサーバー（Apps Script）に接続できませんでした。通信状況を確認して、もう一度お試しください。';
+      case 'bad_action': return 'Apps Script が古いままです。README「手動更新ボタンの設定」の手順2・3（Code.gs の置き換えと、新バージョンでの再デプロイ）を行ってください。';
+      case 'github_not_configured': return '手動更新の設定がまだ完了していません。Apps Script のスクリプトプロパティに GITHUB_TOKEN と GITHUB_REPO を入れてください（README「手動更新ボタンの設定」）。';
+      case 'dispatch_failed': {
+        const s = Number(res.status);
+        if (s === 401) return 'GitHubのトークンが無効か、期限切れです。新しいトークンを作り、GITHUB_TOKEN を入れ替えてください。';
+        if (s === 403) return 'トークンに Actions の書き込み権限がありません。トークンの Actions を「Read and write」にして作り直してください。';
+        if (s === 404) return 'リポジトリ名（GITHUB_REPO）かワークフロー名が違うか、トークンの対象リポジトリに含まれていません。';
+        if (s === 422) return 'ブランチ名が違うようです（既定は main）。スクリプトプロパティ GITHUB_BRANCH に正しいブランチ名を入れてください。';
+        return '更新を開始できませんでした（GitHubの応答 ' + (res.status || '不明') + '）。';
+      }
+      case 'github_error': {
+        const raw = String(res.detail || '');
+        if (/permission|権限|authorization/i.test(raw)) return 'Apps Script に外部通信の許可がありません。Apps Script のエディタで、関数 refresh_ を選んで「実行」し、許可を承認してから再デプロイしてください。';
+        if (/runs_401|runs_403/.test(raw)) return 'トークンの権限が足りません。Actions を「Read and write」にして作り直してください。';
+        if (/runs_404/.test(raw)) return 'リポジトリ名（GITHUB_REPO）が違うか、トークンの対象リポジトリに含まれていません。';
+        return 'GitHubに接続できませんでした' + d + '。少し待ってからもう一度お試しください。';
+      }
+      case 'script_error': return 'Apps Script の処理でエラーが出ました' + d + '。';
+      default: return '更新を開始できませんでした（' + (res.error || '不明なエラー') + '）' + d + '。';
+    }
+  }
+  let running = false, timer = null, startedAt = 0, sinceMs = 0, watching = false;
 
   function setStatus(kind, text) { stat.className = 'rf-status rf-' + kind; stat.textContent = text; }
   function say(text, kind) { msgEl.className = 'hint rf-msg ' + (kind || ''); msgEl.textContent = text || ''; }
@@ -87,24 +106,18 @@
     }
   }
 
-  async function request(key) {
-    let res;
+  async function request() {
     try {
       const r = await fetch(cfg.endpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ key: key, action: 'refresh' }) });
-      res = await r.json();
-    } catch (e) { res = { ok: false, error: 'github_error' }; }
-    return res;
+        body: JSON.stringify({ action: 'refresh' }) });
+      return await r.json();
+    } catch (e) { return { ok: false, error: 'network' }; }
   }
 
-  async function start(key) {
+  async function start() {
     lock(true); setStatus('run', '処理中...'); say('更新を依頼しています…', '');
-    const res = await request(key);
-    if (!res.ok) {
-      if (res.error === 'unauthorized' || res.error === 'locked') pass = null;
-      setStatus('err', 'エラー'); say(ERR[res.error] || ('エラー: ' + res.error), 'err'); lock(false); return;
-    }
-    pass = key;
+    const res = await request();
+    if (!res.ok) { setStatus('err', 'エラー'); say(explain(res), 'err'); lock(false); return; }
     startedAt = Date.now();
     if (res.state === 'already_running') { sinceMs = Date.parse(res.requested_at) - 1000 || 0; say('すでに更新中です。二重には起動していません。', ''); }
     else if (res.state === 'too_soon') { sinceMs = Date.now() - 150000; say('直前に更新を開始したばかりです。その更新の完了を待ちます。', ''); }
@@ -114,15 +127,7 @@
 
   btn.addEventListener('click', function () {
     if (running) return say('更新中です。完了までお待ちください。', '');
-    const known = pass || (g.HoldingsLib && g.HoldingsLib.getPass && g.HoldingsLib.getPass());
-    if (known) return start(known);
-    form.hidden = false; input.focus();
-    say('更新の実行には合言葉が必要です（保有銘柄と同じ合言葉）。', '');
-  });
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    const v = input.value; if (!v) return;
-    input.value = ''; form.hidden = true; start(v);
+    start();
   });
 
   // 開いたとき：すでに更新中か、直近の更新が失敗していないかを表示（認証不要）
