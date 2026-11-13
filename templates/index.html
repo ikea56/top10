@@ -24,6 +24,7 @@
       <span>最終更新：{{ generated_hm }}</span>
       <span>データ基準日：{{ data_date_label }} 終値</span>
     </p>
+    <p class="meta"><a class="back" href="tracking.html">📊 追跡・検証ページ（載った銘柄のその後）</a></p>
   </div>
 </header>
 
@@ -244,6 +245,7 @@
   <!-- ② 急上昇・急下降 -->
   <section class="panel" id="movers">
     <h2>🔄 急上昇・急下降銘柄（前回ランキングとの比較）</h2>
+    <p class="hint"><a href="tracking.html">📊 載った銘柄のその後を毎日追跡した「追跡・検証ページ」はこちら</a></p>
     {% if movers %}
     <p class="hint">前回（{{ prev_date }}）の記録との比較です。順位は総合点の順位で、トップ{{ mv.show_top }}の出入りと、{{ mv.jump }}位以上の変動を表示します。</p>
     {% for key, title in (('new','🆕 新規ランクイン'),('up','📈 急上昇'),('down','📉 急下降'),('out','🚪 ランクアウト')) %}

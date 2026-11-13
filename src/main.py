@@ -16,7 +16,7 @@ from typing import Any, Callable
 
 import pandas as pd
 
-from . import (lead, premarket, backtest, charts, events, explain, features, fundamentals, holdings, movers, pullback, rankings,
+from . import (lead, tracking, premarket, backtest, charts, events, explain, features, fundamentals, holdings, movers, pullback, rankings,
                scoring, tdnet, tdnet_events)
 from .config import JST, Config, ConfigError, load_config, load_exclude_codes, load_themes
 from .log import get_logger
@@ -502,6 +502,12 @@ def run(demo: bool) -> None:
                  "—" if pm["score"] is None else f"{pm['score']:+.2f}", pm["gap_down"], market["stance"]["label"])
     st.lap("外部指標取得（先物など）")
     save_history(hist_dir, data_date, cards, market, demo, ranking)
+    tr = None
+    try:       # 追跡・検証ページ：トップに載った全銘柄を、載った日から毎日追跡
+        tr = tracking.build(panel, bench["topix"], hist_dir, hist_dir.parent / "tracking_ledger.json", cfg)
+        log.info("追跡: %d件（掲載中%d・買値待ち%d）", tr["stats"]["n_total"], tr["stats"]["n_listed"], tr["stats"]["n_pending"])
+    except Exception as e:  # noqa: BLE001 追跡の失敗でランキングを止めない
+        log.warning("追跡・検証の集計に失敗しました（ランキングは通常どおり更新します）: %s", e)
     forward = backtest.forward_stats(panel, bench["topix"], cfg, hist_dir)
     now = datetime.now(JST)
     pb = cfg["pullback"]
@@ -520,6 +526,7 @@ def run(demo: bool) -> None:
         "n_excluded_events": len(excluded_rows),
         "movers": mover, "prev_date": prev_date, "mv": mv, "change_summary": summary_changes,
         "hold": {"endpoint": endpoint, "enabled": bool(endpoint), "demo": demo, "n": None if hold_cards is None else len(hold_cards)},
+        "tr": tr, "tcfg": cfg["tracking"],
         "pb": pb, "w": cfg["weights"], "tdc": cfg["tdnet"], "ev": cfg["events"], "es": cfg["expected_score"],
         "lead_max": cfg["lead"]["max_points"], "pb_lead_effect": cfg["lead"]["rank_effect"], "pb_lead_shift": cfg["lead"]["max_rank_shift"], "top_n": cfg["top_n"], "min_turnover_oku": cfg["filters"]["min_turnover_yen"] / 1e8, "min_price": cfg["filters"]["min_price"],
     }

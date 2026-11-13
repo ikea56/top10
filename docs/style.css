@@ -319,3 +319,23 @@ details.legacy summary { font-size: .82rem; font-weight: 600; color: var(--sub);
 .rf-actions .btn{min-height:44px}.rf-actions button:disabled{opacity:.55}
 .rf-msg.err{color:var(--red);font-weight:600}.rf-msg.ok{color:var(--green)}
 .rf-actions [hidden]{display:none!important}
+
+/* ===== 追跡・検証ページ ===== */
+.back{color:#cfe0ff;text-decoration:underline}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.tile{background:var(--gray-bg);border-radius:10px;padding:10px 12px}.tile .k{display:block;font-size:.75rem;color:var(--sub)}.tile b{font-size:1.25rem}
+.pos{color:var(--green)}.neg{color:var(--red)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:999px;padding:6px 14px;min-height:36px;font-size:.85rem}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+table.trk th small,table.trk td small{display:block;font-weight:400;color:var(--sub);font-size:.72rem}
+table.trk tr.entry{cursor:pointer}table.trk tr.entry:hover{background:var(--gray-bg)}
+table.trk td,table.trk th{white-space:nowrap}
+.st{font-size:.78rem;padding:2px 8px;border-radius:999px;border:1px solid var(--gray);color:var(--sub)}.st-on{border-color:var(--green);color:var(--green)}
+.spark{display:block}.spark.up{color:var(--green)}.spark.down{color:var(--red)}.spark .z{stroke:var(--gray);stroke-dasharray:2 2;stroke-width:1}
+.avgchart .l-pick{stroke:var(--accent)}.avgchart .d-pick{fill:var(--accent)}.avgchart .l-bench{stroke:var(--gray)}.avgchart .d-bench{fill:var(--gray)}
+.avgchart .zero{stroke:var(--line);stroke-dasharray:3 3}.avgchart .tick{fill:var(--sub);font-size:9px}
+.chartbox{margin-top:10px}.legend{display:flex;gap:14px;font-size:.8rem;margin:2px 0}.lg.pick{color:var(--accent)}.lg.bench{color:var(--gray)}
+table.daily{font-size:.85rem}tr.detail td{background:var(--gray-bg)}
+.card h3{font-size:.95rem;margin:12px 0 4px}
+.card .table-wrap th{white-space:nowrap}.center{text-align:center}

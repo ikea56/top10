@@ -32,6 +32,14 @@ def render_site(ctx: dict[str, Any], out_dir: Path | None = None) -> Path:
     shutil.copy(ROOT / "static" / "style.css", out / "style.css")
     shutil.copy(ROOT / "static" / "holdings.js", out / "holdings.js")
     shutil.copy(ROOT / "static" / "refresh.js", out / "refresh.js")
+    shutil.copy(ROOT / "static" / "tracking.js", out / "tracking.js")
+    if ctx.get("tr") is not None:
+        from . import tracking as T
+        tr = ctx["tr"]
+        (out / "tracking.html").write_text(env.get_template("tracking.html").render(
+            **ctx, chart=T.avg_chart_svg(tr["stats"]), sparks={r["key"]: T.spark_svg(r.get("spark")) for r in tr["entries"]},
+            horizons=ctx["tcfg"]["horizons"], max_days=ctx["tcfg"]["max_days"], reentry_gap=ctx["tcfg"]["reentry_gap"]), encoding="utf-8")
+        T.write_files(out, tr, ctx["generated_iso"])
     (out / ".nojekyll").write_text("", encoding="utf-8")
 
     keys = ("rank", "code", "name", "main", "pb_total", "td_score", "penalty", "parts", "label", "close",

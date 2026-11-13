@@ -624,6 +624,81 @@ def test_lead():
     print("ok  業種リード指標（グループ選定・スコア・欠損・順位の上限・設定の点検）")
 
 
+def _tracking_fixture(tmp, n_days=40):
+    """架空の履歴・株価：A銘柄は毎日+1%（始値は前日終値）、B銘柄は毎日−1%。"""
+    import numpy as np
+    idx = pd.bdate_range("2026-09-01", periods=n_days)
+    tks = ["1111.T", "2222.T", "3333.T"]
+    close = pd.DataFrame({"1111.T": 100 * 1.01 ** np.arange(n_days), "2222.T": 100 * 0.99 ** np.arange(n_days), "3333.T": 100.0}, index=idx)
+    opn = close.shift(1).fillna(close.iloc[0])
+    panel = {"close": close, "open": opn, "high": close, "low": close, "volume": close * 0 + 1e6}
+    topix = pd.DataFrame({"close": 100 * 1.002 ** np.arange(n_days), "open": 100 * 1.002 ** np.arange(n_days) / 1.002}, index=idx)
+    hist = tmp / "history"; hist.mkdir(parents=True)
+    # 1111：2日目から連続で載る。2222：5日目に1回だけ載り、30日後にもう一度（再掲載）。3333：載らない
+    for i, d in enumerate(idx[:35]):
+        picks = []
+        if i >= 1:
+            picks.append({"rank": 1, "code": "1111", "name": "上がる株", "main": 82.0, "pb_total": 80, "close": 1})
+        if i == 4 or i == 33:
+            picks.append({"rank": 5, "code": "2222", "name": "下がる株", "main": 71.0, "pb_total": 70, "close": 1})
+        (hist / f"{d:%Y-%m-%d}.json").write_text(json.dumps({"date": f"{d:%Y-%m-%d}", "demo": False, "regime": "good", "stance": ["buy", "neutral"][i % 2],
+                                                            "picks": picks, "ranking": [{"rank": p["rank"], "code": p["code"], "name": p["name"], "main": p["main"]} for p in picks]}), encoding="utf-8")
+    return panel, topix, hist, idx
+
+
+def test_tracking():
+    import tempfile
+    from pathlib import Path
+    from src import tracking as TR
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        panel, topix, hist, idx = _tracking_fixture(tmp)
+        c = {**cfg, "tracking": {**cfg["tracking"], "max_days": 20}}
+        led = tmp / "ledger.json"
+        res = TR.build(panel, topix, hist, led, c)
+        ents = {(e["code"], e["date"]): e for e in res["entries"]}
+        assert len(res["entries"]) == 3, [(e["code"], e["date"]) for e in res["entries"]]       # 1111が1件、2222が2件（再掲載）
+        a = ents[("1111", f"{idx[1]:%Y-%m-%d}")]
+        assert abs(a["buy"] - panel["open"]["1111.T"].iloc[2]) < 1e-9                              # 買値＝翌営業日の始値
+        s1 = a["series"][1]
+        assert s1[0] == 1 and abs(s1[3] - (panel["close"]["1111.T"].iloc[2] / panel["open"]["1111.T"].iloc[2] - 1)) < 1e-9
+        assert a["days"] == 20 and a["closed"] and a["status"] == "追跡終了" and set(a["cp"]) >= {"1", "5", "10", "20"}
+        assert a["ret"] > 0 and a["excess"] is not None and a["max_ret"] >= a["ret"] >= a["min_ret"]
+        b = ents[("2222", f"{idx[4]:%Y-%m-%d}")]
+        assert b["ret"] < 0 and b["excess"] < 0
+        again = ents[("2222", f"{idx[33]:%Y-%m-%d}")]                                                # 載ってから数日しか経っていない
+        assert again["status"] in ("掲載中", "圏外へ") and again["days"] == 6 and again["rank"] == 5 and again["status"] == "圏外へ"
+        assert ents[("2222", f"{idx[4]:%Y-%m-%d}")]["cur_rank"] is None and a["cur_rank"] == 1
+        # 集計：件数・平均・勝率・TOPIX比、区分別
+        h5 = res["stats"]["by_horizon"][5]
+        assert h5["n"] == 3 and abs(h5["win"] - 1 / 3) < 1e-9 and h5["excess"] is not None
+        assert sum(r["n"] for r in res["stats"]["by_stance"]) <= res["stats"]["by_horizon"][10]["n"]
+        assert [r["n"] for r in res["stats"]["by_rank"]] == [1, 1]
+        # 台帳：追跡が終わった銘柄は、株価データが無くなっても結果が残る／取得できない銘柄は最後の記録を表示
+        gone = {k: v.drop(columns=["1111.T", "2222.T"]) for k, v in panel.items()}
+        res2 = TR.build(gone, topix, hist, led, c)
+        e2 = {(e["code"], e["date"]): e for e in res2["entries"]}
+        assert e2[("1111", f"{idx[1]:%Y-%m-%d}")]["ret"] == a["ret"] and e2[("1111", f"{idx[1]:%Y-%m-%d}")]["status"] == "追跡終了"
+        st2 = e2[("2222", f"{idx[33]:%Y-%m-%d}")]                                                       # 追跡中に株価が取れなくなった → 最後の記録を表示
+        assert st2["stale"] and st2["status"].startswith("価格を取得できません") and st2["ret"] == again["ret"]
+        assert e2[("2222", f"{idx[4]:%Y-%m-%d}")]["ret"] == b["ret"] and e2[("2222", f"{idx[4]:%Y-%m-%d}")].get("closed") or e2[("2222", f"{idx[4]:%Y-%m-%d}")]["stale"]
+        # 翌営業日の始値が無い（最新日に載った）→ 買値待ち
+        pend = {k: v.iloc[:2] for k, v in panel.items()}
+        res3 = TR.build(pend, topix.iloc[:2], hist, tmp / "l3.json", c)
+        assert any(e["status"] == "買い値待ち" for e in res3["entries"])
+        # 出力：SVG・CSV・JSON
+        assert "<svg" in TR.spark_svg(a["spark"]) and TR.spark_svg([1.0]) == "" and "<svg" in TR.avg_chart_svg(res["stats"])
+        out = tmp / "docs"; out.mkdir()
+        TR.write_files(out, res, "2026-11-13T07:00")
+        lines = (out / "tracking_daily.csv").read_text(encoding="utf-8-sig").splitlines()
+        assert len(lines) == 1 + sum(len(e["series"]) for e in res["entries"]) and lines[0].startswith("掲載日,コード")
+        js = json.loads((out / "tracking.json").read_text(encoding="utf-8"))
+        assert any(len(v) > 5 for v in js["entries"].values())
+        txt = json.dumps(res["stats"], ensure_ascii=False) + "".join(TR.STANCE_LABEL.values())
+        assert not any(w in txt for w in FORBIDDEN)
+    print("ok  追跡・検証（掲載の検出・再掲載・買値=翌始値・TOPIX比・台帳の保持・買値待ち・CSV）")
+
+
 def test_end_to_end():
     for cmd in (["-m", "src.backtest", "--demo"], ["-m", "src.main", "--demo"]):
         res = subprocess.run([sys.executable, *cmd], cwd=ROOT, capture_output=True, text=True)
@@ -650,7 +725,7 @@ def test_end_to_end():
         assert k in summ["periods"]["5y"], k
     html = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
     for word in ("【強み】", "【押し目状況】", "【注意事項】", "押し目スコア", "イベント点", "なぜ選ばれた",
-                 "補助指標", "期間別の成績", "excluded_events.csv", "推奨撤退ライン", "リスク幅", "ATR", "有効性の検証", "点数帯ごとの成績", "現在の相場判定", "運用ガイド", "本日はギャップダウンリスクあり", "寄り付き前の指標", "【外部環境】", "順位への影響はごく小さく", "ランキング再生成", "最終更新", "refresh.js"):
+                 "補助指標", "期間別の成績", "excluded_events.csv", "推奨撤退ライン", "リスク幅", "ATR", "有効性の検証", "点数帯ごとの成績", "現在の相場判定", "運用ガイド", "本日はギャップダウンリスクあり", "寄り付き前の指標", "【外部環境】", "順位への影響はごく小さく", "ランキング再生成", "最終更新", "refresh.js", "追跡・検証ページ"):
         assert word in html, word
     # ㉒ 保有銘柄：暗号化ファイル・名前一覧・前回比較・3ブロック
     from src import holdings as H
@@ -684,6 +759,6 @@ def test_end_to_end():
 if __name__ == "__main__":
     for fn in (test_config_and_weights, test_momentum_points, test_no_lookahead, test_events,
                test_dividend_and_exclusion, test_expected_and_metrics, test_text, test_pullback, test_tdnet, test_accuracy_21, test_holdings,
-               test_excluded_csv, test_data_fixes, test_validation, test_stance, test_premarket, test_lead, test_end_to_end):
+               test_excluded_csv, test_data_fixes, test_validation, test_stance, test_premarket, test_lead, test_tracking, test_end_to_end):
         fn()
     print("\nALL OK")

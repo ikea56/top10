@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0f1a2b">
+<meta name="robots" content="noindex">
+<title>追跡・検証｜{{ title }}</title>
+<link rel="stylesheet" href="style.css">
+<script>
+(function(){try{var t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+</script>
+</head>
+<body>
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-row">
+      <h1>📊 追跡・検証</h1>
+      <button id="themeBtn" class="icon-btn" type="button" aria-label="ライト／ダーク表示を切り替え">🌓</button>
+    </div>
+    <p class="meta"><span>最終更新：{{ generated_hm }}</span><span>記録の最終日：{{ tr.last_date or '—' }}</span></p>
+    <p class="meta"><a class="back" href="index.html">← ランキングに戻る</a></p>
+  </div>
+</header>
+
+<main class="wrap">
+  {% set s = tr.stats %}
+  {% if demo %}<div class="banner warn">⚠️ <b>デモ表示です。</b>架空のデータで、実在の銘柄・株価ではありません。</div>{% endif %}
+
+  <section class="card">
+    <h2>これは何？</h2>
+    <p>トップ{{ top_n }}に載った銘柄を、<b>載った日から毎日追いかけた記録</b>です。「ランキングに載ったあと、実際にどうなったか」を確かめるためのページで、毎日の自動更新（手動更新も）で自動的に追加されます。</p>
+    <details>
+      <summary>数字の見方・計算のきまり</summary>
+      <ul class="caveats">
+        <li><b>買値</b>＝載った日の翌営業日の<b>始値</b>（朝にランキングを見て、寄り付きで買った想定）。<b>騰落率</b>＝その後の終値 ÷ 買値 − 1。</li>
+        <li><b>TOPIX比</b>＝同じ期間のTOPIX（連動ETF）の騰落率との差。プラスなら、市場全体より良かったことになります。</li>
+        <li>売買コスト・税金は含みません。株価は配当・分割で調整した値です。</li>
+        <li>一度圏外に出て、{{ reentry_gap }}営業日より長く空いてから再び載った銘柄は、新しい掲載として数えます。</li>
+        <li>追跡は{{ max_days }}営業日までです。終わった銘柄は、主な日（{{ horizons|join('・') }}営業日後）の結果だけを残します。</li>
+        <li><b>件数が少ないうちは、結果が偶然に左右されます。</b>目安として、各行の件数（n）が30以上になってから判断してください。</li>
+        <li>全銘柄の毎日の数値は <a href="tracking_daily.csv">tracking_daily.csv</a>（Excelで開けます）で確認できます。</li>
+      </ul>
+    </details>
+  </section>
+
+  {% if not tr.entries %}
+  <section class="card"><p class="hint">まだ記録がありません。ランキングが数日分たまると、ここに推移が表示されます。</p></section>
+  {% else %}
+  <section class="card">
+    <h2>いまの状況</h2>
+    <div class="tiles">
+      <div class="tile"><span class="k">追跡した銘柄</span><b>{{ s.n_total }}</b></div>
+      <div class="tile"><span class="k">現在トップ{{ top_n }}に載っている</span><b>{{ s.n_listed }}</b></div>
+      <div class="tile"><span class="k">買値待ち（翌朝まで）</span><b>{{ s.n_pending }}</b></div>
+      <div class="tile"><span class="k">現在の平均騰落率</span><b class="{{ 'pos' if s.now and s.now.mean >= 0 else 'neg' }}">{{ ((s.now.mean * 100)|pct) if s.now else '—' }}</b></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>載ってから何日後にどうなったか</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>経過</th><th>件数</th><th>平均</th><th>中央値</th><th>勝率</th><th>TOPIX</th><th>TOPIX比</th><th>勝った割合</th></tr></thead>
+      <tbody>
+      {% for h, v in s.by_horizon.items() %}
+        {% if v %}<tr><th scope="row">{{ h }}日後</th><td>{{ v.n }}</td>
+          <td class="{{ 'pos' if v.mean >= 0 else 'neg' }}">{{ (v.mean*100)|pct }}</td><td>{{ (v.median*100)|pct }}</td><td>{{ '%.0f'|format(v.win*100) }}%</td>
+          <td>{{ ((v.bench*100)|pct) if v.bench is not none else '—' }}</td>
+          <td class="{{ 'pos' if v.excess is not none and v.excess >= 0 else 'neg' }}">{{ ((v.excess*100)|pct) if v.excess is not none else '—' }}</td>
+          <td>{{ ('%.0f'|format(v.beat*100) ~ '%') if v.beat is not none else '—' }}</td></tr>
+        {% else %}<tr class="none"><th scope="row">{{ h }}日後</th><td colspan="7">まだ該当する銘柄がありません</td></tr>{% endif %}
+      {% endfor %}
+      </tbody>
+    </table></div>
+    {% if chart %}
+    <div class="chartbox">{{ chart|safe }}
+      <p class="legend"><span class="lg pick">━ ランキング銘柄の平均</span><span class="lg bench">━ TOPIXの平均</span></p>
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2>どんな時に成績が良かったか（{{ s.cut_horizon }}営業日後）</h2>
+    {% for title, rows in (('掲載時の順位', s.by_rank), ('掲載時の相場判定', s.by_stance), ('掲載時の総合点', s.by_main)) %}
+    <h3>{{ title }}</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th></th><th>件数</th><th>平均</th><th>勝率</th><th>TOPIX比</th></tr></thead>
+      <tbody>{% for r in rows %}<tr><th scope="row">{{ r.name }}</th><td>{{ r.n }}</td>
+        {% if r.n %}<td class="{{ 'pos' if r.mean >= 0 else 'neg' }}">{{ (r.mean*100)|pct }}</td><td>{{ '%.0f'|format(r.win*100) }}%</td>
+        <td>{{ ((r.excess*100)|pct) if r.excess is not none else '—' }}</td>{% else %}<td colspan="3" class="none">該当なし</td>{% endif %}</tr>{% endfor %}</tbody>
+    </table></div>
+    {% endfor %}
+    <p class="hint">「経過」は載った日の翌営業日の始値で買ってからの営業日数です。表の「TOPIX」はその間のTOPIXの平均、「勝った割合」はTOPIXを上回った銘柄の割合です。相場判定は、その日の自動更新が記録した判定です（記録が無い古い日は「記録なし」）。件数が少ない区分は参考程度にしてください。</p>
+  </section>
+
+  <section class="card" id="list">
+    <h2>全銘柄の推移</h2>
+    <div class="chips" role="group" aria-label="絞り込み">
+      <button type="button" class="chip on" data-f="all">すべて</button>
+      <button type="button" class="chip" data-f="listed">掲載中</button>
+      <button type="button" class="chip" data-f="out">圏外へ</button>
+      <button type="button" class="chip" data-f="plus">プラス</button>
+      <button type="button" class="chip" data-f="minus">マイナス</button>
+    </div>
+    <div class="table-wrap"><table class="trk" id="trkTable">
+      <thead><tr><th>銘柄</th><th>載った日</th><th>経過</th><th>騰落率</th><th>TOPIX比</th><th>最大／最小</th><th>推移</th><th>状態</th></tr></thead>
+      <tbody>
+      {% for r in tr.entries %}
+      <tr class="entry" data-key="{{ r.key }}" data-status="{{ r.status }}" data-ret="{{ '' if r.ret is none else r.ret }}" tabindex="0">
+        <th scope="row">{{ r.name }}<small>{{ r.code }}</small></th>
+        <td>{{ r.date[5:] }}<small>{{ r.rank }}位{% if r.main %}・{{ '%.0f'|format(r.main) }}点{% endif %}</small></td>
+        <td>{{ r.days }}日</td>
+        {% if r.ret is not none %}
+        <td class="{{ 'pos' if r.ret >= 0 else 'neg' }}"><b>{{ (r.ret*100)|pct }}</b></td>
+        <td class="{{ 'pos' if r.excess is not none and r.excess >= 0 else 'neg' }}">{{ ((r.excess*100)|pct) if r.excess is not none else '—' }}</td>
+        <td><span class="pos">{{ (r.max_ret*100)|pct }}</span><br><span class="neg">{{ (r.min_ret*100)|pct }}</span></td>
+        <td>{{ sparks[r.key]|safe }}</td>
+        {% else %}<td colspan="4" class="none">{{ r.status }}</td>{% endif %}
+        <td><span class="st st-{{ 'on' if r.status == '掲載中' else 'off' }}">{{ r.status }}{% if r.status == '掲載中' and r.cur_rank %}（{{ r.cur_rank }}位）{% endif %}</span></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    <p class="center"><button type="button" class="chip" id="moreBtn" hidden></button></p>
+    <p class="hint">行をタップすると、載った日から毎日の終値・騰落率・その日の順位が表示されます（追跡中の銘柄）。</p>
+  </section>
+  {% endif %}
+</main>
+<footer class="foot"><p>投資判断は自己責任でお願いします。過去の結果は将来を保証しません。</p></footer>
+<script>
+var btn=document.getElementById('themeBtn');
+function isDark(){var t=document.documentElement.getAttribute('data-theme');if(t)return t==='dark';return window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches;}
+btn.addEventListener('click',function(){var n=isDark()?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}});
+</script>
+<script src="tracking.js" defer></script>
+</body>
+</html>
