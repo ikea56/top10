@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-13T09:55+09:00",
+ "generated_at": "2026-11-13T11:35+09:00",
  "data_date": "2026-11-12",
  "demo": false,
  "stance": {
@@ -93,7 +93,7 @@
     "base": 21,
     "events_pts": 18,
     "expected": 38.8,
-    "win_rate": 0.5234061951541951,
+    "win_rate": 0.5234188516973087,
     "win_known": true,
     "liq": 0.95,
     "trend": [
@@ -209,7 +209,7 @@
     "base": 18,
     "events_pts": 20,
     "expected": 37.8,
-    "win_rate": 0.5234061951541951,
+    "win_rate": 0.5234188516973087,
     "win_known": true,
     "liq": 0.95,
     "trend": [
@@ -356,7 +356,7 @@
     "base": 25,
     "events_pts": 13,
     "expected": 37.8,
-    "win_rate": 0.5234061951541951,
+    "win_rate": 0.5234188516973087,
     "win_known": true,
     "liq": 0.95,
     "trend": [
@@ -491,7 +491,7 @@
     "base": 11,
     "events_pts": 9,
     "expected": 17.8,
-    "win_rate": 0.5234061951541951,
+    "win_rate": 0.5234188516973087,
     "win_known": true,
     "liq": 0.85,
     "trend": [
@@ -640,7 +640,7 @@
     "base": 25,
     "events_pts": 14,
     "expected": 38.8,
-    "win_rate": 0.5234061951541951,
+    "win_rate": 0.5234188516973087,
     "win_known": true,
     "liq": 0.95,
     "trend": [
@@ -779,7 +779,7 @@
     "base": 33,
     "events_pts": 16,
     "expected": 48.7,
-    "win_rate": 0.5234061951541951,
+    "win_rate": 0.5234188516973087,
     "win_known": true,
     "liq": 0.95,
     "trend": [
@@ -909,7 +909,7 @@
     "base": 33,
     "events_pts": 13,
     "expected": 45.7,
-    "win_rate": 0.5234061951541951,
+    "win_rate": 0.5234188516973087,
     "win_known": true,
     "liq": 0.95,
     "trend": [
@@ -939,7 +939,7 @@
    "lead": {
     "key": "chemical",
     "group": "化学",
-    "score": 1.2,
+    "score": 1.3,
     "items": [
      {
       "label": "S&P500",
@@ -951,7 +951,7 @@
       "label": "WTI原油",
       "mark": "✅",
       "state": "good",
-      "text": "WTI原油上昇（+2.1%）"
+      "text": "WTI原油上昇（+2.3%）"
      }
     ],
     "verdict": "flat",
@@ -960,7 +960,7 @@
     "available": 2,
     "total": 2
    },
-   "lead_pts": 0.6
+   "lead_pts": 0.7
   },
   {
    "rank": 8,
@@ -1048,7 +1048,7 @@
     "base": 41,
     "events_pts": 16,
     "expected": 41.8,
-    "win_rate": 0.5234061951541951,
+    "win_rate": 0.5234188516973087,
     "win_known": true,
     "liq": 0.7,
     "trend": [
@@ -1156,7 +1156,7 @@
     "base": 25,
     "events_pts": 9,
     "expected": 35.6,
-    "win_rate": 0.5234061951541951,
+    "win_rate": 0.5234188516973087,
     "win_known": true,
     "liq": 1.0,
     "trend": [
@@ -1276,7 +1276,7 @@
     "base": 16,
     "events_pts": 16,
     "expected": 23.4,
-    "win_rate": 0.5234061951541951,
+    "win_rate": 0.5234188516973087,
     "win_known": true,
     "liq": 0.7,
     "trend": [
