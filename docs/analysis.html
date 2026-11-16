@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0f1a2b">
+<meta name="robots" content="noindex">
+<title>順位別・スコア帯別の分析｜本日の注目銘柄ランキング</title>
+<link rel="stylesheet" href="style.css">
+<script>
+(function(){try{var t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+</script>
+</head>
+<body>
+
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-row">
+      <h1>🎯 順位別・スコア帯別の分析</h1>
+      <button id="themeBtn" class="icon-btn" type="button" aria-label="ライト／ダーク表示を切り替え">🌓</button>
+    </div>
+    <p class="meta"><span>最終更新：2026-11-16 18:56</span></p>
+    <p class="meta"><a class="back" href="index.html">← ランキングに戻る</a>　<a class="back" href="tracking.html">📊 追跡・検証ページ</a></p>
+  </div>
+</header>
+
+<main class="wrap">
+  
+  
+  
+  
+  <section class="card verdict-card">
+    <h2>結論：何位まで？何点以上？</h2>
+    <ul class="concl">
+      <li><b>順位</b>：どの順位帯も、平均より有意に良いとは言えません。シャープレシオが最も高いのは <b>TOP5</b>。</li>
+      <li><b>点数</b>：<b>75点以上が推奨</b>。点数が高いほど平均リターンが高い傾向。<br><small>90点以上は見送り／85点以上は中立／80点以上は中立／75点以上は推奨／70点以上は見送り</small></li>
+    </ul>
+    <p class="hint">過去2016〜2026年の毎週のランキング（492回）を再現した結果です。判定の基準は下の「見方」を読んでください。<b>過去の結果は将来を保証しません。</b>最終判断はご自身で。</p>
+  </section>
+
+  <section class="card">
+    <h2>見方・注意</h2>
+    <ul class="caveats">
+      <li><b>点数・順位は毎週その日のものを使います</b>（点数順に並べた順位。固定の銘柄ではありません）。買値＝翌営業日の始値、「○日後」＝掲載日から○営業日後の終値、売買コスト（往復0.2%）込み。</li>
+      <li><b>過去の再現で使う点数は「押し目スコアのテクニカル部分（100点換算）」</b>です。過去の業績・適時開示・決算日は再現できないため、画面の総合点（業績・開示・決算を含む）とは尺度が違います。「85点以上」は、あくまでこの尺度での話です。実際の総合点での結果は、下の「実運用の記録」で少しずつ貯まります。</li>
+      <li><b>判定</b>：平均リターンがプラスで、全体平均（その週の全銘柄の平均）より有意に良ければ「推奨」（差のt値が2.0以上＝偶然とは言いにくい目安）。プラスだが偶然の範囲なら「中立」、それ以外は「見送り」、件数が100件未満は「判定不能」。主な保有期間は5営業日で判定します。</li>
+      <li>最大ドローダウン・PF・シャープレシオは、5営業日ごと（重ならない）の成績から計算しています。PF＝勝ちの合計÷負けの合計（1を超えれば利益が上）。</li>
+      <li>「全体平均」と「TOPIX」の5日後の平均：全銘柄 -0.1%／TOPIX -0.0%。</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>順位別（その週の順位ごとに買った場合）</h2>
+    
+<div class="table-wrap"><table class="rbt">
+  <thead><tr><th>順位</th><th>判定</th><th>件数</th>
+    <th>1日後<br>勝率</th><th>3日後<br>勝率</th><th>5日後<br>勝率</th><th>10日後<br>勝率</th><th>20日後<br>勝率</th>
+    <th>平均<br>5日後</th><th>平均<br>20日後</th><th>最大DD</th><th>PF</th><th>シャープ</th></tr></thead>
+  <tbody>
+  
+    <tr class=""><th scope="row">1位</th><td><span class="vd vd-no">見送り</span></td><td>491</td>
+      <td class="neg">45%</td><td class="neg">46%</td><td class="neg">46%</td><td class="neg">49%</td><td class="pos">54%</td>
+      <td class="neg">-0.2%</td>
+      
+      <td class="pos">+1.5%</td>
+      <td>-90.2%</td>
+      <td>0.87</td>
+      <td>-0.35</td></tr>
+  
+    <tr class=""><th scope="row">2位</th><td><span class="vd vd-no">見送り</span></td><td>491</td>
+      <td class="neg">41%</td><td class="neg">48%</td><td class="neg">49%</td><td class="neg">49%</td><td class="pos">50%</td>
+      <td class="neg">-0.0%</td>
+      
+      <td class="pos">+1.3%</td>
+      <td>-84.6%</td>
+      <td>0.97</td>
+      <td>-0.07</td></tr>
+  
+    <tr class=""><th scope="row">3位</th><td><span class="vd vd-mid">中立</span></td><td>491</td>
+      <td class="neg">42%</td><td class="neg">46%</td><td class="pos">51%</td><td class="pos">52%</td><td class="pos">53%</td>
+      <td class="pos">+0.3%</td>
+      
+      <td class="pos">+1.0%</td>
+      <td>-62.9%</td>
+      <td>1.16</td>
+      <td>0.36</td></tr>
+  
+    <tr class=""><th scope="row">4〜5位</th><td><span class="vd vd-mid">中立</span></td><td>982</td>
+      <td class="neg">42%</td><td class="neg">48%</td><td class="neg">49%</td><td class="pos">52%</td><td class="pos">52%</td>
+      <td class="pos">+0.1%</td>
+      
+      <td class="pos">+0.8%</td>
+      <td>-58.2%</td>
+      <td>1.04</td>
+      <td>0.11</td></tr>
+  
+    <tr class=""><th scope="row">6〜10位</th><td><span class="vd vd-no">見送り</span></td><td>2455</td>
+      <td class="neg">42%</td><td class="neg">47%</td><td class="neg">49%</td><td class="pos">50%</td><td class="pos">51%</td>
+      <td class="neg">-0.1%</td>
+      
+      <td class="pos">+0.8%</td>
+      <td>-54.8%</td>
+      <td>0.95</td>
+      <td>-0.20</td></tr>
+  
+  </tbody>
+</table></div>
+
+    <div class="charts">
+      <figure><figcaption>順位別の平均リターン（%）</figcaption><svg class="barchart" viewBox="0 0 360 200" width="100%" role="img" aria-label="棒グラフ"><line class="grid" x1="40" x2="352" y1="168.6" y2="168.6"/><text class="tick" x="36" y="171.6" text-anchor="end">-0.5%</text><line class="grid" x1="40" x2="352" y1="134.0" y2="134.0"/><text class="tick" x="36" y="137.0" text-anchor="end">0%</text><line class="grid" x1="40" x2="352" y1="16.2" y2="16.2"/><text class="tick" x="36" y="19.2" text-anchor="end">1.7%</text><text class="tick" x="71.2" y="182" text-anchor="middle">1位</text><rect class="s0" x="47.2" y="134.0" width="22.0" height="17.3"/><text class="val" x="58.2" y="161.3" text-anchor="middle">-0.2</text><rect class="s1" x="71.2" y="28.7" width="22.0" height="105.3"/><text class="val" x="82.2" y="25.7" text-anchor="middle">1.5</text><text class="tick" x="133.6" y="182" text-anchor="middle">2位</text><rect class="s0" x="109.6" y="134.0" width="22.0" height="3.5"/><text class="val" x="120.6" y="147.4" text-anchor="middle">-0.1</text><rect class="s1" x="133.6" y="43.9" width="22.0" height="90.0"/><text class="val" x="144.6" y="40.9" text-anchor="middle">1.3</text><text class="tick" x="196.0" y="182" text-anchor="middle">3位</text><rect class="s0" x="172.0" y="114.6" width="22.0" height="19.4"/><text class="val" x="183.0" y="111.6" text-anchor="middle">0.3</text><rect class="s1" x="196.0" y="63.3" width="22.0" height="70.6"/><text class="val" x="207.0" y="60.3" text-anchor="middle">1.0</text><text class="tick" x="258.4" y="182" text-anchor="middle">4〜5位</text><rect class="s0" x="234.4" y="129.8" width="22.0" height="4.2"/><text class="val" x="245.4" y="126.8" text-anchor="middle">0.1</text><rect class="s1" x="258.4" y="76.5" width="22.0" height="57.5"/><text class="val" x="269.4" y="73.5" text-anchor="middle">0.8</text><text class="tick" x="320.8" y="182" text-anchor="middle">6〜10位</text><rect class="s0" x="296.8" y="134.0" width="22.0" height="6.2"/><text class="val" x="307.8" y="150.2" text-anchor="middle">-0.1</text><rect class="s1" x="320.8" y="75.8" width="22.0" height="58.2"/><text class="val" x="331.8" y="72.8" text-anchor="middle">0.8</text></svg><div class="legend"><span class="lg s0">5日後</span><span class="lg s1">20日後</span></div></figure>
+      <figure><figcaption>順位別の勝率（%・点線は50%）</figcaption><svg class="barchart" viewBox="0 0 360 200" width="100%" role="img" aria-label="棒グラフ"><line class="grid" x1="40" x2="352" y1="166.1" y2="166.1"/><text class="tick" x="36" y="169.1" text-anchor="end">44.6%</text><line class="grid" x1="40" x2="352" y1="86.3" y2="86.3"/><text class="tick" x="36" y="89.3" text-anchor="end">50%</text><line class="grid" x1="40" x2="352" y1="13.9" y2="13.9"/><text class="tick" x="36" y="16.9" text-anchor="end">54.9%</text><line class="base" x1="40" x2="352" y1="86.3" y2="86.3"/><text class="tick" x="71.2" y="182" text-anchor="middle">1位</text><rect class="s0" x="47.2" y="86.3" width="22.0" height="65.0"/><text class="val" x="58.2" y="161.3" text-anchor="middle">45.6</text><rect class="s1" x="71.2" y="28.7" width="22.0" height="57.6"/><text class="val" x="82.2" y="25.7" text-anchor="middle">53.9</text><text class="tick" x="133.6" y="182" text-anchor="middle">2位</text><rect class="s0" x="109.6" y="86.3" width="22.0" height="19.2"/><text class="val" x="120.6" y="115.5" text-anchor="middle">48.7</text><rect class="s1" x="133.6" y="83.4" width="22.0" height="3.0"/><text class="val" x="144.6" y="80.4" text-anchor="middle">50.2</text><text class="tick" x="196.0" y="182" text-anchor="middle">3位</text><rect class="s0" x="172.0" y="78.9" width="22.0" height="7.4"/><text class="val" x="183.0" y="75.9" text-anchor="middle">50.5</text><rect class="s1" x="196.0" y="40.5" width="22.0" height="45.8"/><text class="val" x="207.0" y="37.5" text-anchor="middle">53.1</text><text class="tick" x="258.4" y="182" text-anchor="middle">4〜5位</text><rect class="s0" x="234.4" y="86.3" width="22.0" height="19.2"/><text class="val" x="245.4" y="115.5" text-anchor="middle">48.7</text><rect class="s1" x="258.4" y="64.2" width="22.0" height="22.2"/><text class="val" x="269.4" y="61.2" text-anchor="middle">51.5</text><text class="tick" x="320.8" y="182" text-anchor="middle">6〜10位</text><rect class="s0" x="296.8" y="86.3" width="22.0" height="19.2"/><text class="val" x="307.8" y="115.5" text-anchor="middle">48.7</text><rect class="s1" x="320.8" y="68.6" width="22.0" height="17.7"/><text class="val" x="331.8" y="65.6" text-anchor="middle">51.2</text></svg><div class="legend"><span class="lg s0">5日後</span><span class="lg s1">20日後</span></div></figure>
+    </div>
+    <p class="hint">順位による期待値の差を見るページです。右に行くほど（順位が下がるほど）棒が低くなっていれば「順位に意味がある」、バラバラなら「順位の差はあまり無い」と読みます。</p>
+  </section>
+
+  <section class="card">
+    <h2>ポートフォリオ比較（TOP1／TOP3／TOP5／TOP10を均等に買う）</h2>
+    
+<div class="table-wrap"><table class="rbt">
+  <thead><tr><th>買い方</th><th>判定</th><th>件数</th>
+    <th>1日後<br>勝率</th><th>3日後<br>勝率</th><th>5日後<br>勝率</th><th>10日後<br>勝率</th><th>20日後<br>勝率</th>
+    <th>平均<br>5日後</th><th>平均<br>20日後</th><th>最大DD</th><th>PF</th><th>シャープ</th></tr></thead>
+  <tbody>
+  
+    <tr class=""><th scope="row">TOP1</th><td><span class="vd vd-no">見送り</span></td><td>491</td>
+      <td class="neg">45%</td><td class="neg">46%</td><td class="neg">46%</td><td class="neg">49%</td><td class="pos">54%</td>
+      <td class="neg">-0.2%</td>
+      
+      <td class="pos">+1.5%</td>
+      <td>-90.2%</td>
+      <td>0.87</td>
+      <td>-0.35</td></tr>
+  
+    <tr class=""><th scope="row">TOP3</th><td><span class="vd vd-no">見送り</span></td><td>491</td>
+      <td class="neg">40%</td><td class="neg">49%</td><td class="pos">51%</td><td class="pos">54%</td><td class="pos">56%</td>
+      <td class="neg">-0.0%</td>
+      
+      <td class="pos">+1.3%</td>
+      <td>-53.5%</td>
+      <td>1.00</td>
+      <td>-0.01</td></tr>
+  
+    <tr class=""><th scope="row">TOP5</th><td><span class="vd vd-mid">中立</span></td><td>491</td>
+      <td class="neg">41%</td><td class="pos">51%</td><td class="pos">51%</td><td class="pos">55%</td><td class="pos">55%</td>
+      <td class="pos">+0.0%</td>
+      
+      <td class="pos">+1.1%</td>
+      <td>-48.3%</td>
+      <td>1.02</td>
+      <td>0.05</td></tr>
+  
+    <tr class=""><th scope="row">TOP10</th><td><span class="vd vd-no">見送り</span></td><td>491</td>
+      <td class="neg">40%</td><td class="neg">50%</td><td class="pos">51%</td><td class="pos">56%</td><td class="pos">59%</td>
+      <td class="neg">-0.0%</td>
+      
+      <td class="pos">+1.0%</td>
+      <td>-46.5%</td>
+      <td>0.97</td>
+      <td>-0.09</td></tr>
+  
+  </tbody>
+</table></div>
+
+    <figure><figcaption>資産曲線（毎週入れ替え・5営業日ごとの複利、コスト込み）</figcaption><svg class="barchart" viewBox="0 0 360 210" width="100%" role="img" aria-label="資産曲線"><line class="base" x1="40" x2="352" y1="65.2" y2="65.2"/><text class="tick" x="36" y="194.8" text-anchor="end">-90%</text><text class="tick" x="36" y="68.2" text-anchor="end">+0%</text><text class="tick" x="36" y="13.4" text-anchor="end">+39%</text><polyline class="ln s0" fill="none" stroke-width="2" points="40.0,67.5 42.6,76.5 45.1,72.3 47.7,82.8 50.2,87.0 52.8,98.2 55.3,94.4 57.9,83.2 60.5,80.6 63.0,100.8 65.6,95.8 68.1,92.7 70.7,94.7 73.2,112.5 75.8,117.3 78.4,135.6 80.9,128.6 83.5,128.3 86.0,119.1 88.6,117.9 91.1,127.7 93.7,131.1 96.3,138.8 98.8,118.8 101.4,133.0 103.9,134.8 106.5,138.4 109.0,136.9 111.6,137.1 114.2,136.4 116.7,135.8 119.3,131.3 121.8,128.3 124.4,130.6 127.0,144.2 129.5,139.8 132.1,136.6 134.6,137.0 137.2,130.1 139.7,131.3 142.3,135.6 144.9,159.0 147.4,146.2 150.0,124.5 152.5,128.3 155.1,128.9 157.6,123.8 160.2,132.0 162.8,133.3 165.3,139.4 167.9,141.4 170.4,139.4 173.0,144.3 175.5,145.9 178.1,141.4 180.7,146.7 183.2,152.0 185.8,158.3 188.3,158.1 190.9,160.8 193.4,164.7 196.0,166.6 198.6,172.0 201.1,172.8 203.7,174.6 206.2,174.4 208.8,172.7 211.3,173.2 213.9,176.6 216.5,181.8 219.0,178.2 221.6,178.4 224.1,182.1 226.7,183.3 229.2,178.5 231.8,180.3 234.4,177.8 236.9,176.2 239.5,175.2 242.0,175.0 244.6,177.8 247.1,178.8 249.7,181.9 252.3,186.4 254.8,183.7 257.4,185.0 259.9,186.1 262.5,186.0 265.0,185.9 267.6,187.8 270.2,187.8 272.7,188.6 275.3,188.6 277.8,188.5 280.4,185.5 283.0,188.4 285.5,186.9 288.1,187.3 290.6,186.8 293.2,186.1 295.7,187.5 298.3,188.2 300.9,191.0 303.4,192.0 306.0,190.9 308.5,189.3 311.1,190.2 313.6,188.3 316.2,186.6 318.8,187.3 321.3,187.1 323.9,188.4 326.4,187.7 329.0,184.6 331.5,184.8 334.1,184.6 336.7,185.5 339.2,187.6 341.8,187.4 344.3,186.5 346.9,186.5 349.4,185.6 352.0,181.6"/><polyline class="ln s1" fill="none" stroke-width="2" points="40.0,62.1 42.6,72.6 45.1,73.1 47.7,75.9 50.2,85.6 52.8,92.3 55.3,76.4 57.9,64.0 60.5,57.3 63.0,65.4 65.6,59.6 68.1,55.1 70.7,53.6 73.2,54.3 75.8,50.0 78.4,75.2 80.9,60.9 83.5,55.0 86.0,44.1 88.6,10.0 91.1,18.8 93.7,18.3 96.3,49.1 98.8,28.1 101.4,39.2 103.9,58.9 106.5,64.6 109.0,62.0 111.6,50.9 114.2,64.7 116.7,58.0 119.3,59.5 121.8,60.7 124.4,63.1 127.0,81.0 129.5,76.0 132.1,68.1 134.6,75.1 137.2,67.1 139.7,62.2 142.3,76.5 144.9,103.7 147.4,97.1 150.0,75.1 152.5,74.8 155.1,77.5 157.6,66.2 160.2,81.7 162.8,70.8 165.3,70.3 167.9,63.3 170.4,59.8 173.0,56.9 175.5,48.6 178.1,41.7 180.7,45.5 183.2,45.0 185.8,39.1 188.3,52.1 190.9,60.9 193.4,64.2 196.0,69.1 198.6,85.4 201.1,84.4 203.7,104.3 206.2,102.2 208.8,97.2 211.3,100.3 213.9,94.0 216.5,101.4 219.0,92.2 221.6,97.5 224.1,105.7 226.7,108.2 229.2,105.2 231.8,108.0 234.4,98.4 236.9,96.4 239.5,92.8 242.0,89.6 244.6,93.9 247.1,86.0 249.7,93.5 252.3,105.9 254.8,93.1 257.4,92.8 259.9,83.2 262.5,79.6 265.0,72.0 267.6,74.5 270.2,81.0 272.7,85.9 275.3,85.9 277.8,89.9 280.4,82.9 283.0,94.8 285.5,93.4 288.1,90.3 290.6,86.5 293.2,86.8 295.7,99.5 298.3,101.0 300.9,106.0 303.4,112.6 306.0,106.6 308.5,103.4 311.1,107.7 313.6,99.4 316.2,99.2 318.8,103.9 321.3,99.7 323.9,103.3 326.4,103.0 329.0,97.0 331.5,77.7 334.1,84.7 336.7,89.6 339.2,103.9 341.8,98.4 344.3,99.0 346.9,103.8 349.4,101.0 352.0,96.7"/><polyline class="ln s2" fill="none" stroke-width="2" points="40.0,64.7 42.6,77.8 45.1,77.2 47.7,81.1 50.2,89.6 52.8,94.3 55.3,83.9 57.9,77.1 60.5,71.7 63.0,69.5 65.6,68.6 68.1,68.0 70.7,68.6 73.2,73.8 75.8,68.1 78.4,87.4 80.9,80.8 83.5,78.3 86.0,68.8 88.6,44.6 91.1,52.2 93.7,53.1 96.3,65.9 98.8,55.7 101.4,62.6 103.9,82.2 106.5,84.3 109.0,85.0 111.6,82.0 114.2,86.6 116.7,84.2 119.3,84.1 121.8,83.5 124.4,87.3 127.0,99.1 129.5,102.4 132.1,100.0 134.6,100.0 137.2,92.5 139.7,82.8 142.3,91.3 144.9,117.4 147.4,112.0 150.0,97.7 152.5,97.0 155.1,96.3 157.6,89.4 160.2,99.0 162.8,87.4 165.3,83.7 167.9,84.6 170.4,81.7 173.0,79.5 175.5,78.5 178.1,70.7 180.7,76.1 183.2,76.6 185.8,71.6 188.3,79.1 190.9,84.1 193.4,83.0 196.0,85.7 198.6,97.2 201.1,98.2 203.7,116.6 206.2,115.4 208.8,110.5 211.3,114.7 213.9,111.4 216.5,115.0 219.0,109.5 221.6,100.5 224.1,105.5 226.7,105.0 229.2,100.3 231.8,103.0 234.4,96.3 236.9,93.2 239.5,87.9 242.0,84.4 244.6,90.0 247.1,82.5 249.7,86.4 252.3,90.7 254.8,79.0 257.4,84.8 259.9,75.2 262.5,69.2 265.0,64.2 267.6,65.2 270.2,67.3 272.7,70.2 275.3,64.9 277.8,66.4 280.4,64.0 283.0,78.3 285.5,77.1 288.1,65.0 290.6,64.8 293.2,74.5 295.7,83.0 298.3,78.6 300.9,85.0 303.4,88.4 306.0,76.1 308.5,70.7 311.1,73.6 313.6,64.4 316.2,63.6 318.8,72.7 321.3,70.6 323.9,76.0 326.4,77.4 329.0,72.7 331.5,54.1 334.1,62.5 336.7,68.8 339.2,78.0 341.8,76.6 344.3,82.9 346.9,77.2 349.4,74.3 352.0,72.0"/><polyline class="ln s3" fill="none" stroke-width="2" points="40.0,64.0 42.6,67.7 45.1,68.5 47.7,66.9 50.2,75.9 52.8,84.1 55.3,75.7 57.9,74.3 60.5,68.8 63.0,66.6 65.6,66.6 68.1,62.5 70.7,62.6 73.2,67.7 75.8,61.6 78.4,76.1 80.9,74.5 83.5,70.7 86.0,65.8 88.6,52.2 91.1,57.6 93.7,55.7 96.3,74.2 98.8,69.2 101.4,77.5 103.9,89.5 106.5,90.3 109.0,96.5 111.6,92.6 114.2,94.5 116.7,88.7 119.3,90.9 121.8,92.7 124.4,95.5 127.0,102.2 129.5,101.7 132.1,96.3 134.6,97.5 137.2,91.0 139.7,82.7 142.3,88.8 144.9,117.1 147.4,113.9 150.0,108.2 152.5,105.4 155.1,105.2 157.6,104.7 160.2,105.1 162.8,93.5 165.3,92.5 167.9,87.0 170.4,86.3 173.0,89.1 175.5,90.8 178.1,86.5 180.7,91.2 183.2,93.1 185.8,89.5 188.3,90.6 190.9,89.9 193.4,87.4 196.0,91.5 198.6,97.1 201.1,95.2 203.7,114.8 206.2,117.2 208.8,113.8 211.3,116.3 213.9,113.7 216.5,115.9 219.0,113.2 221.6,108.8 224.1,113.1 226.7,112.4 229.2,107.4 231.8,106.9 234.4,103.1 236.9,98.3 239.5,96.4 242.0,93.0 244.6,101.1 247.1,93.6 249.7,97.1 252.3,95.4 254.8,86.0 257.4,94.9 259.9,90.0 262.5,87.1 265.0,84.7 267.6,82.3 270.2,82.1 272.7,81.7 275.3,77.8 277.8,79.8 280.4,79.2 283.0,97.8 285.5,93.5 288.1,85.5 290.6,87.3 293.2,93.2 295.7,96.6 298.3,93.9 300.9,96.3 303.4,100.5 306.0,89.1 308.5,87.6 311.1,89.8 313.6,82.5 316.2,83.6 318.8,91.2 321.3,94.6 323.9,96.8 326.4,97.2 329.0,97.6 331.5,87.6 334.1,91.4 336.7,93.5 339.2,96.6 341.8,98.1 344.3,101.4 346.9,95.1 349.4,94.5 352.0,96.5"/></svg><div class="legend"><span class="lg s0">TOP1</span><span class="lg s1">TOP3</span><span class="lg s2">TOP5</span><span class="lg s3">TOP10</span></div></figure>
+    <p class="hint">件数は「買った週の数」です。1銘柄に絞るほど平均は高く見えても、ブレ（最大DD・シャープ）が大きくなりがちです。<b>平均だけでなくシャープレシオと最大DDも見てください。</b></p>
+  </section>
+
+  <section class="card">
+    <h2>スコア帯別（「この点数以上」の銘柄を全部買った場合）</h2>
+    
+<div class="table-wrap"><table class="rbt">
+  <thead><tr><th>点数</th><th>判定</th><th>件数</th>
+    <th>1日後<br>勝率</th><th>3日後<br>勝率</th><th>5日後<br>勝率</th><th>10日後<br>勝率</th><th>20日後<br>勝率</th>
+    <th>平均<br>5日後</th><th>平均<br>20日後</th><th>最大DD</th><th>PF</th><th>シャープ</th></tr></thead>
+  <tbody>
+  
+    <tr class=""><th scope="row">90点以上</th><td><span class="vd vd-no">見送り</span></td><td>718</td>
+      <td class="neg">43%</td><td class="pos">52%</td><td class="neg">49%</td><td class="neg">48%</td><td class="neg">48%</td>
+      <td class="pos">+0.1%</td>
+      
+      <td class="pos">+0.8%</td>
+      <td>-58.5%</td>
+      <td>1.07</td>
+      <td>-0.44</td></tr>
+  
+    <tr class=""><th scope="row">85点以上</th><td><span class="vd vd-mid">中立</span></td><td>5560</td>
+      <td class="neg">42%</td><td class="neg">48%</td><td class="neg">48%</td><td class="neg">49%</td><td class="pos">50%</td>
+      <td class="pos">+0.1%</td>
+      
+      <td class="pos">+0.9%</td>
+      <td>-41.1%</td>
+      <td>1.03</td>
+      <td>0.05</td></tr>
+  
+    <tr class=""><th scope="row">80点以上</th><td><span class="vd vd-mid">中立</span></td><td>19031</td>
+      <td class="neg">41%</td><td class="neg">47%</td><td class="neg">48%</td><td class="neg">49%</td><td class="pos">51%</td>
+      <td class="pos">+0.0%</td>
+      
+      <td class="pos">+0.9%</td>
+      <td>-38.8%</td>
+      <td>1.02</td>
+      <td>-0.24</td></tr>
+  
+    <tr class=""><th scope="row">75点以上</th><td><span class="vd vd-ok">推奨</span></td><td>41847</td>
+      <td class="neg">41%</td><td class="neg">46%</td><td class="neg">48%</td><td class="neg">50%</td><td class="pos">51%</td>
+      <td class="pos">+0.0%</td>
+      
+      <td class="pos">+0.9%</td>
+      <td>-29.3%</td>
+      <td>1.00</td>
+      <td>0.12</td></tr>
+  
+    <tr class=""><th scope="row">70点以上</th><td><span class="vd vd-no">見送り</span></td><td>68592</td>
+      <td class="neg">41%</td><td class="neg">46%</td><td class="neg">48%</td><td class="neg">50%</td><td class="pos">52%</td>
+      <td class="neg">-0.0%</td>
+      
+      <td class="pos">+0.9%</td>
+      <td>-25.6%</td>
+      <td>0.99</td>
+      <td>0.05</td></tr>
+  
+  </tbody>
+</table></div>
+
+    <p class="hint">各行は「その週にその点数以上だった銘柄すべて」を買った場合です（上位10位に限りません）。上の行ほど条件が厳しく、該当する週・銘柄が少なくなります。</p>
+    <div class="charts">
+      <figure><figcaption>点数帯別の平均リターン（%）</figcaption><svg class="barchart" viewBox="0 0 360 200" width="100%" role="img" aria-label="棒グラフ"><line class="grid" x1="40" x2="352" y1="162.1" y2="162.1"/><text class="tick" x="36" y="165.1" text-anchor="end">-0.1%</text><line class="grid" x1="40" x2="352" y1="148.6" y2="148.6"/><text class="tick" x="36" y="151.6" text-anchor="end">0%</text><line class="grid" x1="40" x2="352" y1="13.9" y2="13.9"/><text class="tick" x="36" y="16.9" text-anchor="end">1%</text><text class="tick" x="71.2" y="182" text-anchor="middle">70+</text><rect class="s0" x="47.2" y="148.6" width="22.0" height="2.7"/><text class="val" x="58.2" y="161.3" text-anchor="middle">-0.0</text><rect class="s1" x="71.2" y="32.8" width="22.0" height="115.8"/><text class="val" x="82.2" y="29.8" text-anchor="middle">0.9</text><text class="tick" x="133.6" y="182" text-anchor="middle">75+</text><rect class="s0" x="109.6" y="148.6" width="22.0" height="1.0"/><text class="val" x="120.6" y="145.6" text-anchor="middle">0.0</text><rect class="s1" x="133.6" y="34.1" width="22.0" height="114.5"/><text class="val" x="144.6" y="31.1" text-anchor="middle">0.8</text><text class="tick" x="196.0" y="182" text-anchor="middle">80+</text><rect class="s0" x="172.0" y="144.6" width="22.0" height="4.0"/><text class="val" x="183.0" y="141.6" text-anchor="middle">0.0</text><rect class="s1" x="196.0" y="28.7" width="22.0" height="119.9"/><text class="val" x="207.0" y="25.7" text-anchor="middle">0.9</text><text class="tick" x="258.4" y="182" text-anchor="middle">85+</text><rect class="s0" x="234.4" y="141.9" width="22.0" height="6.7"/><text class="val" x="245.4" y="138.9" text-anchor="middle">0.1</text><rect class="s1" x="258.4" y="32.8" width="22.0" height="115.8"/><text class="val" x="269.4" y="29.8" text-anchor="middle">0.9</text><text class="tick" x="320.8" y="182" text-anchor="middle">90+</text><rect class="s0" x="296.8" y="132.4" width="22.0" height="16.2"/><text class="val" x="307.8" y="129.4" text-anchor="middle">0.1</text><rect class="s1" x="320.8" y="47.6" width="22.0" height="101.0"/><text class="val" x="331.8" y="44.6" text-anchor="middle">0.8</text></svg><div class="legend"><span class="lg s0">5日後</span><span class="lg s1">20日後</span></div></figure>
+      <figure><figcaption>点数帯別の勝率（%・点線は50%）</figcaption><svg class="barchart" viewBox="0 0 360 200" width="100%" role="img" aria-label="棒グラフ"><line class="grid" x1="40" x2="352" y1="166.2" y2="166.2"/><text class="tick" x="36" y="169.2" text-anchor="end">47.2%</text><line class="grid" x1="40" x2="352" y1="82.5" y2="82.5"/><text class="tick" x="36" y="85.5" text-anchor="end">50%</text><line class="grid" x1="40" x2="352" y1="13.8" y2="13.8"/><text class="tick" x="36" y="16.8" text-anchor="end">52.3%</text><line class="base" x1="40" x2="352" y1="82.5" y2="82.5"/><text class="tick" x="71.2" y="182" text-anchor="middle">70+</text><rect class="s0" x="47.2" y="82.5" width="22.0" height="56.8"/><text class="val" x="58.2" y="149.3" text-anchor="middle">48.1</text><rect class="s1" x="71.2" y="28.7" width="22.0" height="53.8"/><text class="val" x="82.2" y="25.7" text-anchor="middle">51.8</text><text class="tick" x="133.6" y="182" text-anchor="middle">75+</text><rect class="s0" x="109.6" y="82.5" width="22.0" height="59.8"/><text class="val" x="120.6" y="152.3" text-anchor="middle">48.0</text><rect class="s1" x="133.6" y="43.7" width="22.0" height="38.9"/><text class="val" x="144.6" y="40.7" text-anchor="middle">51.3</text><text class="tick" x="196.0" y="182" text-anchor="middle">80+</text><rect class="s0" x="172.0" y="82.5" width="22.0" height="65.8"/><text class="val" x="183.0" y="158.3" text-anchor="middle">47.8</text><rect class="s1" x="196.0" y="52.6" width="22.0" height="29.9"/><text class="val" x="207.0" y="49.6" text-anchor="middle">51.0</text><text class="tick" x="258.4" y="182" text-anchor="middle">85+</text><rect class="s0" x="234.4" y="82.5" width="22.0" height="68.8"/><text class="val" x="245.4" y="161.3" text-anchor="middle">47.7</text><rect class="s1" x="258.4" y="76.5" width="22.0" height="6.0"/><text class="val" x="269.4" y="73.5" text-anchor="middle">50.2</text><text class="tick" x="320.8" y="182" text-anchor="middle">90+</text><rect class="s0" x="296.8" y="82.5" width="22.0" height="17.9"/><text class="val" x="307.8" y="110.5" text-anchor="middle">49.4</text><rect class="s1" x="320.8" y="82.5" width="22.0" height="53.8"/><text class="val" x="331.8" y="146.3" text-anchor="middle">48.2</text></svg><div class="legend"><span class="lg s0">5日後</span><span class="lg s1">20日後</span></div></figure>
+    </div>
+    <h3>推奨エントリー基準（この結果から）</h3>
+    <ul class="concl">
+      <li>90点以上：<span class="vd vd-no">見送り</span>　<small>平均+0.12%・全体平均より-0.10%（該当168週）</small></li><li>85点以上：<span class="vd vd-mid">中立</span>　<small>全体平均より良いが偶然の範囲（t=1.3）（該当272週）</small></li><li>80点以上：<span class="vd vd-mid">中立</span>　<small>全体平均より良いが偶然の範囲（t=1.0）（該当318週）</small></li><li>75点以上：<span class="vd vd-ok">推奨</span>　<small>平均+0.00%・全体平均より+0.13%（t=2.2）（該当348週）</small></li><li>70点以上：<span class="vd vd-no">見送り</span>　<small>平均-0.02%・全体平均より+0.11%（該当354週）</small></li>
+    </ul>
+    <p class="hint">例：「推奨」が出た最も低い点数が、この尺度でのエントリー目安です。「判定不能」は該当が少なすぎて、良し悪しを言えない状態です。</p>
+  </section>
+  
+
+  
+  <section class="card">
+    <h2>実運用の記録（実際に載った順位・総合点での結果）</h2>
+    
+    <p class="hint">まだ結果が出ている記録がありません。毎日の更新で貯まると、ここに表示されます。</p>
+    
+  </section>
+</main>
+<footer class="foot"><p>投資判断は自己責任でお願いします。過去の結果は将来を保証しません。</p></footer>
+<script>
+var btn=document.getElementById('themeBtn');
+function isDark(){var t=document.documentElement.getAttribute('data-theme');if(t)return t==='dark';return window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches;}
+btn.addEventListener('click',function(){var n=isDark()?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}});
+</script>
+</body>
+</html>

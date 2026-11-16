@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0f1a2b">
+<meta name="robots" content="noindex">
+<title>追跡・検証｜本日の注目銘柄ランキング</title>
+<link rel="stylesheet" href="style.css">
+<script>
+(function(){try{var t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+</script>
+</head>
+<body>
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-row">
+      <h1>📊 追跡・検証</h1>
+      <button id="themeBtn" class="icon-btn" type="button" aria-label="ライト／ダーク表示を切り替え">🌓</button>
+    </div>
+    <p class="meta"><span>最終更新：2026-11-16 18:56</span><span>記録の最終日：2026-11-16</span></p>
+    <p class="meta"><a class="back" href="index.html">← ランキングに戻る</a>　<a class="back" href="analysis.html">🎯 順位別・スコア帯別の分析</a></p>
+  </div>
+</header>
+
+<main class="wrap">
+  
+  
+
+  <section class="card">
+    <h2>これは何？</h2>
+    <p>トップ10に載った銘柄を、<b>載った日から毎日追いかけた記録</b>です。「ランキングに載ったあと、実際にどうなったか」を確かめるためのページで、毎日の自動更新（手動更新も）で自動的に追加されます。</p>
+    <details>
+      <summary>数字の見方・計算のきまり</summary>
+      <ul class="caveats">
+        <li><b>買値</b>＝載った日の翌営業日の<b>始値</b>（朝にランキングを見て、寄り付きで買った想定）。<b>騰落率</b>＝その後の終値 ÷ 買値 − 1。</li>
+        <li><b>TOPIX比</b>＝同じ期間のTOPIX（連動ETF）の騰落率との差。プラスなら、市場全体より良かったことになります。</li>
+        <li>売買コスト・税金は含みません。株価は配当・分割で調整した値です。</li>
+        <li>一度圏外に出て、10営業日より長く空いてから再び載った銘柄は、新しい掲載として数えます。</li>
+        <li>追跡は60営業日までです。終わった銘柄は、主な日（1・3・5・10・20・40・60営業日後）の結果だけを残します。</li>
+        <li><b>件数が少ないうちは、結果が偶然に左右されます。</b>目安として、各行の件数（n）が30以上になってから判断してください。</li>
+        <li>全銘柄の毎日の数値は <a href="tracking_daily.csv">tracking_daily.csv</a>（Excelで開けます）で確認できます。</li>
+      </ul>
+    </details>
+  </section>
+
+  
+  <section class="card">
+    <h2>いまの状況</h2>
+    <div class="tiles">
+      <div class="tile"><span class="k">追跡した銘柄</span><b>10</b></div>
+      <div class="tile"><span class="k">現在トップ10に載っている</span><b>0</b></div>
+      <div class="tile"><span class="k">買値待ち（翌朝まで）</span><b>10</b></div>
+      <div class="tile"><span class="k">現在の平均騰落率</span><b class="neg">—</b></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>載ってから何日後にどうなったか</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>経過</th><th>件数</th><th>平均</th><th>中央値</th><th>勝率</th><th>TOPIX</th><th>TOPIX比</th><th>勝った割合</th></tr></thead>
+      <tbody>
+      
+        <tr class="none"><th scope="row">1日後</th><td colspan="7">まだ該当する銘柄がありません</td></tr>
+      
+        <tr class="none"><th scope="row">3日後</th><td colspan="7">まだ該当する銘柄がありません</td></tr>
+      
+        <tr class="none"><th scope="row">5日後</th><td colspan="7">まだ該当する銘柄がありません</td></tr>
+      
+        <tr class="none"><th scope="row">10日後</th><td colspan="7">まだ該当する銘柄がありません</td></tr>
+      
+        <tr class="none"><th scope="row">20日後</th><td colspan="7">まだ該当する銘柄がありません</td></tr>
+      
+        <tr class="none"><th scope="row">40日後</th><td colspan="7">まだ該当する銘柄がありません</td></tr>
+      
+        <tr class="none"><th scope="row">60日後</th><td colspan="7">まだ該当する銘柄がありません</td></tr>
+      
+      </tbody>
+    </table></div>
+    
+  </section>
+
+  <section class="card">
+    <h2>どんな時に成績が良かったか（10営業日後）</h2>
+    
+    <h3>掲載時の順位</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th></th><th>件数</th><th>平均</th><th>勝率</th><th>TOPIX比</th></tr></thead>
+      <tbody><tr><th scope="row">1〜3位</th><td>0</td>
+        <td colspan="3" class="none">該当なし</td></tr><tr><th scope="row">4位以下</th><td>0</td>
+        <td colspan="3" class="none">該当なし</td></tr></tbody>
+    </table></div>
+    
+    <h3>掲載時の相場判定</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th></th><th>件数</th><th>平均</th><th>勝率</th><th>TOPIX比</th></tr></thead>
+      <tbody><tr><th scope="row">🟢買い優勢</th><td>0</td>
+        <td colspan="3" class="none">該当なし</td></tr><tr><th scope="row">🟡中立</th><td>0</td>
+        <td colspan="3" class="none">該当なし</td></tr><tr><th scope="row">🔴防御優先</th><td>0</td>
+        <td colspan="3" class="none">該当なし</td></tr></tbody>
+    </table></div>
+    
+    <h3>掲載時の総合点</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th></th><th>件数</th><th>平均</th><th>勝率</th><th>TOPIX比</th></tr></thead>
+      <tbody><tr><th scope="row">75点未満</th><td>0</td>
+        <td colspan="3" class="none">該当なし</td></tr><tr><th scope="row">75〜80点</th><td>0</td>
+        <td colspan="3" class="none">該当なし</td></tr><tr><th scope="row">80点以上</th><td>0</td>
+        <td colspan="3" class="none">該当なし</td></tr></tbody>
+    </table></div>
+    
+    <p class="hint">「経過」は載った日の翌営業日の始値で買ってからの営業日数です。表の「TOPIX」はその間のTOPIXの平均、「勝った割合」はTOPIXを上回った銘柄の割合です。相場判定は、その日の自動更新が記録した判定です（記録が無い古い日は「記録なし」）。件数が少ない区分は参考程度にしてください。</p>
+  </section>
+
+  <section class="card">
+    <h2>暴騰率（トップ3まで）</h2>
+    <p class="hint">載ってから◯営業日以内に、終値が買値から+10％以上／+20％以上になった銘柄の割合です。期間が終わった銘柄だけを数えます（まだ途中の銘柄は含みません）。</p>
+    <div class="table-wrap"><table class="surge">
+      <thead><tr><th></th><th>5日以内</th><th>10日以内</th><th>20日以内</th></tr></thead>
+      <tbody><tr><th scope="row">1位</th>
+        
+        <td><span class="none">該当なし</span></td>
+        
+        <td><span class="none">該当なし</span></td>
+        
+        <td><span class="none">該当なし</span></td>
+        </tr><tr><th scope="row">2位</th>
+        
+        <td><span class="none">該当なし</span></td>
+        
+        <td><span class="none">該当なし</span></td>
+        
+        <td><span class="none">該当なし</span></td>
+        </tr><tr><th scope="row">3位</th>
+        
+        <td><span class="none">該当なし</span></td>
+        
+        <td><span class="none">該当なし</span></td>
+        
+        <td><span class="none">該当なし</span></td>
+        </tr><tr><th scope="row">1〜3位</th>
+        
+        <td><span class="none">該当なし</span></td>
+        
+        <td><span class="none">該当なし</span></td>
+        
+        <td><span class="none">該当なし</span></td>
+        </tr><tr><th scope="row">4位以下</th>
+        
+        <td><span class="none">該当なし</span></td>
+        
+        <td><span class="none">該当なし</span></td>
+        
+        <td><span class="none">該当なし</span></td>
+        </tr><tr><th scope="row">全体</th>
+        
+        <td><span class="none">該当なし</span></td>
+        
+        <td><span class="none">該当なし</span></td>
+        
+        <td><span class="none">該当なし</span></td>
+        </tr></tbody>
+    </table></div>
+    <p class="hint">終値ベースです（日中の高値は含みません）。件数（右の分母）が少ないうちは偶然に左右されます。</p>
+  </section>
+
+  <section class="card" id="list">
+    <h2>全銘柄の推移</h2>
+    <div class="chips" role="group" aria-label="絞り込み">
+      <button type="button" class="chip on" data-f="all">すべて</button>
+      <button type="button" class="chip" data-f="listed">掲載中</button>
+      <button type="button" class="chip" data-f="out">圏外へ</button>
+      <button type="button" class="chip" data-f="plus">プラス</button>
+      <button type="button" class="chip" data-f="minus">マイナス</button>
+    </div>
+    <div class="table-wrap"><table class="trk" id="trkTable">
+      <thead><tr><th>銘柄</th><th>載った日</th><th>経過</th><th>騰落率</th><th>TOPIX比</th><th>最大／最小</th><th>推移</th><th>状態</th></tr></thead>
+      <tbody>
+      
+      <tr class="entry" data-key="1941@2026-11-16" data-status="買い値待ち" data-ret="" tabindex="0">
+        <th scope="row">中電工<small>1941</small></th>
+        <td>11-16<small>1位・70点</small></td>
+        <td>0日</td>
+        <td colspan="4" class="none">買い値待ち</td>
+        <td><span class="st st-off">買い値待ち</span></td>
+      </tr>
+      
+      <tr class="entry" data-key="9075@2026-11-16" data-status="買い値待ち" data-ret="" tabindex="0">
+        <th scope="row">福山通運<small>9075</small></th>
+        <td>11-16<small>2位・69点</small></td>
+        <td>0日</td>
+        <td colspan="4" class="none">買い値待ち</td>
+        <td><span class="st st-off">買い値待ち</span></td>
+      </tr>
+      
+      <tr class="entry" data-key="4208@2026-11-16" data-status="買い値待ち" data-ret="" tabindex="0">
+        <th scope="row">ＵＢＥ<small>4208</small></th>
+        <td>11-16<small>3位・69点</small></td>
+        <td>0日</td>
+        <td colspan="4" class="none">買い値待ち</td>
+        <td><span class="st st-off">買い値待ち</span></td>
+      </tr>
+      
+      <tr class="entry" data-key="8037@2026-11-16" data-status="買い値待ち" data-ret="" tabindex="0">
+        <th scope="row">カメイ<small>8037</small></th>
+        <td>11-16<small>4位・68点</small></td>
+        <td>0日</td>
+        <td colspan="4" class="none">買い値待ち</td>
+        <td><span class="st st-off">買い値待ち</span></td>
+      </tr>
+      
+      <tr class="entry" data-key="4373@2026-11-16" data-status="買い値待ち" data-ret="" tabindex="0">
+        <th scope="row">シンプレクス・ホールディングス<small>4373</small></th>
+        <td>11-16<small>5位・67点</small></td>
+        <td>0日</td>
+        <td colspan="4" class="none">買い値待ち</td>
+        <td><span class="st st-off">買い値待ち</span></td>
+      </tr>
+      
+      <tr class="entry" data-key="6850@2026-11-16" data-status="買い値待ち" data-ret="" tabindex="0">
+        <th scope="row">チノー<small>6850</small></th>
+        <td>11-16<small>6位・66点</small></td>
+        <td>0日</td>
+        <td colspan="4" class="none">買い値待ち</td>
+        <td><span class="st st-off">買い値待ち</span></td>
+      </tr>
+      
+      <tr class="entry" data-key="6098@2026-11-16" data-status="買い値待ち" data-ret="" tabindex="0">
+        <th scope="row">リクルートホールディングス<small>6098</small></th>
+        <td>11-16<small>7位・66点</small></td>
+        <td>0日</td>
+        <td colspan="4" class="none">買い値待ち</td>
+        <td><span class="st st-off">買い値待ち</span></td>
+      </tr>
+      
+      <tr class="entry" data-key="8098@2026-11-16" data-status="買い値待ち" data-ret="" tabindex="0">
+        <th scope="row">稲畑産業<small>8098</small></th>
+        <td>11-16<small>8位・66点</small></td>
+        <td>0日</td>
+        <td colspan="4" class="none">買い値待ち</td>
+        <td><span class="st st-off">買い値待ち</span></td>
+      </tr>
+      
+      <tr class="entry" data-key="6306@2026-11-16" data-status="買い値待ち" data-ret="" tabindex="0">
+        <th scope="row">日工<small>6306</small></th>
+        <td>11-16<small>9位・64点</small></td>
+        <td>0日</td>
+        <td colspan="4" class="none">買い値待ち</td>
+        <td><span class="st st-off">買い値待ち</span></td>
+      </tr>
+      
+      <tr class="entry" data-key="7979@2026-11-16" data-status="買い値待ち" data-ret="" tabindex="0">
+        <th scope="row">松風<small>7979</small></th>
+        <td>11-16<small>10位・64点</small></td>
+        <td>0日</td>
+        <td colspan="4" class="none">買い値待ち</td>
+        <td><span class="st st-off">買い値待ち</span></td>
+      </tr>
+      
+      </tbody>
+    </table></div>
+    <p class="center"><button type="button" class="chip" id="moreBtn" hidden></button></p>
+    <p class="hint">行をタップすると、載った日から毎日の終値・騰落率・その日の順位が表示されます（追跡中の銘柄）。</p>
+  </section>
+  
+</main>
+<footer class="foot"><p>投資判断は自己責任でお願いします。過去の結果は将来を保証しません。</p></footer>
+<script>
+var btn=document.getElementById('themeBtn');
+function isDark(){var t=document.documentElement.getAttribute('data-theme');if(t)return t==='dark';return window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches;}
+btn.addEventListener('click',function(){var n=isDark()?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}});
+</script>
+<script src="tracking.js" defer></script>
+</body>
+</html>
