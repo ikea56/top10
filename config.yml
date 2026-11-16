@@ -378,11 +378,6 @@ holdings:
   collapse_dd: -0.25           # 52週高値から-25%以上下落したら「押し目崩れ」
   pbkdf2_iterations: 200000    # 監視データの暗号化（合言葉から鍵を作る回数）
 
-# 手動更新ボタン（「ランキング再生成」）。実行は Apps Script（holdings.endpoint）経由で daily-update を起動します
-refresh:
-  repo: "ikea56/top10"         # GitHubのリポジトリ（ユーザー名/リポジトリ名）。更新状況の表示に使います（公開リポジトリのみ）
-  workflow: "daily.yml"
-
 # 追跡・検証ページ（トップ10に載った銘柄を、載った日から毎日追跡）。買値＝載った日の翌営業日の始値
 tracking:
   max_days: 60                 # この営業日数まで追跡（終わった銘柄は主要な日の結果だけを台帳に残す）

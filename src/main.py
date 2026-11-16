@@ -528,7 +528,7 @@ def run(demo: bool) -> None:
     pb = cfg["pullback"]
     ctx = {
         "title": cfg["site_title"], "demo": demo,
-        "generated_at": f"{now:%Y年%m月%d日} {now:%H:%M}", "generated_hm": f"{now:%Y-%m-%d %H:%M}", "refresh": cfg["refresh"], "generated_iso": now.isoformat(timespec="minutes"),
+        "generated_at": f"{now:%Y年%m月%d日} {now:%H:%M}", "generated_hm": f"{now:%Y-%m-%d %H:%M}", "generated_iso": now.isoformat(timespec="minutes"),
         "data_date_label": f"{data_date.month}/{data_date.day}（{WEEKDAY[data_date.weekday()]}）",
         "data_date_iso": data_date.strftime("%Y-%m-%d"),
         "market": market, "nikkei_ok": nikkei_ok, "cards": cards,

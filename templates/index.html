@@ -33,17 +33,12 @@
   {% if demo %}
   <div class="banner warn">⚠️ <b>デモ表示です。</b>架空のデータで、実在の銘柄・株価ではありません。</div>
   {% endif %}
-  <!-- 最終更新・手動更新 -->
+  <!-- 最終更新 -->
   <section class="card refresh" id="refresh">
     <div class="rf-row">
       <div><span class="rf-label">最終更新</span> <b class="rf-time">{{ generated_hm }}</b>
         <small>（データ基準日 {{ data_date_label }} 終値）</small></div>
-      <span id="rfStatus" class="rf-status rf-idle">最新</span>
     </div>
-    <div class="rf-actions">
-      <button id="rfBtn" class="btn" type="button"{% if not hold.enabled %} hidden{% endif %}>ランキング再生成</button>
-    </div>
-    <p id="rfMsg" class="hint rf-msg"></p>
   </section>
 
   <div id="staleBanner" class="banner danger" hidden>
@@ -469,8 +464,6 @@ function toggleTV(b){
   if(!isNaN(gen)&&Date.now()-gen.getTime()>84*3600*1000){document.getElementById('staleBanner').hidden=false;}})();
 </script>
 <script>window.HOLDINGS_CFG = {{ {'endpoint': hold.endpoint, 'statusUrl': 'holdings_status.enc.json', 'namesUrl': 'names.json'}|tojson }};</script>
-<script>window.REFRESH_CFG = {{ {'endpoint': hold.endpoint, 'enabled': hold.enabled, 'repo': refresh.repo, 'workflow': refresh.workflow, 'generated': generated_iso}|tojson }};</script>
 <script src="holdings.js" defer></script>
-<script src="refresh.js" defer></script>
 </body>
 </html>
