@@ -126,7 +126,11 @@
     const rank = c.rank_main ? '本日のランキング ' + c.rank_main + '位' : '本日のランキング圏外（押し目スコア順 ' + c.rank_tech + '位／' + c.n_tech + '銘柄中）';
     const e = c.earnings || {};
     const ev = (c.events || []).map(function (x) { return chip(x.label, x.state, x.detail); });
-    ev.push(e.days != null && e.days <= 10 ? chip('決算接近', 'bad', e.date.slice(5).replace('-', '/') + '・あと' + e.days + '日') : chip('決算接近', 'none', e.date ? '次回 ' + e.date.slice(5).replace('-', '/') : ''));
+    const nd = e.date ? e.date.slice(5).replace('-', '/') + (e.estimate ? '（推定）' : '') : '';
+    if (e.days != null && e.days <= 3) ev.push(chip('決算跨ぎ注意', 'bad', nd + '・あと' + e.days + '営業日'));
+    else if (e.days != null && e.days <= 5) ev.push(chip('要監視（決算接近）', 'bad', nd + '・あと' + e.days + '営業日'));
+    else if (e.state === 'passed') ev.push(chip('決算通過済み', 'good', '通過後' + e.days_since + '営業日'));
+    else ev.push(chip('決算接近', 'none', e.days != null ? '次回 ' + nd + '・あと' + e.days + '営業日' : (e.text || '')));
     const s = c.stop;
     return h('article', { class: 'card stock hcard act-' + a.key },
       h('header', { class: 'stock-head' },
