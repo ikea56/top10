@@ -336,3 +336,21 @@ table.surge td{text-align:left;white-space:nowrap;font-size:.85rem}table.surge t
 .earn-badge.warn{background:#fdecea;color:#b3261e}
 .earn-badge.ok{background:#e6f4ea;color:#1e7a3c}
 @media (prefers-color-scheme:dark){.earn-badge.warn{background:#4a2321;color:#ffb4ab}.earn-badge.ok{background:#1d3b27;color:#9be0b0}}
+
+/* 順位別・スコア帯別の分析（㉕） */
+.vd{display:inline-block;padding:1px 9px;border-radius:999px;font-size:.78rem;font-weight:700;border:1px solid var(--gray);color:var(--gray)}
+.vd-ok{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+.vd-mid{border-color:var(--yellow);color:var(--yellow);background:var(--yellow-bg)}
+.vd-no{border-color:var(--red);color:var(--red);background:var(--red-bg)}
+.rbt th,.rbt td{white-space:nowrap;text-align:right}.rbt th:first-child,.rbt thead th:nth-child(2),.rbt td:nth-child(2){text-align:left}
+.rbt tr.dim{opacity:.6}.concl{padding-left:1.1em}.concl li{margin:.3em 0}
+.charts{display:grid;grid-template-columns:1fr;gap:12px;margin-top:10px}
+@media (min-width:720px){.charts{grid-template-columns:1fr 1fr}}
+figure{margin:10px 0}figcaption{font-size:.82rem;color:var(--sub);margin-bottom:2px}
+.barchart .grid{stroke:var(--line)}.barchart .base{stroke:var(--gray);stroke-dasharray:4 3}
+.barchart .tick{fill:var(--sub);font-size:9px}.barchart .val{fill:var(--text,currentColor);font-size:9px}
+.barchart rect.s0{fill:var(--accent)}.barchart rect.s1{fill:var(--gray)}
+.barchart rect.pos{fill:var(--green)}.barchart rect.neg{fill:var(--red)}
+.barchart .ln{stroke:var(--accent)}.barchart .ln.s1{stroke:var(--green)}.barchart .ln.s2{stroke:var(--yellow)}.barchart .ln.s3{stroke:var(--red)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.78rem;color:var(--sub)}.legend .lg::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;background:var(--accent)}
+.legend .lg.s1::before{background:var(--gray)}.legend .lg.s2::before{background:var(--yellow)}.legend .lg.s3::before{background:var(--red)}

@@ -39,6 +39,8 @@ def render_site(ctx: dict[str, Any], out_dir: Path | None = None) -> Path:
             **ctx, chart=T.avg_chart_svg(tr["stats"]), sparks={r["key"]: T.spark_svg(r.get("spark")) for r in tr["entries"]},
             horizons=ctx["tcfg"]["horizons"], max_days=ctx["tcfg"]["max_days"], reentry_gap=ctx["tcfg"]["reentry_gap"]), encoding="utf-8")
         T.write_files(out, tr, ctx["generated_iso"])
+    from . import rankband
+    (out / "analysis.html").write_text(env.get_template("analysis.html").render(**ctx, **rankband.page_ctx(ctx.get("summary"), ctx.get("tr"), ctx["cfg"])), encoding="utf-8")
     (out / ".nojekyll").write_text("", encoding="utf-8")
 
     keys = ("rank", "code", "name", "main", "pb_total", "td_score", "penalty", "parts", "label", "close",

@@ -302,7 +302,7 @@ def test_accuracy_21():
     assert es_["estimate"] and es_["next"] == "2026-11-19" and es_["days_to"] == 12 and "推定" in es_["text"]
     assert ea(None)["state"] == "unknown" and "取得できません" in ea(None)["text"]
     assert E.busdays(date(2026, 11, 20), date(2026, 11, 24), cfg) == 1, "11/23（祝日）と土日を除く（金のみ）"
-    from src import jpholidays as J
+    from src import jpholidays as J, main as MAIN
     hd = lambda y: {d.strftime("%m-%d") for d in J.holidays(y) if d.weekday() < 5}  # noqa: E731
     assert {"09-21", "09-22", "09-23", "05-06", "03-20", "12-31"} <= hd(2026), "2026：敬老・国民の休日・秋分・振替・春分"
     assert {"03-22", "09-20", "09-23", "05-03", "01-11", "07-19"} <= hd(2027) and "11-23" in hd(2027)
@@ -310,9 +310,15 @@ def test_accuracy_21():
     td = NS(status="ok", hits=[NS(kind="dividend_increase", date="2026-10-25"), NS(kind="upward_revision", date="2026-10-01"),
                                 NS(kind="buyback", date="2026-10-28")])
     evx = NS(has=lambda k: k in ("record_high", "turnaround"))
-    bn, lb = E.event_bonus(p1, td, evx, cfg)
-    assert bn == 10 and set(lb) == {"増配", "自社株買い", "黒字転換", "最高益更新"}, "上方修正は決算前の開示なので対象外・上限10"
-    assert E.event_bonus(ea("2026-11-06"), td, evx, cfg) == (0.0, []), "通過済みでなければ加点なし"
+    lb = E.good_news(p1, td, evx)
+    assert set(lb) == {"増配", "自社株買い", "黒字転換", "最高益更新"}, "上方修正は決算前の開示なので対象外（表示のみ・点数なし）"
+    assert E.good_news(ea("2026-11-06"), td, evx) == [], "通過済みでなければ表示なし"
+    assert "bonus" not in cfg["earnings"], "好材料の再加点（二重加点）は設定にも存在しない"
+    # 二重加点がないこと：決算通過後の加点は基本点だけで、好材料の有無で総合点が変わらない
+    import copy
+    ca = {"pb_total": 70.0, "fund": {}, "earn": p1, "ev": evx, "td": None}
+    cb = dict(ca, ev=NS(has=lambda k: False))
+    assert MAIN.final_score(ca, cfg)[0] == MAIN.final_score(cb, cfg)[0] == 70.0
     assert E.cap_label("押し目良好", "bull", ea("2026-11-04"), cfg)[0] == "様子見"
     assert E.cap_label("押し目良好", "bull", ea("2026-11-06"), cfg)[0] == "押し目候補"
     assert E.cap_label("押し目良好", "bull", ea("2026-11-11"), cfg)[0] == "押し目良好"
@@ -680,6 +686,61 @@ def _tracking_fixture(tmp, n_days=40):
     return panel, topix, hist, idx
 
 
+def test_rankband():
+    """㉕ 順位別・スコア帯別：人工データで、点数が高いほど上がる世界／無関係な世界を見分けられるか。"""
+    from src import rankband as RB
+    cfg = load_config()
+    rng = np.random.default_rng(3)
+    hs = [1, 3, 5, 10, 20]
+
+    def world(edge: float, n_days: int = 300) -> list[dict]:
+        recs = []
+        for d in range(n_days):
+            n = 200
+            sc = rng.uniform(40, 100, n)
+            order = np.argsort(-sc)
+            base = rng.normal(0.001, 0.03, n)
+            ret = {h: (base + edge * (sc - 70) / 30 * (h / 5)).astype(float) for h in hs}
+            recs.append({"date": pd.Timestamp("2018-01-01") + pd.Timedelta(days=7 * d), "s": sc, "rk": order[:10],
+                         "ret": ret, "bench": {h: 0.001 for h in hs}})
+        return recs
+
+    good = RB.analyze_replay(world(0.01), cfg, 5)
+    assert good["ok"]
+    st = {g["name"]: g["status"] for g in good["levels"]}
+    assert st["90点以上"] == "推奨" and st["85点以上"] == "推奨", st
+    assert good["advice"]["rec_level"] is not None and "推奨" in good["advice"]["score"]
+    assert all(g["by_h"][5]["avg"] > good["all"]["by_h"][5]["avg"] for g in good["ranks"]), "上位は全体平均より高い"
+    assert good["levels"][0]["by_h"][5]["avg"] > good["levels"][4]["by_h"][5]["avg"], "点数が高いほど平均が高い"
+    assert good["advice"]["rank_thru"] >= 3 and good["advice"]["best_portfolio"] in {"TOP1", "TOP3", "TOP5", "TOP10"}
+    for g in good["ranks"] + good["portfolios"] + good["levels"]:
+        for k in ("pf", "sharpe", "max_dd"):
+            assert k in g
+        assert set(g["by_h"]) == set(hs) and 0 <= g["by_h"][5]["win"] <= 1
+    assert good["portfolios"][0]["max_dd"] <= 0
+    flat = RB.analyze_replay(world(0.0), cfg, 5)
+    assert flat["advice"]["rec_level"] is None, "点数に意味が無い世界で『推奨』を出さない"
+    assert all(g["status"] != "推奨" for g in flat["ranks"] + flat["levels"])
+    tiny = RB.analyze_replay(world(0.01, 10), cfg, 5)
+    assert not tiny["ok"], "日数が足りないときは分析しない"
+    # 件数が少ない帯は判定不能（90点以上かつ少数）
+    few = world(0.01, 60)
+    assert RB.analyze_replay(few, cfg, 5)["levels"][0]["status"] in ("判定不能", "推奨", "中立", "見送り")
+    # JSONを経由してもページ用に読み直せる（キーが文字列になる）
+    v = RB._norm(json.loads(json.dumps({"rankband": good}))["rankband"])
+    assert isinstance(next(iter(v["levels"][0]["by_h"])), int)
+    svg = RB.bars_svg(["a", "b"], [("5日後", [1.0, -2.0]), ("20日後", [2.0, None])])
+    assert "<svg" in svg and "—" in svg and RB.bars_svg(["a"], [("x", [None])]) == ""
+    # 実運用の記録（追跡台帳）：順位・総合点で切り分け
+    res = [{"rank": r, "main": m, "date": f"2026-10-{d:02d}", "cp": {"5": (x, 0.0), "20": (x * 2, 0.0)}}
+           for d, (r, m, x) in enumerate([(1, 88, 0.05), (2, 82, -0.02), (3, 76, 0.01), (5, 72, -0.03), (8, 71, 0.02)], 1)]
+    lv = RB.analyze_live(res, cfg)
+    assert lv["ranks"][0]["by_h"][5]["n"] == 1 and lv["ranks"][0]["by_h"][5]["win"] == 1.0
+    assert lv["levels"][3]["name"] == "75点以上" and lv["levels"][3]["by_h"][5]["n"] == 3     # 88・82・76
+    assert lv["levels"][0]["by_h"][5]["n"] == 0 and lv["portfolios"][0]["name"] == "TOP1"
+    print("ok  順位別・スコア帯別の分析（点数に意味がある/無い世界の見分け・判定不能・実運用の記録）")
+
+
 def test_tracking():
     import tempfile
     from pathlib import Path
@@ -766,7 +827,7 @@ def test_end_to_end():
         assert k in summ["periods"]["5y"], k
     html = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
     for word in ("【強み】", "【押し目状況】", "【注意事項】", "押し目スコア", "イベント点", "なぜ選ばれた",
-                 "補助指標", "期間別の成績", "excluded_events.csv", "推奨撤退ライン", "リスク幅", "ATR", "有効性の検証", "点数帯ごとの成績", "現在の相場判定", "運用ガイド", "本日はギャップダウンリスクあり", "寄り付き前の指標", "【外部環境】", "順位への影響はごく小さく", "最終更新", "追跡・検証ページ", "【決算状況】", "決算まで"):
+                 "補助指標", "期間別の成績", "excluded_events.csv", "推奨撤退ライン", "リスク幅", "ATR", "有効性の検証", "点数帯ごとの成績", "現在の相場判定", "運用ガイド", "本日はギャップダウンリスクあり", "寄り付き前の指標", "【外部環境】", "順位への影響はごく小さく", "最終更新", "追跡・検証ページ", "順位別・スコア帯別の分析", "【決算状況】", "決算まで"):
         assert word in html, word
     # ㉒ 保有銘柄：暗号化ファイル・名前一覧・前回比較・3ブロック
     from src import holdings as H
@@ -800,6 +861,6 @@ def test_end_to_end():
 if __name__ == "__main__":
     for fn in (test_config_and_weights, test_momentum_points, test_no_lookahead, test_events,
                test_dividend_and_exclusion, test_expected_and_metrics, test_text, test_pullback, test_tdnet, test_accuracy_21, test_holdings,
-               test_excluded_csv, test_data_fixes, test_validation, test_stance, test_premarket, test_lead, test_tracking, test_end_to_end):
+               test_excluded_csv, test_data_fixes, test_validation, test_stance, test_premarket, test_lead, test_tracking, test_rankband, test_end_to_end):
         fn()
     print("\nALL OK")

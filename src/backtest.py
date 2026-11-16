@@ -214,6 +214,8 @@ def run_replay(panel: Panel, bench: dict[str, pd.DataFrame], sectors: pd.Series,
     idx = list(range(first, len(c) - 1, int(bt["step_days"])))
     entry = o.shift(-1).where(lambda x: x > 0)
     fwd = {k: (c.shift(-h) / entry - 1 - cost).iloc[idx] for k, h in horizons.items()}
+    rbh = [int(h) for h in cfg["rankband"]["horizons"]]                    # 順位別・スコア帯別の分析用（1・3・5・10・20営業日後）
+    rbf = {h: (c.shift(-h) / entry - 1 - cost).iloc[idx].astype("float32") for h in rbh}
     del entry
     cfwd = {k: (c.shift(-h) / c.shift(-1) - 1 - cost).iloc[idx] for k, h in horizons.items()}   # 翌日終値で買う場合
     atr_df = atr_frame(panel, int(cfg["pullback"]["atr"]["period"]))
@@ -222,6 +224,9 @@ def run_replay(panel: Panel, bench: dict[str, pd.DataFrame], sectors: pd.Series,
     carr = c.to_numpy(dtype=float)
     bentry = topix["open"].shift(-1)
     bfwd = {k: (topix["close"].shift(-h) / bentry - 1 - cost).iloc[idx] for k, h in horizons.items()}
+    rbb = {h: (topix["close"].shift(-h) / bentry - 1 - cost).iloc[idx] for h in rbh}
+    rb_recs: list[dict] = []
+    max_rank = max(hi for _, hi in cfg["rankband"]["rank_groups"])
 
     records: list[dict] = []
     for pos, i in enumerate(idx):
@@ -245,6 +250,10 @@ def run_replay(panel: Panel, bench: dict[str, pd.DataFrame], sectors: pd.Series,
             x[f"r_{k}"] = fwd[k].iloc[pos].reindex(x.index)
             x[f"rc_{k}"] = cfwd[k].iloc[pos].reindex(x.index)
         pb_picks = list(pb_order.index[:top_n])
+        rb_recs.append({"date": c.index[i], "s": pb.to_numpy(dtype=float),
+                        "rk": s.index.get_indexer(pb_order.index[:max_rank]),
+                        "ret": {h: rbf[h].iloc[pos].reindex(s.index).to_numpy(dtype=float) for h in rbh},
+                        "bench": {h: float(rbb[h].iloc[pos]) for h in rbh}})
         stop = _simulate_stop(carr, c.columns, i, vh, pb_picks, f["ma50"].iloc[i], f["ma200"].iloc[i], atr_df.iloc[i],
                               sm, cost, fwd[cfg["validation"]["horizon"]].iloc[pos])
         sec = sectors.reindex(pb_picks).fillna("不明")
@@ -278,6 +287,13 @@ def run_replay(panel: Panel, bench: dict[str, pd.DataFrame], sectors: pd.Series,
     except Exception as e:  # 検証部分の失敗で、既存の成績表まで失わない
         log.warning("有効性の検証に失敗しました: %s", e)
         summary["validation"] = {"ok": False, "reason": f"検証の計算に失敗しました（{e}）"}
+    try:
+        from . import rankband
+        summary["rankband"] = rankband.analyze_replay(rb_recs, cfg, int(bt["step_days"]))
+    except Exception as e:  # noqa: BLE001
+        log.warning("順位別・スコア帯別の分析に失敗しました: %s", e)
+        summary["rankband"] = {"ok": False, "reason": f"分析の計算に失敗しました（{e}）"}
+    del rb_recs
     for r in records:           # メモリ解放
         r.pop("x", None)
     return summary

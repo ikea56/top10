@@ -1,7 +1,7 @@
 """決算イベント評価（㉔）。決算ギャンブルを避け、決算を通過した後の押し目を優先する。
 
   決算接近ペナルティ … 決算までの営業日数に応じて総合点から減点（押し目スコアより優先される大きさ）
-  決算通過後ボーナス … 決算通過後30営業日以内なら基本加点、さらに増配・上方修正・自社株買い・黒字転換・最高益で加点
+  決算通過後の基本加点 … 決算通過後30営業日以内なら加点（時期の良さ）。増配・上方修正などの好材料は、他の項目で加点済みのため再加点しない（表示のみ）
   バッジ … ✅ 決算通過済み / ⚠ 決算接近（5営業日以内）/ ⚠ 決算跨ぎ注意（3営業日以内）
 
 注意：決算発表は引け後が多いため、発表の翌営業日の朝はまだ株価の反応が出ていない。
@@ -83,21 +83,21 @@ def assess(fund: dict | None, today: date, cfg: Config, td_dates: list[str] | No
     return out
 
 
-def event_bonus(earn: dict | None, td: Any, ev: Any, cfg: Config) -> tuple[float, list[str]]:
-    """決算通過後の好材料ボーナス。通過済み（state=passed）のときだけ。TDnetは前回決算日以降の開示だけ数える。"""
+def good_news(earn: dict | None, td: Any, ev: Any) -> list[str]:
+    """決算通過後の好材料（表示用）。点数は加えない：
+    増配・上方修正・自社株買い・黒字転換・最高益は、すでに「業績・還元」の点とTDnetのイベント点で加点されているため、
+    ここで再び加点すると二重加点になる。決算の加点は『通過済みという時期の良さ』の基本点だけ。"""
     if not earn or earn.get("state") != "passed":
-        return 0.0, []
-    bc = cfg["earnings"]["bonus"]
-    last = earn["last"]
-    pts, labels = 0.0, []
+        return []
+    last, labels = earn["last"], []
     if td is not None and getattr(td, "status", "") == "ok":
         for kind, name in (("dividend_increase", "増配"), ("upward_revision", "上方修正"), ("buyback", "自社株買い")):
             if any(h.kind == kind and h.date >= last for h in td.hits):
-                pts += float(bc[kind]); labels.append(name)
+                labels.append(name)
     for key, name in (("turnaround", "黒字転換"), ("record_high", "最高益更新")):
         if ev is not None and ev.has(key):
-            pts += float(bc[key]); labels.append(name)
-    return min(pts, float(bc["cap"])), labels
+            labels.append(name)
+    return labels
 
 
 def cap_label(label: str, css: str, earn: dict | None, cfg: Config) -> tuple[str, str, str]:
@@ -114,8 +114,8 @@ def cap_label(label: str, css: str, earn: dict | None, cfg: Config) -> tuple[str
     return label, css, ""
 
 
-def summary(earn: dict, bonus: float, labels: list[str]) -> dict[str, Any]:
+def summary(earn: dict, labels: list[str]) -> dict[str, Any]:
     """画面・JSON用（保有銘柄の監視にも使う）。"""
     return {"text": earn["text"], "state": earn["state"], "badges": earn["badges"], "next": earn["next"], "estimate": earn["estimate"],
             "days_to": earn["days_to"], "last": earn["last"], "days_since": earn["days_since"],
-            "pen": round(earn["pen"]), "base": round(earn["base"]), "bonus": round(bonus), "bonus_labels": labels}
+            "pen": round(earn["pen"]), "base": round(earn["base"]), "good_news": labels}

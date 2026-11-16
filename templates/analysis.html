@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0f1a2b">
+<meta name="robots" content="noindex">
+<title>順位別・スコア帯別の分析｜{{ title }}</title>
+<link rel="stylesheet" href="style.css">
+<script>
+(function(){try{var t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+</script>
+</head>
+<body>
+{% macro st(s) %}<span class="vd vd-{{ {'推奨':'ok','中立':'mid','見送り':'no','判定不能':'na'}[s] }}">{{ s }}</span>{% endmacro %}
+{% macro table(rows, v, kind) %}
+<div class="table-wrap"><table class="rbt">
+  <thead><tr><th>{{ kind }}</th><th>判定</th><th>件数</th>
+    {% for h in v.horizons %}<th>{{ h }}日後<br>勝率</th>{% endfor %}
+    <th>平均<br>{{ v.eh }}日後</th><th>平均<br>20日後</th><th>最大DD</th><th>PF</th><th>シャープ</th></tr></thead>
+  <tbody>
+  {% for g in rows %}{% set c = g.by_h[v.eh] %}
+    <tr class="{{ 'dim' if g.status == '判定不能' else '' }}"><th scope="row">{{ g.name }}</th><td>{{ st(g.status) }}</td><td>{{ c.n }}</td>
+      {% for h in v.horizons %}{% set x = g.by_h[h] %}<td class="{{ 'pos' if x.win is not none and x.win > 0.5 else 'neg' if x.win is not none else 'na' }}">{{ ('%.0f'|format(x.win*100) ~ '%') if x.win is not none else '—' }}</td>{% endfor %}
+      <td class="{{ 'pos' if c.avg is not none and c.avg > 0 else 'neg' }}">{{ ((c.avg*100)|pct) if c.avg is not none else '—' }}</td>
+      {% set c20 = g.by_h[20] if 20 in g.by_h else none %}
+      <td class="{{ 'pos' if c20 and c20.avg is not none and c20.avg > 0 else 'neg' }}">{{ ((c20.avg*100)|pct) if c20 and c20.avg is not none else '—' }}</td>
+      <td>{{ ((g.max_dd*100)|pct) if g.max_dd is not none else '—' }}</td>
+      <td>{{ '%.2f'|format(g.pf) if g.pf is not none else '—' }}</td>
+      <td>{{ '%.2f'|format(g.sharpe) if g.sharpe is not none else '—' }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% endmacro %}
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-row">
+      <h1>🎯 順位別・スコア帯別の分析</h1>
+      <button id="themeBtn" class="icon-btn" type="button" aria-label="ライト／ダーク表示を切り替え">🌓</button>
+    </div>
+    <p class="meta"><span>最終更新：{{ generated_hm }}</span></p>
+    <p class="meta"><a class="back" href="index.html">← ランキングに戻る</a>　<a class="back" href="tracking.html">📊 追跡・検証ページ</a></p>
+  </div>
+</header>
+
+<main class="wrap">
+  {% if demo %}<div class="banner warn">⚠️ <b>デモ表示です。</b>架空のデータで、実在の銘柄・株価ではありません。</div>{% endif %}
+  {% set v = rb_replay %}
+  {% if not v or not v.ok %}
+  <section class="card"><h2>まだ分析結果がありません</h2>
+    <p class="hint">{{ (v.reason if v else '週次バックテストの結果がまだありません。') }}GitHubの Actions で <b>weekly-backtest</b> を実行したあと、<b>daily-update</b> を実行すると表示されます。</p></section>
+  {% else %}
+  {% set a = v.advice %}
+  <section class="card verdict-card">
+    <h2>結論：何位まで？何点以上？</h2>
+    <ul class="concl">
+      <li><b>順位</b>：{{ a.rank }}。{% if a.best_portfolio %}シャープレシオが最も高いのは <b>{{ a.best_portfolio }}</b>。{% endif %}</li>
+      <li><b>点数</b>：<b>{{ a.score }}</b>。{% if a.trend %}{{ a.trend }}。{% endif %}<br><small>{{ a.score_detail }}</small></li>
+    </ul>
+    <p class="hint">過去{{ v.period.start[:4] }}〜{{ v.period.end[:4] }}年の毎週のランキング（{{ v.n_dates }}回）を再現した結果です。判定の基準は下の「見方」を読んでください。<b>過去の結果は将来を保証しません。</b>最終判断はご自身で。</p>
+  </section>
+
+  <section class="card">
+    <h2>見方・注意</h2>
+    <ul class="caveats">
+      <li><b>点数・順位は毎週その日のものを使います</b>（点数順に並べた順位。固定の銘柄ではありません）。買値＝翌営業日の始値、「○日後」＝掲載日から○営業日後の終値、売買コスト（往復{{ cost_pct }}%）込み。</li>
+      <li><b>過去の再現で使う点数は「押し目スコアのテクニカル部分（100点換算）」</b>です。過去の業績・適時開示・決算日は再現できないため、画面の総合点（業績・開示・決算を含む）とは尺度が違います。「85点以上」は、あくまでこの尺度での話です。実際の総合点での結果は、下の「実運用の記録」で少しずつ貯まります。</li>
+      <li><b>判定</b>：平均リターンがプラスで、全体平均（その週の全銘柄の平均）より有意に良ければ「推奨」（差のt値が{{ rcfg.t_good }}以上＝偶然とは言いにくい目安）。プラスだが偶然の範囲なら「中立」、それ以外は「見送り」、件数が{{ rcfg.min_trades }}件未満は「判定不能」。主な保有期間は{{ v.eh }}営業日で判定します。</li>
+      <li>最大ドローダウン・PF・シャープレシオは、{{ v.eh }}営業日ごと（重ならない）の成績から計算しています。PF＝勝ちの合計÷負けの合計（1を超えれば利益が上）。</li>
+      <li>「全体平均」と「TOPIX」の{{ v.eh }}日後の平均：全銘柄 {{ ((v.all.by_h[v.eh].avg*100)|pct) if v.all.by_h[v.eh].avg is not none else '—' }}／TOPIX {{ ((v.bench[v.eh]*100)|pct) if v.bench[v.eh] is not none else '—' }}。</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>順位別（その週の順位ごとに買った場合）</h2>
+    {{ table(v.ranks, v, '順位') }}
+    <div class="charts">
+      <figure><figcaption>順位別の平均リターン（%）</figcaption>{{ ch.rank_avg|safe }}</figure>
+      <figure><figcaption>順位別の勝率（%・点線は50%）</figcaption>{{ ch.rank_win|safe }}</figure>
+    </div>
+    <p class="hint">順位による期待値の差を見るページです。右に行くほど（順位が下がるほど）棒が低くなっていれば「順位に意味がある」、バラバラなら「順位の差はあまり無い」と読みます。</p>
+  </section>
+
+  <section class="card">
+    <h2>ポートフォリオ比較（TOP1／TOP3／TOP5／TOP10を均等に買う）</h2>
+    {{ table(v.portfolios, v, '買い方') }}
+    <figure><figcaption>資産曲線（毎週入れ替え・{{ v.eh }}営業日ごとの複利、コスト込み）</figcaption>{{ ch.equity|safe }}</figure>
+    <p class="hint">件数は「買った週の数」です。1銘柄に絞るほど平均は高く見えても、ブレ（最大DD・シャープ）が大きくなりがちです。<b>平均だけでなくシャープレシオと最大DDも見てください。</b></p>
+  </section>
+
+  <section class="card">
+    <h2>スコア帯別（「この点数以上」の銘柄を全部買った場合）</h2>
+    {{ table(v.levels, v, '点数') }}
+    <p class="hint">各行は「その週にその点数以上だった銘柄すべて」を買った場合です（上位10位に限りません）。上の行ほど条件が厳しく、該当する週・銘柄が少なくなります。</p>
+    <div class="charts">
+      <figure><figcaption>点数帯別の平均リターン（%）</figcaption>{{ ch.lv_avg|safe }}</figure>
+      <figure><figcaption>点数帯別の勝率（%・点線は50%）</figcaption>{{ ch.lv_win|safe }}</figure>
+    </div>
+    <h3>推奨エントリー基準（この結果から）</h3>
+    <ul class="concl">
+      {% for g in v.levels %}<li>{{ g.name }}：{{ st(g.status) }}　<small>{{ g.why }}（該当{{ g.days_with }}週）</small></li>{% endfor %}
+    </ul>
+    <p class="hint">例：「推奨」が出た最も低い点数が、この尺度でのエントリー目安です。「判定不能」は該当が少なすぎて、良し悪しを言えない状態です。</p>
+  </section>
+  {% endif %}
+
+  {% set lv = rb_live %}
+  <section class="card">
+    <h2>実運用の記録（実際に載った順位・総合点での結果）</h2>
+    {% if not lv or not lv.n_entries %}
+    <p class="hint">まだ結果が出ている記録がありません。毎日の更新で貯まると、ここに表示されます。</p>
+    {% else %}
+    <p class="hint">これまでに実際にトップ10へ載った銘柄 {{ lv.n_entries }}件（{{ lv.n_days }}日分）。<b>件数が30件を超えるまでは偶然に左右されます。</b>点数は画面に出ていた総合点（業績・開示・決算を含む）です。</p>
+    {% for title, rows in (('順位別', lv.ranks), ('ポートフォリオ（その日のTOPnを均等に買う）', lv.portfolios), ('総合点別（この点数以上）', lv.levels)) %}
+    <h3>{{ title }}</h3>
+    <div class="table-wrap"><table class="rbt">
+      <thead><tr><th></th>{% for h in lv.horizons %}<th>{{ h }}日後<br>勝率</th><th>平均</th>{% endfor %}</tr></thead>
+      <tbody>{% for g in rows %}<tr><th scope="row">{{ g.name }}</th>
+        {% for h in lv.horizons %}{% set x = g.by_h[h] %}
+          {% if x.n %}<td>{{ '%.0f'|format(x.win*100) }}%<small>（{{ x.n }}）</small></td><td class="{{ 'pos' if x.avg > 0 else 'neg' }}">{{ (x.avg*100)|pct }}</td>{% else %}<td class="na">—</td><td class="na">—</td>{% endif %}
+        {% endfor %}</tr>{% endfor %}</tbody>
+    </table></div>
+    {% endfor %}
+    <p class="hint">（　）内は件数。最大ドローダウン・シャープレシオは、実運用の件数が十分に貯まるまで計算していません。</p>
+    {% endif %}
+  </section>
+</main>
+<footer class="foot"><p>投資判断は自己責任でお願いします。過去の結果は将来を保証しません。</p></footer>
+<script>
+var btn=document.getElementById('themeBtn');
+function isDark(){var t=document.documentElement.getAttribute('data-theme');if(t)return t==='dark';return window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches;}
+btn.addEventListener('click',function(){var n=isDark()?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}});
+</script>
+</body>
+</html>

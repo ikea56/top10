@@ -212,8 +212,7 @@ def final_score(c: dict, cfg: Config) -> tuple[float, float, float, list[str]]:
     td_score = td.score if td is not None and td.status == "ok" else 0.0
     src = tdnet_events.recent_downward(td, c["fund"], cfg)
     pen = float(cfg["tdnet"]["downward_recent"]["penalty"]) if src else 0.0
-    bonus, _ = earnings.event_bonus(c.get("earn"), td, c.get("ev"), cfg)      # 決算通過後の好材料（増配・上方修正など）
-    return c["pb_total"] + td_score - pen + bonus, td_score, pen, src
+    return c["pb_total"] + td_score - pen, td_score, pen, src
 
 
 def make_cards(top: list[dict], f: features.Features, panel: features.Panel, themes: dict, regime: str,
@@ -229,7 +228,7 @@ def make_cards(top: list[dict], f: features.Features, panel: features.Panel, the
         if note:
             note = "直近30日以内に下方修正があるため" if down_src else "減配の開示があるため"
         earn = x["earn"]
-        e_bonus, e_labels = earnings.event_bonus(earn, td, ev, cfg)
+        e_labels = earnings.good_news(earn, td, ev)
         label, css, cap_note = earnings.cap_label(label, css, earn, cfg)
         note = note or cap_note
         sl = slice(-60, None)
@@ -250,7 +249,7 @@ def make_cards(top: list[dict], f: features.Features, panel: features.Panel, the
             "down_pen": round(down_pen), "market_pts": round(float(r["pb_market"])),
             "parts": {k: [round(float(a), 1), b] for k, (a, b) in parts.items()},
             "label": label, "css": css, "label_note": note,
-            "earn": earnings.summary(earn, e_bonus, e_labels),
+            "earn": earnings.summary(earn, e_labels),
             "strengths": stren,
             "status": explain.pullback_status(r, cfg, regime, nikkei_ok),
             "cautions": explain.cautions(r, fund, td, ev, cfg, regime, r["market"], today, x["earn_pen"], x["earn_days"], down_src, earn),
@@ -324,7 +323,7 @@ def monitor_holdings(codes: list[str], snap_full: pd.DataFrame, snap: pd.DataFra
         cand = {"pb_total": pullback.total(float(r["pb_sum"]), q, float(r["pb_penalty"]), earn_pen - earn["base"]),
                 "td": td, "fund": fund, "earn": earn, "ev": ev}
         main, td_score, down_pen, down_src = final_score(cand, cfg)
-        e_bonus, e_labels = earnings.event_bonus(earn, td, ev, cfg)
+        e_labels = earnings.good_news(earn, td, ev)
         hits = list(td.hits) if td is not None and td.status == "ok" else []
         down_hits = [h for h in hits if h.kind == "downward_revision"]
         cut = [h for h in hits if h.kind == "dividend_cut"]
@@ -366,7 +365,7 @@ def monitor_holdings(codes: list[str], snap_full: pd.DataFrame, snap: pd.DataFra
             "events": [flag("増配", has("dividend_increase")), flag("上方修正", has("upward_revision")),
                        flag("下方修正", down_hits or ([] if not down_src else ["予想EPS"]), bad=True),
                        flag("自社株買い", has("buyback"))],
-            "earnings": {"date": ne, "days": e_days, "penalty": round(earn_pen), **earnings.summary(earn, e_bonus, e_labels)},
+            "earnings": {"date": ne, "days": e_days, "penalty": round(earn_pen), **earnings.summary(earn, e_labels)},
             "td_events": [{"label": h.label, "date": h.date, "points": round(h.points, 1)} for h in hits],
             "td_status": td_status,
             "cautions": explain.cautions(r, fund, td, ev, cfg, regime, r["market"], today, earn_pen, earn_days, down_src, earn),
@@ -541,7 +540,7 @@ def run(demo: bool) -> None:
         "n_excluded_events": len(excluded_rows),
         "movers": mover, "prev_date": prev_date, "mv": mv, "change_summary": summary_changes,
         "hold": {"endpoint": endpoint, "enabled": bool(endpoint), "demo": demo, "n": None if hold_cards is None else len(hold_cards)},
-        "tr": tr, "tcfg": cfg["tracking"],
+        "tr": tr, "tcfg": cfg["tracking"], "summary": summary, "cfg": cfg,
         "pb": pb, "earn_cfg": cfg["earnings"], "w": cfg["weights"], "tdc": cfg["tdnet"], "ev": cfg["events"], "es": cfg["expected_score"],
         "lead_max": cfg["lead"]["max_points"], "pb_lead_effect": cfg["lead"]["rank_effect"], "pb_lead_shift": cfg["lead"]["max_rank_shift"], "top_n": cfg["top_n"], "min_turnover_oku": cfg["filters"]["min_turnover_yen"] / 1e8, "min_price": cfg["filters"]["min_price"],
     }
