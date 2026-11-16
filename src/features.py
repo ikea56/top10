@@ -62,6 +62,8 @@ def compute_features(panel: Panel, topix_close: pd.Series | None, sc: dict) -> F
     f["ret3d"] = c.pct_change(3, fill_method=None)
     f["ma5"] = c.rolling(5, min_periods=5).mean()
     f["ret60"] = c.pct_change(60, fill_method=None)
+    f["hi252_recent"] = f["hi252"].astype(float).rolling(int(sc.get("breakout_window", 150)), min_periods=1).max()   # 直近N営業日に252日高値を更新したか（1/0）
+    f["vol60"] = f["ret1d"].rolling(60, min_periods=40).std()                                  # 60日の日次値動きの大きさ（保有しやすさ）
     f["vol_cont"] = v.rolling(10, min_periods=8).mean() / v.rolling(50, min_periods=40).mean()   # 出来高の収縮率
 
     if topix_close is not None and len(topix_close.dropna()) > 21:

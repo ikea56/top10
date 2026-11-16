@@ -741,6 +741,34 @@ def test_rankband():
     print("ok  順位別・スコア帯別の分析（点数に意味がある/無い世界の見分け・判定不能・実運用の記録）")
 
 
+def test_quality_first():
+    """良い企業の押し目を優先する仕組み：減益は除外・増益は加点・高値突破の実績がない銘柄は大きく減点・値動きが穏やかなら加点。"""
+    from src import fundamentals as FU, pullback
+    cfg = load_config()
+    fc = cfg["fundamentals"]
+    ok = {"op_ttm": 100.0, "op_yoy": 0.12, "op_annual": [100, 80]}
+    assert FU.exclusion_reason(ok, fc) is None
+    assert "減益" in FU.exclusion_reason(dict(ok, op_yoy=-0.08), fc), "減益の企業は除外"
+    assert FU.exclusion_reason(dict(ok, op_yoy=None), fc) is None, "前年比が出せない（黒字転換など）は残す"
+    assert "引き下げ" in FU.exclusion_reason(dict(ok, eps_rev={"cur": 80.0, "d90": 100.0}), fc)
+    assert FU.exclusion_reason(dict(ok, eps_rev={"cur": 95.0, "d90": 100.0}), fc) is None
+    # 営業増益が大きいほど高得点
+    qp = lambda yoy: pullback.quality_points(dict(ok, op_yoy=yoy), None, cfg)[0]  # noqa: E731
+    assert qp(0.0) < qp(0.10) < qp(0.25) < qp(0.50) and qp(0.50) - qp(0.0) >= 7.9
+    assert pullback.quality_points(ok, None, cfg)[0] <= cfg["pullback"]["weights"]["quality"]
+    # 高値突破・保有のしやすさ
+    idx = ["A", "B", "C"]
+    snap = pd.DataFrame({"close": 100.0, "ma5": 99.0, "ma50": 100.0, "ma200": 90.0, "ma200_slope": 0.03, "gap50": 0.0,
+                         "dist52w": -0.10, "vol_cont": 0.7, "rs60": 0.1, "ret3d": 0.02, "ret5d": 0.0, "ret20d": 0.0, "ret1d": 0.0,
+                         "vol_ratio": 1.0, "hi252_recent": [1.0, 0.0, 1.0], "vol60": [0.012, 0.012, 0.04]}, index=idx)
+    o = pullback.score_technical(snap, "good", True, cfg)
+    assert o.loc["A", "pb_penalty"] == 0 and o.loc["B", "pb_penalty"] == cfg["pullback"]["penalties"]["no_breakout"]["pts"]
+    assert o.loc["A", "pb_hold"] == cfg["pullback"]["weights"]["hold"] and o.loc["C", "pb_hold"] == 0
+    assert o.loc["A", "pb_tech_scaled"] > o.loc["C", "pb_tech_scaled"] > o.loc["B", "pb_tech_scaled"]
+    assert sum(pullback.max_points(cfg["pullback"]).values()) == 100
+    print("ok  良い企業優先（減益除外・増益加点・高値突破・保有のしやすさ・配点合計100）")
+
+
 def test_tracking():
     import tempfile
     from pathlib import Path
@@ -810,7 +838,7 @@ def test_end_to_end():
     for p in d["picks"]:
         assert 0 < len(p["explain"]) <= 100, p["name"]
         assert not any(w in p["explain"] for w in FORBIDDEN)
-        assert set(p["parts"]) == {"trend", "drawdown", "ma50", "volume", "strength", "quality", "market"}
+        assert set(p["parts"]) == {"trend", "drawdown", "ma50", "volume", "strength", "hold", "quality", "market"}
         assert abs(p["main"] - p["lead_pts"] - p["main_base"]) <= 0.11 and abs(p["lead_pts"]) <= cfg["lead"]["max_points"] * cfg["lead"]["rank_effect"] + 1e-6
         assert isinstance(p["cautions"], list) and "legacy" in p
     mains = [p["main"] for p in d["picks"]]
@@ -861,6 +889,6 @@ def test_end_to_end():
 if __name__ == "__main__":
     for fn in (test_config_and_weights, test_momentum_points, test_no_lookahead, test_events,
                test_dividend_and_exclusion, test_expected_and_metrics, test_text, test_pullback, test_tdnet, test_accuracy_21, test_holdings,
-               test_excluded_csv, test_data_fixes, test_validation, test_stance, test_premarket, test_lead, test_tracking, test_rankband, test_end_to_end):
+               test_excluded_csv, test_data_fixes, test_validation, test_stance, test_premarket, test_lead, test_tracking, test_rankband, test_quality_first, test_end_to_end):
         fn()
     print("\nALL OK")

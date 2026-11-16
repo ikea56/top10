@@ -238,6 +238,7 @@ def make_cards(top: list[dict], f: features.Features, panel: features.Panel, the
         parts = {"trend": (r["pb_trend"], pbw["trend"]), "drawdown": (r["pb_dd"], pbw["drawdown"]),
                  "ma50": (r["pb_ma50"], pbw["ma50"]), "volume": (r["pb_vol"], pbw["volume"]),
                  "strength": (r["pb_rs"] + r["pb_bounce"], pbw["rs"] + pbw["bounce"]),
+                 "hold": (r["pb_hold"], pbw["hold"]),
                  "quality": (x["quality"], pbw["quality"]), "market": (r["pb_market"], pbw["market"])}
         cards.append({
             "rank": rank, "code": r["code"], "name": r["name"], "market": r["market"], "sector": r["sector"],
@@ -541,7 +542,7 @@ def run(demo: bool) -> None:
         "movers": mover, "prev_date": prev_date, "mv": mv, "change_summary": summary_changes,
         "hold": {"endpoint": endpoint, "enabled": bool(endpoint), "demo": demo, "n": None if hold_cards is None else len(hold_cards)},
         "tr": tr, "tcfg": cfg["tracking"], "summary": summary, "cfg": cfg,
-        "pb": pb, "earn_cfg": cfg["earnings"], "w": cfg["weights"], "tdc": cfg["tdnet"], "ev": cfg["events"], "es": cfg["expected_score"],
+        "pb": pb, "cfg_breakout": cfg["scoring"]["breakout_window"], "earn_cfg": cfg["earnings"], "w": cfg["weights"], "tdc": cfg["tdnet"], "ev": cfg["events"], "es": cfg["expected_score"],
         "lead_max": cfg["lead"]["max_points"], "pb_lead_effect": cfg["lead"]["rank_effect"], "pb_lead_shift": cfg["lead"]["max_rank_shift"], "top_n": cfg["top_n"], "min_turnover_oku": cfg["filters"]["min_turnover_yen"] / 1e8, "min_price": cfg["filters"]["min_price"],
     }
     out = render_site(ctx)

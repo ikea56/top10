@@ -1,9 +1,9 @@
 """押し目スコア（Pullback Score）＝ メインランキング。
 
 目的は「いま強い（急騰した）銘柄」ではなく、「業績・株主還元が良好で、健全な押し目を形成中の優良銘柄」。
-  長期上昇トレンド20 ＋ 高値からの調整率25 ＋ 50日線への接近15 ＋ 出来高の収縮10 ＋ 業績・還元の維持20 ＋ 地合い10 = 100点
-  そこから「急騰済み・高値から離れすぎ・出来高だけの上昇」を減点する。
-テクニカル部分（業績維持を除く80点）はバックテストにも同じ関数を使う。株価の将来を予想する処理は含まない。
+  業績・還元28 ＋ 長期トレンド15 ＋ 高値からの調整16 ＋ 50日線への接近8 ＋ 出来高の収縮5 ＋ 相対力8 ＋ 反発確認4 ＋ 保有のしやすさ6 ＋ 地合い10 = 100点
+  そこから「急騰済み・高値から離れすぎ・直近に高値更新がない」などを減点する。
+テクニカル部分（業績を除く72点）はバックテストにも同じ関数を使う。株価の将来を予想する処理は含まない。
 """
 from __future__ import annotations
 
@@ -32,6 +32,7 @@ def max_points(pb: dict) -> dict[str, float]:
             "drawdown": top(pb["drawdown_curve"]), "ma50": top(pb["ma50_gap_curve"]),
             "volume": top(pb["volume"]["curve"]), "rs": top(pb["rs"]["curve"]),
             "bounce": pb["bounce"]["above_ma5"] + top(pb["bounce"]["ret3d_curve"]),
+            "hold": top(pb["hold"]["curve"]),
             "quality": pb["weights"]["quality"],
             "market": max(pb["market"]["topix"].values()) + max(pb["market"]["nikkei"].values())}
 
@@ -113,6 +114,7 @@ def score_technical(snap: pd.DataFrame, regime: str, nikkei_ok: bool, cfg: Confi
     out["pb_bounce"] = ((snap["close"] > snap["ma5"]) * float(bn["above_ma5"])
                         + _curve(snap["ret3d"].astype(float), bn["ret3d_curve"])).where(gate, 0.0).astype(float)
 
+    out["pb_hold"] = _curve(snap["vol60"].astype(float), pb["hold"]["curve"]) if "vol60" in snap else 0.0   # 値動きが穏やか＝落ちても持っていやすい
     out["pb_market"] = market_points(regime, nikkei_ok, topix_below200, cfg, growth_weak)
 
     p = pb["penalties"]
@@ -123,26 +125,36 @@ def score_technical(snap: pd.DataFrame, regime: str, nikkei_ok: bool, cfg: Confi
         "pen_spike": (snap["vol_ratio"] >= p["volume_spike"]["vol_ratio"]) & (snap["ret1d"] >= p["volume_spike"]["ret1d"]),
         "pen_expand": (vc >= p["volume_expansion"]["ratio"]) & (dd <= vol["pullback_gate"]),
     }).fillna(False)
+    if "hi252_recent" in snap and p.get("no_breakout", {}).get("enabled"):     # 直近に高値を更新していない（高値突破後の押し目ではない）
+        flags["pen_nobreak"] = (snap["hi252_recent"].fillna(0) < 1)
     pts = {"pen_surge5": p["surge_5d"]["pts"], "pen_surge20": p["surge_20d"]["pts"], "pen_far": p["far_from_high"]["pts"],
-           "pen_spike": p["volume_spike"]["pts"], "pen_expand": p["volume_expansion"]["pts"]}
+           "pen_spike": p["volume_spike"]["pts"], "pen_expand": p["volume_expansion"]["pts"],
+           "pen_nobreak": p.get("no_breakout", {}).get("pts", 0)}
     out = out.join(flags)
-    out["pb_penalty"] = sum(flags[k].astype(float) * v for k, v in pts.items())
-    out["pb_sum"] = out[["pb_trend", "pb_dd", "pb_ma50", "pb_vol", "pb_rs", "pb_bounce", "pb_market"]].sum(axis=1)
+    out["pb_penalty"] = sum(flags[k].astype(float) * v for k, v in pts.items() if k in flags)
+    out["pb_sum"] = out[["pb_trend", "pb_dd", "pb_ma50", "pb_vol", "pb_rs", "pb_bounce", "pb_hold", "pb_market"]].sum(axis=1)
     out["pb_tech_scaled"] = ((out["pb_sum"] - out["pb_penalty"]).clip(lower=0) / tech_max(cfg) * 100)
     return out
 
 
 def quality_points(fund: dict | None, ev: EventResult | None, cfg: Config) -> tuple[float, list[str]]:
-    """業績・株主還元の維持（20点）。黒字転換・最高益・増配・連続増配・自社株買いなどを評価（上限あり）。"""
+    """業績・株主還元（満点は weights.quality）。黒字で減益でない・営業増益の大きさ・黒字転換・最高益・増配・自社株買いなどを評価（上限あり）。"""
     q = cfg["pullback"]["quality"]
     cap = float(cfg["pullback"]["weights"]["quality"])
     keys: list[str] = []
+    pts = 0.0
     if fund and (fund.get("op_ttm") or 0) > 0 and (fund.get("op_yoy") is None or fund["op_yoy"] >= 0):
-        keys.append("profit_ok")
+        keys.append("profit_ok"); pts += float(q["profit_ok"])
+    yoy = (fund or {}).get("op_yoy")
+    if yoy is not None and yoy > 0:                               # 営業増益の大きさ（連続的に採点）
+        g = float(np.interp(yoy, [p[0] for p in q["growth_curve"]], [p[1] for p in q["growth_curve"]]))
+        if g > 0:
+            keys.append("growth"); pts += g
     if ev:
-        keys += [k for k in ("turnaround", "record_high", "dividend", "streak", "buyback", "sustained", "revision")
-                 if ev.has(k)]
-    return min(sum(float(q[k]) for k in keys), cap), keys
+        for k in ("turnaround", "record_high", "dividend", "streak", "buyback", "sustained", "revision"):
+            if ev.has(k):
+                keys.append(k); pts += float(q[k])
+    return min(pts, cap), keys
 
 
 def total(pb_sum: float, quality: float, penalty: float, extra: float = 0.0) -> float:

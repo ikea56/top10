@@ -165,6 +165,13 @@ def exclusion_reason(fund: Fund, fc: dict) -> str | None:
     chronic = len(annual) >= n and all(x <= 0 for x in annual[:n]) and ttm <= 0
     if chronic and fc["exclude_chronic_loss"]:
         return "継続赤字"
+    if fc.get("require_growth"):                                   # 良い企業だけ：減益・予想の大幅な引き下げは除外
+        yoy = fund.get("op_yoy")
+        if yoy is not None and yoy < float(fc["min_op_yoy"]) and ttm > 0:
+            return f"減益（営業利益{yoy * 100:+.0f}%）"
+        er, thr = fund.get("eps_rev") or {}, float(fc.get("exclude_eps_downgrade") or 0)
+        if thr and er.get("cur") and er.get("d90") and er["d90"] > 0 and er["cur"] / er["d90"] - 1 <= -thr:
+            return "業績予想の大幅な引き下げ"
     forecast_profit = fc["allow_forecast_turnaround"] and (fund.get("eps_est_0y") or 0) > 0
     if ttm <= 0 and fc["exclude_loss_making"] and not forecast_profit:
         return "赤字"

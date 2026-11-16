@@ -32,7 +32,7 @@ import pandas as pd
 from .config import Config
 
 COMPONENTS = {"pb_trend": "長期トレンド", "pb_dd": "高値からの調整", "pb_ma50": "50日線に接近",
-              "pb_vol": "出来高の収縮", "pb_rs": "相対力", "pb_bounce": "反発確認"}
+              "pb_vol": "出来高の収縮", "pb_rs": "相対力", "pb_bounce": "反発確認", "pb_hold": "保有のしやすさ"}
 REGIME_LABEL = {"good": "追い風", "neutral": "中立", "bad": "逆風"}
 
 
