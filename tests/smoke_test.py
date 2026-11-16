@@ -285,9 +285,42 @@ def test_accuracy_21():
     assert mp("bad", False, True) == -15, "下限は-15"
     assert mp("good", False, True) == 6 - 5 - 3
     # ⑤ 決算接近（営業日）
-    ep = lambda dt: pullback.earnings_penalty(dt, today, cfg)  # noqa: E731
-    assert ep("2026-11-05")[0] == 10 and ep("2026-11-06")[0] == 5 and ep("2026-11-09")[0] == 5
-    assert ep("2026-11-10")[0] == 0 and ep("2026-10-30")[0] == 0 and ep(None)[0] == 0
+    from src import earnings as E
+    ea = lambda nx, past=None: E.assess({"next_earnings": nx, "earnings_past": past or []}, today, cfg)  # noqa: E731
+    # 今日=11/2(月)、11/3は文化の日（休場）。営業日：11/4=1, 11/5=2, 11/6=3, 11/9=4, 11/10=5, 11/11=6
+    assert [ea(d)["days_to"] for d in ("2026-11-02", "2026-11-04", "2026-11-05", "2026-11-06", "2026-11-10", "2026-11-11")] == [0, 1, 2, 3, 5, 6]
+    assert [ea(d)["pen"] for d in ("2026-11-04", "2026-11-05", "2026-11-06", "2026-11-09", "2026-11-10", "2026-11-11", "2026-11-17", "2026-11-18")] == [25, 15, 15, 10, 10, 5, 5, 0]
+    assert ea("2026-11-02")["pen"] == 25 and ea(None)["pen"] == 0 and ea("2026-10-30")["pen"] == 0
+    assert ea("2026-11-06")["badges"] == ["⚠ 決算接近", "⚠ 決算跨ぎ注意"] and ea("2026-11-10")["badges"] == ["⚠ 決算接近"] and ea("2026-11-11")["badges"] == []
+    assert ea("2026-11-30")["pen"] == 0 and ea("2026-11-30")["state"] == "ample"
+    p1 = ea("2027-02-05", ["2026-10-20"])                    # 9営業日前に発表 → 通過済み
+    assert p1["state"] == "passed" and p1["badges"] == ["✅ 決算通過済み"] and p1["base"] == 3 and p1["text"].startswith("決算通過後")
+    assert ea("2027-02-05", ["2026-11-02"])["state"] == "pending", "発表当日〜翌営業日は反応待ち"
+    assert ea("2027-02-05", ["2026-09-01"])["state"] == "ample", "30営業日を過ぎたら通過ボーナスなし"
+    assert ea("2026-11-06", ["2026-10-20"])["state"] == "approach", "接近が優先"
+    es_ = ea(None, ["2026-08-20"])                           # 次回不明 → 前回+91日の推定
+    assert es_["estimate"] and es_["next"] == "2026-11-19" and es_["days_to"] == 12 and "推定" in es_["text"]
+    assert ea(None)["state"] == "unknown" and "取得できません" in ea(None)["text"]
+    assert E.busdays(date(2026, 11, 20), date(2026, 11, 24), cfg) == 1, "11/23（祝日）と土日を除く（金のみ）"
+    from src import jpholidays as J
+    hd = lambda y: {d.strftime("%m-%d") for d in J.holidays(y) if d.weekday() < 5}  # noqa: E731
+    assert {"09-21", "09-22", "09-23", "05-06", "03-20", "12-31"} <= hd(2026), "2026：敬老・国民の休日・秋分・振替・春分"
+    assert {"03-22", "09-20", "09-23", "05-03", "01-11", "07-19"} <= hd(2027) and "11-23" in hd(2027)
+    from types import SimpleNamespace as NS
+    td = NS(status="ok", hits=[NS(kind="dividend_increase", date="2026-10-25"), NS(kind="upward_revision", date="2026-10-01"),
+                                NS(kind="buyback", date="2026-10-28")])
+    evx = NS(has=lambda k: k in ("record_high", "turnaround"))
+    bn, lb = E.event_bonus(p1, td, evx, cfg)
+    assert bn == 10 and set(lb) == {"増配", "自社株買い", "黒字転換", "最高益更新"}, "上方修正は決算前の開示なので対象外・上限10"
+    assert E.event_bonus(ea("2026-11-06"), td, evx, cfg) == (0.0, []), "通過済みでなければ加点なし"
+    assert E.cap_label("押し目良好", "bull", ea("2026-11-04"), cfg)[0] == "様子見"
+    assert E.cap_label("押し目良好", "bull", ea("2026-11-06"), cfg)[0] == "押し目候補"
+    assert E.cap_label("押し目良好", "bull", ea("2026-11-11"), cfg)[0] == "押し目良好"
+    assert E.cap_label("押し目良好", "bull", p1, cfg)[0] == "押し目良好"
+    # 決算直前の良い押し目は、通過後の押し目より下に来る
+    hi = pullback.total(70, 15, 0, ea("2026-11-04")["pen"])
+    lo = pullback.total(60, 15, 0, p1["base"] * -1)
+    assert hi < lo, "決算前（-25）は押し目スコアが10点高くても通過後に負ける"
     # ③ 鮮度
     assert [te.freshness(x, cfg) for x in (0, 30, 31, 90, 91, 180, 181)] == [1, 1, 0.7, 0.7, 0.4, 0.4, 0]
     r = te.analyze([d("業績予想の上方修正のお知らせ", "2026-09-03")], None, cfg, today)     # 60日前
@@ -367,8 +400,9 @@ def test_holdings():
     assert act(corporate=["公開買付け"])["key"] == "sell" and act(supervised=True)["key"] == "sell"
     assert act(price_lock=True)["key"] == "sell"
     assert act(down_days=60)["key"] == "watch", "30日を過ぎた下方修正は要監視"
-    assert act(broken=["200日線割れ"])["key"] == "watch" and act(earn_pen=5, earnings_days=4)["key"] == "watch"
-    assert act(earnings_days=8)["key"] == "watch" and act(earnings_days=30)["key"] == "hold"
+    assert act(broken=["200日線割れ"])["key"] == "watch" and act(earnings_days=4)["key"] == "watch"
+    assert act(earnings_days=5)["key"] == "watch" and "要監視" in act(earnings_days=5)["reasons"][0]
+    assert "決算跨ぎ注意" in act(earnings_days=3)["reasons"][0] and act(earnings_days=8)["key"] == "hold" and act(earnings_days=30)["key"] == "hold"
     assert act(unknown_rev=True)["key"] == "watch" and act(td_status="unavailable")["key"] == "watch"
     assert act(data_ok=False)["key"] == "watch"
     assert act(down_recent=["TDnet"], broken=["x"])["key"] == "sell", "売却検討が最優先"
@@ -674,6 +708,13 @@ def test_tracking():
         assert h5["n"] == 3 and abs(h5["win"] - 1 / 3) < 1e-9 and h5["excess"] is not None
         assert sum(r["n"] for r in res["stats"]["by_stance"]) <= res["stats"]["by_horizon"][10]["n"]
         assert [r["n"] for r in res["stats"]["by_rank"]] == [1, 1]
+        # 暴騰率：h営業日以内の最高の騰落率で数える（期間が終わった銘柄だけ）
+        sg = {r["name"]: r for r in res["stats"]["surge"]["rows"]}
+        c5 = sg["全体"]["cells"][5]
+        assert c5["n"] == 3 and c5["lv"][10.0]["k"] == 0 and sg["1位"]["cells"][5]["n"] == 1 and sg["1〜3位"]["cells"][5]["n"] == 1
+        assert a["pk"]["5"] >= 0.04 and b["pk"]["5"] < 0.01                              # 毎日+1%の株は5日で約+5%、毎日-1%の株は上がらない
+        hi = {**cfg["tracking"], "surge_levels": [3, 10]}
+        assert TR.surge_table(res["entries"], hi)["rows"][-1]["cells"][5]["lv"][3.0]["k"] == 1       # +3%以上に達したのは上がる株だけ
         # 台帳：追跡が終わった銘柄は、株価データが無くなっても結果が残る／取得できない銘柄は最後の記録を表示
         gone = {k: v.drop(columns=["1111.T", "2222.T"]) for k, v in panel.items()}
         res2 = TR.build(gone, topix, hist, led, c)
@@ -725,7 +766,7 @@ def test_end_to_end():
         assert k in summ["periods"]["5y"], k
     html = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
     for word in ("【強み】", "【押し目状況】", "【注意事項】", "押し目スコア", "イベント点", "なぜ選ばれた",
-                 "補助指標", "期間別の成績", "excluded_events.csv", "推奨撤退ライン", "リスク幅", "ATR", "有効性の検証", "点数帯ごとの成績", "現在の相場判定", "運用ガイド", "本日はギャップダウンリスクあり", "寄り付き前の指標", "【外部環境】", "順位への影響はごく小さく", "ランキング再生成", "最終更新", "refresh.js", "追跡・検証ページ"):
+                 "補助指標", "期間別の成績", "excluded_events.csv", "推奨撤退ライン", "リスク幅", "ATR", "有効性の検証", "点数帯ごとの成績", "現在の相場判定", "運用ガイド", "本日はギャップダウンリスクあり", "寄り付き前の指標", "【外部環境】", "順位への影響はごく小さく", "ランキング再生成", "最終更新", "refresh.js", "追跡・検証ページ", "【決算状況】", "決算まで"):
         assert word in html, word
     # ㉒ 保有銘柄：暗号化ファイル・名前一覧・前回比較・3ブロック
     from src import holdings as H

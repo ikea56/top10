@@ -135,6 +135,16 @@ def fetch_one(code: str) -> Fund:
     dates = (cal.get("Earnings Date") if isinstance(cal, dict) else None) or []
     future = sorted(str(d)[:10] for d in dates if str(d)[:10] >= date.today().isoformat())
     out["next_earnings"] = future[0] if future else None
+    ed = _safe(lambda: t.get_earnings_dates(limit=8), "決算発表日の履歴", code)      # 過去の決算日（通過後の評価に使う）
+    try:
+        idx = [str(x)[:10] for x in getattr(ed, "index", [])]
+    except Exception:  # noqa: BLE001
+        idx = []
+    today_s = date.today().isoformat()
+    out["earnings_past"] = sorted(d for d in idx if d <= today_s)
+    if not out["next_earnings"]:
+        fut = sorted(d for d in idx if d > today_s)
+        out["next_earnings"] = fut[0] if fut else None
 
     cf = _safe(lambda: t.cashflow, "キャッシュフロー", code)
     rep = _series(cf, ("Repurchase Of Capital Stock", "Common Stock Payments", "RepurchaseOfCapitalStock"))

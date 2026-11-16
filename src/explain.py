@@ -154,7 +154,7 @@ def strengths(ev: EventResult, td: Any) -> list[dict]:
 
 
 def cautions(r: Any, fund: dict | None, td: Any, ev: EventResult, cfg: Config, regime: str, market: str,
-             today: Any, earn_pen: float = 0.0, earn_days: int | None = None, down_src: list | None = None) -> list[dict]:
+             today: Any, earn_pen: float = 0.0, earn_days: int | None = None, down_src: list | None = None, earn: dict | None = None) -> list[dict]:
     """【注意事項】重要度の高い順（level=high は赤、それ以外は黄）。"""
     cp, pen = cfg["pullback"]["caution"], cfg["pullback"]["penalties"]
     out: list[dict] = []
@@ -173,11 +173,12 @@ def cautions(r: Any, fund: dict | None, td: Any, ev: EventResult, cfg: Config, r
         out.append({"label": "TDnetを確認できていません（TOB・下方修正などの有無が未確認）", "level": "high"})
     if down_src and "EPS予想" in down_src and "TDnet" not in down_src:
         out.append({"label": f"アナリストの予想EPSが直近30日で下方修正（総合点−{dpen}点、判定は様子見）", "level": "high"})
-    ne = (fund or {}).get("next_earnings")
-    if earn_pen > 0 and ne:
-        out.append({"label": f"決算接近（{ne[5:].replace('-', '/')}発表予定・あと{earn_days}営業日）・窓開けリスクで総合点−{earn_pen:.0f}点", "level": "high"})
-    elif ne and 0 <= (date.fromisoformat(ne) - today).days <= cp["earnings_days"]:
-        out.append({"label": f"決算接近（{ne[5:].replace('-', '/')}発表予定）・発表で大きく動く可能性", "level": "mid"})
+    if earn and earn["state"] == "approach":
+        ne = earn["next"][5:].replace("-", "/")
+        est = "・推定日" if earn["estimate"] else ""
+        out.append({"label": f"決算接近（{ne}発表予定{est}・あと{earn['days_to']}営業日）・窓開けリスクで総合点−{earn_pen:.0f}点。決算前の押し目買いは避けて、通過後に判断", "level": "high"})
+    elif earn and earn["state"] == "pending":
+        out.append({"label": "決算発表の直後です。株価の反応を見てから判断してください", "level": "mid"})
     v20, v60 = r.get("vol20"), r.get("vol60")
     if v20 == v20 and v60 == v60 and v60 and v20 / v60 >= cp["vol_ratio"]:
         out.append({"label": f"ボラティリティ上昇（直近の値動きが60日平均の{v20 / v60:.1f}倍）", "level": "mid"})

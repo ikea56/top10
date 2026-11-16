@@ -16,7 +16,7 @@ from typing import Any, Callable
 
 import pandas as pd
 
-from . import (lead, tracking, premarket, backtest, charts, events, explain, features, fundamentals, holdings, movers, pullback, rankings,
+from . import (earnings, lead, tracking, premarket, backtest, charts, events, explain, features, fundamentals, holdings, movers, pullback, rankings,
                scoring, tdnet, tdnet_events)
 from .config import JST, Config, ConfigError, load_config, load_exclude_codes, load_themes
 from .log import get_logger
@@ -154,10 +154,11 @@ def evaluate_candidates(snap: pd.DataFrame, fund_fn: FundFn, cfg: Config, today:
         op_pts, mc_pts = scoring.earnings_points(fund, sc)
         legacy_base = float(r["tech_base"]) + op_pts + mc_pts
         legacy_total = legacy_base + ev.total
-        earn_pen, earn_days = pullback.earnings_penalty(fund.get("next_earnings"), today, cfg)   # 決算接近の減点
+        earn = earnings.assess(fund, today, cfg)                   # 決算接近の減点・通過後の基本加点
+        earn_pen = earn["pen"]
         cands.append({"ticker": tk, "row": r, "fund": fund, "ev": ev, "quality": q, "qkeys": qkeys,
-                      "earn_pen": earn_pen, "earn_days": earn_days,
-                      "pb_total": pullback.total(float(r["pb_sum"]), q, float(r["pb_penalty"]), earn_pen),
+                      "earn": earn, "earn_pen": earn_pen, "earn_days": earn["days_to"],
+                      "pb_total": pullback.total(float(r["pb_sum"]), q, float(r["pb_penalty"]), earn_pen - earn["base"]),
                       "op_pts": op_pts, "mc_pts": mc_pts, "legacy_base": legacy_base, "legacy_total": legacy_total,
                       "legacy_expected": scoring.expected_score(legacy_total, float(r["win_rate"]), float(r["liq"]), es)})
     cands.sort(key=lambda c: (c["pb_total"], c["legacy_expected"]), reverse=True)
@@ -195,7 +196,12 @@ def run_tdnet(cands: list[dict], client: Any, cfg: Config, today: date) -> tuple
                          "events": " / ".join(x["event"] for x in res.excluded)[:300],
                          "date": max(x["date"] for x in res.excluded)})
             continue
-        kept.append(dict(c, td=res))
+        c = dict(c, td=res)
+        if res.earnings_dates:                                  # 決算短信の開示日から前回の決算日を補う
+            e2 = earnings.assess(c["fund"], today, cfg, res.earnings_dates)
+            c.update(earn=e2, earn_pen=e2["pen"], earn_days=e2["days_to"],
+                     pb_total=pullback.total(float(c["row"]["pb_sum"]), c["quality"], float(c["row"]["pb_penalty"]), e2["pen"] - e2["base"]))
+        kept.append(c)
     return kept, rows, stats
 
 
@@ -206,7 +212,8 @@ def final_score(c: dict, cfg: Config) -> tuple[float, float, float, list[str]]:
     td_score = td.score if td is not None and td.status == "ok" else 0.0
     src = tdnet_events.recent_downward(td, c["fund"], cfg)
     pen = float(cfg["tdnet"]["downward_recent"]["penalty"]) if src else 0.0
-    return c["pb_total"] + td_score - pen, td_score, pen, src
+    bonus, _ = earnings.event_bonus(c.get("earn"), td, c.get("ev"), cfg)      # 決算通過後の好材料（増配・上方修正など）
+    return c["pb_total"] + td_score - pen + bonus, td_score, pen, src
 
 
 def make_cards(top: list[dict], f: features.Features, panel: features.Panel, themes: dict, regime: str,
@@ -221,6 +228,10 @@ def make_cards(top: list[dict], f: features.Features, panel: features.Panel, the
         label, css, note = pullback.label(main, tdnet_events.serious_negative(td, fund, cfg), cfg)
         if note:
             note = "直近30日以内に下方修正があるため" if down_src else "減配の開示があるため"
+        earn = x["earn"]
+        e_bonus, e_labels = earnings.event_bonus(earn, td, ev, cfg)
+        label, css, cap_note = earnings.cap_label(label, css, earn, cfg)
+        note = note or cap_note
         sl = slice(-60, None)
         svg = charts.candle_svg(*(panel[k][tk].iloc[sl].to_numpy() for k in ("open", "high", "low", "close", "volume")),
                                 f["ma25"][tk].iloc[sl].to_numpy(), f["ma50"][tk].iloc[sl].to_numpy())
@@ -239,9 +250,10 @@ def make_cards(top: list[dict], f: features.Features, panel: features.Panel, the
             "down_pen": round(down_pen), "market_pts": round(float(r["pb_market"])),
             "parts": {k: [round(float(a), 1), b] for k, (a, b) in parts.items()},
             "label": label, "css": css, "label_note": note,
+            "earn": earnings.summary(earn, e_bonus, e_labels),
             "strengths": stren,
             "status": explain.pullback_status(r, cfg, regime, nikkei_ok),
-            "cautions": explain.cautions(r, fund, td, ev, cfg, regime, r["market"], today, x["earn_pen"], x["earn_days"], down_src),
+            "cautions": explain.cautions(r, fund, td, ev, cfg, regime, r["market"], today, x["earn_pen"], x["earn_days"], down_src, earn),
             "explain": explain.pullback_reason(r, stren, regime, nikkei_ok),
             "indicators": explain.build_indicators(r), "stop": pullback.stop_line(r, cfg), "svg": svg,
             "tdnet": "ok" if td is not None and td.status == "ok" else ("off" if td is None else "ng"),
@@ -298,7 +310,6 @@ def monitor_holdings(codes: list[str], snap_full: pd.DataFrame, snap: pd.DataFra
         fund = fund_fn(code)
         ev = events.evaluate_events(r, fund, cfg)
         q, _ = pullback.quality_points(fund, ev, cfg)
-        earn_pen, earn_days = pullback.earnings_penalty(fund.get("next_earnings"), today, cfg)
         td = None
         td_status = "off"
         if client is not None:
@@ -308,8 +319,12 @@ def monitor_holdings(codes: list[str], snap_full: pd.DataFrame, snap: pd.DataFra
             except tdnet.TdnetError as e:
                 log.warning("%s（保有銘柄）", e)
                 td, td_status = tdnet_events.TdnetResult(status="unavailable", error=str(e)), "unavailable"
-        cand = {"pb_total": pullback.total(float(r["pb_sum"]), q, float(r["pb_penalty"]), earn_pen), "td": td, "fund": fund}
+        earn = earnings.assess(fund, today, cfg, list(td.earnings_dates) if td is not None else None)
+        earn_pen, earn_days = earn["pen"], earn["days_to"]
+        cand = {"pb_total": pullback.total(float(r["pb_sum"]), q, float(r["pb_penalty"]), earn_pen - earn["base"]),
+                "td": td, "fund": fund, "earn": earn, "ev": ev}
         main, td_score, down_pen, down_src = final_score(cand, cfg)
+        e_bonus, e_labels = earnings.event_bonus(earn, td, ev, cfg)
         hits = list(td.hits) if td is not None and td.status == "ok" else []
         down_hits = [h for h in hits if h.kind == "downward_revision"]
         cut = [h for h in hits if h.kind == "dividend_cut"]
@@ -325,8 +340,7 @@ def monitor_holdings(codes: list[str], snap_full: pd.DataFrame, snap: pd.DataFra
                 broken.append("株価が「50日線−ATR」を下回りました（押し目が崩れた可能性）")
             if r["dist52w"] <= hc["collapse_dd"]:
                 broken.append(f"52週高値から{r['dist52w'] * 100:.0f}%下落しています")
-        ne = fund.get("next_earnings")
-        e_days = (date.fromisoformat(ne) - today).days if ne and date.fromisoformat(ne) >= today else None
+        ne, e_days = earn["next"], earn["days_to"]
         locked = bool(lock["enabled"] and r.get("max_ret60", 0) >= lock["jump"] and r.get("range10", 1) <= lock["range10"])
         act = holdings.decide_action({
             "corporate": [x["event"] for x in (td.excluded if td is not None else [])],
@@ -334,7 +348,7 @@ def monitor_holdings(codes: list[str], snap_full: pd.DataFrame, snap: pd.DataFra
             "price_lock": locked, "down_recent": down_src,
             "down_days": min((h.age for h in down_hits), default=None),
             "dividend_cut_days": min((h.age for h in cut), default=None),
-            "broken": broken, "earnings_days": e_days, "earn_pen": earn_pen,
+            "broken": broken, "earnings_days": e_days, "earn_pen": earn_pen, "earn_state": earn["state"],
             "unknown_rev": any(h.kind == "unknown_revision" for h in hits), "td_status": td_status, "data_ok": data_ok,
         }, cfg)
         has = lambda *ks: [h for h in hits if h.kind in ks]  # noqa: E731
@@ -342,6 +356,7 @@ def monitor_holdings(codes: list[str], snap_full: pd.DataFrame, snap: pd.DataFra
                                               "detail": hs[0].date[5:].replace("-", "/") if hs and not isinstance(hs[0], str) else (hs[0] if hs else "")}
         tech_rank = int((snap["pb_tech_scaled"] > r["pb_tech_scaled"]).sum()) + 1
         label, css, _ = pullback.label(main, tdnet_events.serious_negative(td, fund, cfg), cfg)
+        label, css, _ = earnings.cap_label(label, css, earn, cfg)
         out.append({
             "code": code, "name": r["name"], "found": True, "market": r["market"], "sector": r["sector"],
             "close": close, "ret1d": None if r["ret1d"] != r["ret1d"] else float(r["ret1d"]) * 100,
@@ -351,10 +366,10 @@ def monitor_holdings(codes: list[str], snap_full: pd.DataFrame, snap: pd.DataFra
             "events": [flag("増配", has("dividend_increase")), flag("上方修正", has("upward_revision")),
                        flag("下方修正", down_hits or ([] if not down_src else ["予想EPS"]), bad=True),
                        flag("自社株買い", has("buyback"))],
-            "earnings": {"date": ne, "days": e_days, "penalty": round(earn_pen)},
+            "earnings": {"date": ne, "days": e_days, "penalty": round(earn_pen), **earnings.summary(earn, e_bonus, e_labels)},
             "td_events": [{"label": h.label, "date": h.date, "points": round(h.points, 1)} for h in hits],
             "td_status": td_status,
-            "cautions": explain.cautions(r, fund, td, ev, cfg, regime, r["market"], today, earn_pen, earn_days, down_src),
+            "cautions": explain.cautions(r, fund, td, ev, cfg, regime, r["market"], today, earn_pen, earn_days, down_src, earn),
             "stop": pullback.stop_line(r, cfg), "action": act,
         })
     order = {"sell": 0, "watch": 1, "hold": 2}
@@ -527,7 +542,7 @@ def run(demo: bool) -> None:
         "movers": mover, "prev_date": prev_date, "mv": mv, "change_summary": summary_changes,
         "hold": {"endpoint": endpoint, "enabled": bool(endpoint), "demo": demo, "n": None if hold_cards is None else len(hold_cards)},
         "tr": tr, "tcfg": cfg["tracking"],
-        "pb": pb, "w": cfg["weights"], "tdc": cfg["tdnet"], "ev": cfg["events"], "es": cfg["expected_score"],
+        "pb": pb, "earn_cfg": cfg["earnings"], "w": cfg["weights"], "tdc": cfg["tdnet"], "ev": cfg["events"], "es": cfg["expected_score"],
         "lead_max": cfg["lead"]["max_points"], "pb_lead_effect": cfg["lead"]["rank_effect"], "pb_lead_shift": cfg["lead"]["max_rank_shift"], "top_n": cfg["top_n"], "min_turnover_oku": cfg["filters"]["min_turnover_yen"] / 1e8, "min_price": cfg["filters"]["min_price"],
     }
     out = render_site(ctx)

@@ -94,6 +94,19 @@
     <p class="hint">「経過」は載った日の翌営業日の始値で買ってからの営業日数です。表の「TOPIX」はその間のTOPIXの平均、「勝った割合」はTOPIXを上回った銘柄の割合です。相場判定は、その日の自動更新が記録した判定です（記録が無い古い日は「記録なし」）。件数が少ない区分は参考程度にしてください。</p>
   </section>
 
+  <section class="card">
+    <h2>暴騰率（トップ3まで）</h2>
+    <p class="hint">載ってから◯営業日以内に、終値が買値から+{{ s.surge.levels|map('int')|join('％以上／+') }}％以上になった銘柄の割合です。期間が終わった銘柄だけを数えます（まだ途中の銘柄は含みません）。</p>
+    <div class="table-wrap"><table class="surge">
+      <thead><tr><th></th>{% for h in s.surge.windows %}<th>{{ h }}日以内</th>{% endfor %}</tr></thead>
+      <tbody>{% for r in s.surge.rows %}<tr><th scope="row">{{ r.name }}</th>
+        {% for h in s.surge.windows %}{% set c = r.cells[h] %}
+        <td>{% if c.n %}{% for x in s.surge.levels %}<span class="{{ 'pos' if c.lv[x].k else '' }}">+{{ '%.0f'|format(x) }}%: <b>{{ '%.0f'|format(c.lv[x].rate*100) }}%</b>（{{ c.lv[x].k }}/{{ c.n }}）</span><br>{% endfor %}<small>最高の平均 {{ (c.avg_max*100)|pct }}</small>{% else %}<span class="none">該当なし</span>{% endif %}</td>
+        {% endfor %}</tr>{% endfor %}</tbody>
+    </table></div>
+    <p class="hint">終値ベースです（日中の高値は含みません）。件数（右の分母）が少ないうちは偶然に左右されます。</p>
+  </section>
+
   <section class="card" id="list">
     <h2>全銘柄の推移</h2>
     <div class="chips" role="group" aria-label="絞り込み">

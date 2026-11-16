@@ -194,6 +194,15 @@
     </section>
     {% endif %}
 
+    <section class="block earn earn-{{ c.earn.state }}">
+      <h4>【決算状況】{% for b in c.earn.badges %}<span class="earn-badge{{ ' warn' if b.startswith('⚠') else ' ok' }}">{{ b }}</span>{% endfor %}</h4>
+      <ul>
+        <li>{{ c.earn.text }}{% if c.earn.next and c.earn.state in ('approach','ample') %}（{{ c.earn.next[5:].replace('-', '/') }}発表予定{{ '・推定' if c.earn.estimate else '' }}）{% endif %}{% if c.earn.state == 'passed' and c.earn.last %}（{{ c.earn.last[5:].replace('-', '/') }}発表）{% endif %}</li>
+        {% if c.earn.pen %}<li class="lv-high">総合点 −{{ c.earn.pen }}（決算前の押し目はギャップのリスクが高いため）</li>{% endif %}
+        {% if c.earn.state == 'passed' %}<li>✅ 決算通過後の基本加点 +{{ c.earn.base }}{% if c.earn.bonus_labels %}／好材料 +{{ c.earn.bonus }}（{{ c.earn.bonus_labels|join('・') }}）{% endif %}</li>{% endif %}
+      </ul>
+    </section>
+
     <section class="block risk">
       <h4>【注意事項】</h4>
       <ul>
@@ -397,7 +406,7 @@
           <b>減点：TOPIXが75日線の下 {{ pb.market.topix_below_ma75 }}、200日線の下 {{ pb.market.topix_below_ma200 }}、日経平均が50日線の下 {{ pb.market.nikkei_below_ma50 }}、東証グロース250が75日線の下 {{ pb.market.growth_below_ma75 }}</b>。逆風時は全銘柄の総合点が下がります</td></tr>
         <tr><th>減点</th><td>直近5日で+{{ '%.0f'|format(pb.penalties.surge_5d.ret * 100) }}%以上の急騰 −{{ pb.penalties.surge_5d.pts }}、20日で+{{ '%.0f'|format(pb.penalties.surge_20d.ret * 100) }}%以上 −{{ pb.penalties.surge_20d.pts }}、
           高値から{{ '%.0f'|format(pb.penalties.far_from_high.dd * 100) }}%以上 −{{ pb.penalties.far_from_high.pts }}、出来高急騰だけの上昇 −{{ pb.penalties.volume_spike.pts }}、調整中の出来高膨張 −{{ pb.penalties.volume_expansion.pts }}、
-          <b>決算まで3営業日以内 −{{ pb.earnings_penalty[0].pts }}／5営業日以内 −{{ pb.earnings_penalty[1].pts }}</b>（発表後の窓開けリスク）</td></tr>
+          <b>決算まで{% for t in earn_cfg.penalty %}{{ t.business_days }}営業日以内 −{{ t.pts }}{% if not loop.last %}／{% endif %}{% endfor %}</b>（発表後の窓開けリスク。押し目スコアより優先され、決算直前の銘柄は上位に残りにくくなります。決算通過後{{ earn_cfg.passed_days }}営業日以内は +{{ earn_cfg.passed_base }}、増配・上方修正・自社株買い・黒字転換・最高益でさらに加点）</td></tr>
         <tr><th>イベント点<br>（TDnet）</th><td>直近{{ tdc.lookback_days }}日の適時開示。上方修正 +{{ tdc.points.upward_revision }}、増配 +{{ tdc.points.dividend_increase }}、自社株買い +{{ tdc.points.buyback }}、大型受注 +{{ tdc.points.large_order }}、
           業務提携 +{{ tdc.points.alliance }}、設備投資・工場増設 +{{ tdc.points.capex }}、新製品 +{{ tdc.points.new_product }}、株式分割 +{{ tdc.points.stock_split }}。
           <b>下方修正 {{ tdc.points.downward_revision }}、減配 {{ tdc.points.dividend_cut }}</b>。

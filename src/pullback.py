@@ -72,23 +72,6 @@ def market_points(regime: str, nikkei_ok: bool, topix_below200: bool, cfg: Confi
     return max(float(m["floor"]), min(pts, float(cfg["pullback"]["weights"]["market"])))
 
 
-def earnings_penalty(next_earnings: str | None, today: date, cfg: Config) -> tuple[float, int | None]:
-    """決算までの営業日数（土日を除く）に応じた減点。(減点, 営業日数)。決算日が不明・過去なら (0, None)。"""
-    if not next_earnings:
-        return 0.0, None
-    try:
-        d = date.fromisoformat(next_earnings)
-    except ValueError:
-        return 0.0, None
-    if d < today:
-        return 0.0, None
-    n = int(np.busday_count(today, d))
-    for tier in sorted(cfg["pullback"]["earnings_penalty"], key=lambda t: t["business_days"]):
-        if n <= tier["business_days"]:
-            return float(tier["pts"]), n
-    return 0.0, n
-
-
 def stop_line(r: Any, cfg: Config) -> dict | None:
     """ATRベースの撤退ライン＝移動平均線 − ATR×倍率。50日線→200日線の順に、現在値より下にある線を使う。"""
     a = cfg["pullback"]["atr"]

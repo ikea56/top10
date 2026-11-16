@@ -26,7 +26,7 @@ STANCE_LABEL = {"buy": "🟢買い優勢", "neutral": "🟡中立", "defense": "
 
 
 DEFAULTS: dict[str, Any] = {"ret": None, "bench": None, "excess": None, "max_ret": None, "min_ret": None, "spark": None,
-                            "last_close": None, "buy": None, "close0": None}
+                            "last_close": None, "buy": None, "close0": None, "pk": {}}
 
 
 # ---------------------------------------------------------------- 履歴の読み込み
@@ -111,6 +111,7 @@ def compute_entry(e: dict, c: pd.DataFrame, o: pd.DataFrame, tb: pd.DataFrame, r
     last = series[-1]
     out.update(last_close=last[2], ret=last[3], bench=last[4], excess=None if last[4] is None else last[3] - last[4],
                max_ret=max(rets), min_ret=min(rets), spark=_spark(rets))
+    out["pk"] = {str(h): max(rets[:h]) for h in tc["surge_windows"] if len(rets) >= h}      # h営業日以内の最高の騰落率（終値ベース）
     for h in tc["horizons"]:
         row = next((s for s in series if s[0] == h), None)
         if row:
@@ -160,7 +161,7 @@ def build(panel: dict[str, pd.DataFrame], bench_topix: pd.DataFrame, hist_dir: P
         else:
             r["status"] = "掲載中" if cur is not None and cur <= int(cfg["top_n"]) else "圏外へ"
     keep = ("name", "date", "rank", "main", "stance", "regime", "code", "buy", "close0", "last_close", "ret", "bench", "excess",
-            "max_ret", "min_ret", "spark", "cp", "days", "closed", "stale")
+            "max_ret", "min_ret", "spark", "cp", "pk", "days", "closed", "stale")
     new_ledger = {r["key"]: {k: r[k] for k in keep if k in r} for r in results}
     ledger_path.parent.mkdir(parents=True, exist_ok=True)
     ledger_path.write_text(json.dumps(new_ledger, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
@@ -202,7 +203,7 @@ def summarize(results: list[dict], cfg: Config) -> dict[str, Any]:
             next(f"{a}〜{b}点" for a, b in zip(edges[:-1], edges[1:]) if a <= m < b)
         return lab
     main_order = [f"{edges[0]}点未満"] + [f"{a}〜{b}点" for a, b in zip(edges[:-1], edges[1:])] + [f"{edges[-1]}点以上"]
-    return {"by_horizon": by_h, "cut_horizon": ch,
+    return {"by_horizon": by_h, "cut_horizon": ch, "surge": surge_table(results, tc),
             "by_rank": cut(lambda r: "1〜3位" if r["rank"] <= 3 else "4位以下", ["1〜3位", "4位以下"]),
             "by_stance": cut(lambda r: STANCE_LABEL.get(r.get("stance"), "記録なし"), [STANCE_LABEL[k] for k in ("buy", "neutral", "defense")]),
             "by_main": cut(main_band, main_order),
@@ -210,6 +211,22 @@ def summarize(results: list[dict], cfg: Config) -> dict[str, Any]:
             "n_listed": sum(1 for r in results if r["status"] == "掲載中"),
             "n_pending": sum(1 for r in results if r["status"] == "買い値待ち"),
             "now": _agg([(r["ret"], r.get("bench")) for r in results if r.get("ret") is not None])}
+
+
+def surge_table(results: list[dict], tc: dict) -> dict[str, Any]:
+    """暴騰率：載ってからh営業日以内に、終値が買値から+X%以上になった銘柄の割合（期間が終わった銘柄だけを数える）。"""
+    groups = [("1位", lambda r: r["rank"] == 1), ("2位", lambda r: r["rank"] == 2), ("3位", lambda r: r["rank"] == 3),
+              ("1〜3位", lambda r: r["rank"] <= 3), ("4位以下", lambda r: r["rank"] > 3), ("全体", lambda r: True)]
+    wins, lv = [int(h) for h in tc["surge_windows"]], [float(x) for x in tc["surge_levels"]]
+    rows = []
+    for name, fn in groups:
+        cells = {}
+        for h in wins:
+            pk = [r["pk"][str(h)] for r in results if fn(r) and str(h) in (r.get("pk") or {})]
+            cells[h] = {"n": len(pk), "avg_max": float(np.mean(pk)) if pk else None,
+                        "lv": {x: {"k": sum(1 for v in pk if v >= x / 100), "rate": (sum(1 for v in pk if v >= x / 100) / len(pk)) if pk else None} for x in lv}}
+        rows.append({"name": name, "cells": cells})
+    return {"windows": wins, "levels": lv, "rows": rows}
 
 
 # ---------------------------------------------------------------- 図（SVG）

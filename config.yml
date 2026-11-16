@@ -295,16 +295,12 @@ pullback:
     far_from_high: {dd: -0.25, pts: 15}       # 高値から-25%以上離れている
     volume_spike: {vol_ratio: 3.0, ret1d: 0.04, pts: 10}   # 出来高急騰だけで上がった日
     volume_expansion: {ratio: 1.5, pts: 6}    # 調整中なのに出来高が膨らんでいる
-  earnings_penalty:            # 決算直前はギャップ（寄り付きの窓開け）リスクが高いため総合点から減点
-    - {business_days: 3, pts: 10}     # 決算まで3営業日以内
-    - {business_days: 5, pts: 5}      # 決算まで5営業日以内
   atr:                         # 撤退ライン＝移動平均線 − ATR×倍率
     period: 14
     multiplier: 1.0
     fallback_multiplier: 2.0   # 株価が50日線・200日線の下にあるとき：現在値 − ATR×この倍率
   labels: {good: 70, fair: 50}                # 押し目良好 / 押し目候補 / 様子見
   caution:
-    earnings_days: 10          # 決算発表がこの日数以内なら「決算接近」
     vol_ratio: 1.5             # 20日ボラティリティ ÷ 60日ボラティリティ
 
 # ============================================================
@@ -351,12 +347,32 @@ tdnet:
   buyback_unknown: 1
 
 # ============================================================
+#  決算イベント評価（㉔）：決算前の押し目はギャンブルになりやすいので避け、決算通過後の押し目を優先する
+# ============================================================
+earnings:
+  penalty:                     # 決算までの営業日数に応じた減点（総合点から引く。押し目スコアより優先される大きさ）
+    - {business_days: 1, pts: 25}     # 翌営業日（当日発表を含む）
+    - {business_days: 3, pts: 15}
+    - {business_days: 5, pts: 10}
+    - {business_days: 10, pts: 5}     # 11営業日以上は減点なし（20営業日以上は十分な余裕）
+  approach_days: 5             # この営業日以内は「⚠ 決算接近」
+  cross_days: 3                # この営業日以内は「⚠ 決算跨ぎ注意」
+  watch_cap_days: 1            # この営業日以内はラベルを「様子見」まで下げる
+  fair_cap_days: 3             # この営業日以内はラベルを「押し目候補」までに抑える
+  passed_days: 30              # 決算通過後この営業日以内を「通過済み」として評価
+  passed_base: 3               # 通過済みの基本加点
+  bonus: {dividend_increase: 3, upward_revision: 4, buyback: 3, turnaround: 3, record_high: 3, cap: 10}   # 通過後の好材料（前回決算日以降の開示のみ）
+  estimate_days: 91            # 次回の決算日が取得できない銘柄は、前回の決算日＋この日数で『推定』する
+  extra_holidays: []           # 東証の休場日は自動計算します（更新不要）。臨時の休場日がある時だけ "2027-01-04" の形で追記   # 東証の休場日（土日以外）。年末にここを更新してください
+
+# ============================================================
 #  保有銘柄の監視（㉒）。保有銘柄の保存先は Google スプレッドシート＋Apps Script（README参照）
 # ============================================================
 holdings:
   endpoint: "https://script.google.com/macros/s/AKfycbzjG548aNKEbuxKhw784JmIlhL8q8KwvxMiKgoQVo5fRyRrPVaS7HRSD8xXPv1Ll0PXfQ/exec"                 # Apps Script の「ウェブアプリ」URL（https://script.google.com/macros/s/.../exec）。空なら機能オフ
   max_holdings: 50
-  earnings_watch_days: 10      # 決算までこの日数以内なら「要監視」
+  earnings_watch_days: 5       # 決算まで（営業日）この日数以内なら「要監視」
+  earnings_cross_days: 3       # 決算まで（営業日）この日数以内なら「決算跨ぎ注意」
   down_watch_days: 90          # 下方修正から31〜90日は「要監視」（30日以内は「売却検討」）
   dividend_cut_days: 90        # 減配の開示がこの日数以内なら「売却検討」
   collapse_dd: -0.25           # 52週高値から-25%以上下落したら「押し目崩れ」
@@ -373,6 +389,8 @@ tracking:
   horizons: [1, 3, 5, 10, 20, 40, 60]   # 集計に使う「載ってから何営業日後」
   cut_horizon: 10              # 順位別・相場判定別・点数別の比較に使う営業日後
   reentry_gap: 10              # 圏外に出てからこの記録数より長く空いて再び載ったら、新しい掲載として数える
+  surge_windows: [5, 10, 20]   # 暴騰率：載ってからこの営業日以内に
+  surge_levels: [10, 20]       # 暴騰率：終値が買値からこの%以上になった銘柄の割合
   main_edges: [75, 80]         # 総合点の区分け（75点未満／75〜80点／80点以上）
 
 # 前回ランキングとの比較（急上昇・急下降）

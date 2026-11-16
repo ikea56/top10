@@ -42,6 +42,7 @@ def _demo_fund(code: str) -> Fund:
         "payout_latest": float(r.uniform(0.25, 0.5)), "payout_prev": float(r.uniform(0.2, 0.45)),
         "buyback": float(1e9 * r.uniform(0.5, 5)) if r.random() < 0.3 else None,
         "next_earnings": (date.today() + timedelta(days=int(r.integers(3, 60)))).isoformat(),
+        "earnings_past": [(date.today() - timedelta(days=int(r.integers(3, 80)))).isoformat()],
     }
 
 

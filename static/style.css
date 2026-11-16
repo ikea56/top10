@@ -339,3 +339,10 @@ table.trk td,table.trk th{white-space:nowrap}
 table.daily{font-size:.85rem}tr.detail td{background:var(--gray-bg)}
 .card h3{font-size:.95rem;margin:12px 0 4px}
 .card .table-wrap th{white-space:nowrap}.center{text-align:center}
+table.surge td{text-align:left;white-space:nowrap;font-size:.85rem}table.surge td span{display:block}table.surge td small{display:block;color:var(--sub)}
+
+/* 決算状況（㉔） */
+.earn-badge{display:inline-block;margin-left:.5em;padding:.05em .55em;border-radius:999px;font-size:.78em;font-weight:700;vertical-align:middle}
+.earn-badge.warn{background:#fdecea;color:#b3261e}
+.earn-badge.ok{background:#e6f4ea;color:#1e7a3c}
+@media (prefers-color-scheme:dark){.earn-badge.warn{background:#4a2321;color:#ffb4ab}.earn-badge.ok{background:#1d3b27;color:#9be0b0}}

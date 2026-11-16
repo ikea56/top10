@@ -89,7 +89,7 @@ def decide_action(i: dict, cfg: Config) -> dict:
     """🔴売却検討／🟡要監視／🟢保有継続 を、理由つきで返す。
 
     i のキー：corporate(list[str] TOB等の検出)・supervised・price_lock・down_recent(list)・down_days(下方修正からの日数)・
-              dividend_cut_days・trend_ok・broken(list[str] 押し目崩れの理由)・earnings_days(カレンダー日数)・
+              dividend_cut_days・trend_ok・broken(list[str] 押し目崩れの理由)・earnings_days(営業日数)・
               earn_pen・unknown_rev・td_status("ok"/"unavailable"/"off")・data_ok
     """
     h = cfg["holdings"]
@@ -111,8 +111,11 @@ def decide_action(i: dict, cfg: Config) -> dict:
         watch.append("株価データが不足しています（状態を判定できません）")
     for b in i.get("broken", []):
         watch.append(b)
-    if i.get("earn_pen") or (i.get("earnings_days") is not None and 0 <= i["earnings_days"] <= h["earnings_watch_days"]):
-        watch.append(f"決算が近い（あと{i['earnings_days']}日）・発表後に大きく動く可能性")
+    ed = i.get("earnings_days")                      # 営業日
+    if ed is not None and 0 <= ed <= h["earnings_cross_days"]:
+        watch.append(f"⚠ 決算跨ぎ注意（決算まであと{ed}営業日）・発表後に大きく動く可能性。持ち越すか事前に判断を")
+    elif ed is not None and 0 <= ed <= h["earnings_watch_days"]:
+        watch.append(f"要監視：決算が近い（あと{ed}営業日）・発表後に大きく動く可能性")
     if i.get("unknown_rev"):
         watch.append("業績予想の修正あり（増額か減額か未判定）")
     if i.get("td_status") != "ok":

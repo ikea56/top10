@@ -40,6 +40,7 @@ EVENT_RULES: list[tuple[str, str, re.Pattern, re.Pattern | None]] = [
     ("capex", "設備投資拡大", re.compile(r"設備投資|生産能力.{0,6}(増強|拡大)|能力増強|増産投資"), None),
     ("new_product", "新製品発表", re.compile(r"新製品|新商品|新サービス|新型|新モデル|新発売|発売開始|提供開始"), None),
 ]
+EARNINGS_REPORT = re.compile(r"決算短信")
 BIG_ORDER = re.compile(r"大型|大口|大規模|多額|大量|過去最大|億円")
 REV_ANY = re.compile(r"業績予想.{0,6}修正|予想.{0,4}修正|通期.{0,6}修正|業績修正")
 REV_UP = re.compile(r"上方修正|上方に修正|増額|引き上げ|引上げ|上振れ|上回る")
@@ -145,6 +146,7 @@ class TdnetResult:
     hits: list[EventHit] = field(default_factory=list)
     score: float = 0.0
     error: str = ""
+    earnings_dates: list[str] = field(default_factory=list)   # 決算短信の開示日（直近の決算日の推定に使う）
 
     @property
     def has_down_revision(self) -> bool:
@@ -254,6 +256,8 @@ def analyze(discs: list[Disclosure], fund: dict | None, cfg: Config, today: date
                 seen_ex.add((reason, d.date))
                 res.excluded.append({"reason": reason, "event": ev, "date": d.date})
         title = d.title
+        if EARNINGS_REPORT.search(title):
+            res.earnings_dates.append(d.date)
         if BUYBACK.search(title) and not BUYBACK_SKIP.search(title) and "buyback" not in found:
             ratio = buyback_ratio(d)
             put("buyback", d, buyback_points(ratio, cfg), f"時価総額の{ratio * 100:.1f}%" if ratio is not None else "規模は未判定")
