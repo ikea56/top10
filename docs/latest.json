@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-18T18:45+09:00",
+ "generated_at": "2026-11-19T07:48+09:00",
  "data_date": "2026-11-18",
  "demo": false,
  "stance": {
@@ -9,130 +9,9 @@
  "picks": [
   {
    "rank": 1,
-   "code": "9824",
-   "name": "泉州電業",
-   "main": 76.8,
-   "pb_total": 68.1,
-   "td_score": 9,
-   "penalty": 0,
-   "parts": {
-    "trend": [
-     15.0,
-     15
-    ],
-    "drawdown": [
-     15.7,
-     16
-    ],
-    "ma50": [
-     6.5,
-     8
-    ],
-    "volume": [
-     5.0,
-     5
-    ],
-    "strength": [
-     11.1,
-     12
-    ],
-    "hold": [
-     1.8,
-     6
-    ],
-    "quality": [
-     28.0,
-     28
-    ],
-    "market": [
-     -15.0,
-     10
-    ]
-   },
-   "label": "押し目良好",
-   "close": 7590.0,
-   "strengths": [
-    {
-     "label": "最高益更新（今期予想EPSが過去最高）",
-     "src": "予想"
-    },
-    {
-     "label": "上方修正（TDnet 09/04）",
-     "src": "TDnet"
-    },
-    {
-     "label": "増配（TDnet 09/04）",
-     "src": "TDnet"
-    },
-    {
-     "label": "5年連続増配",
-     "src": "実績"
-    },
-    {
-     "label": "自社株買い（時価総額の0.4%）（TDnet 10/28）",
-     "src": "TDnet"
-    }
-   ],
-   "status": [
-    "長期上昇トレンド（50日線＞200日線）",
-    "高値から-10%（52週高値比）",
-    "50日線付近（乖離-3.3%）",
-    "出来高縮小（直近10日が50日平均の0.67倍）",
-    "相対力が強い（直近60日でTOPIXを+14.3%上回る）",
-    "短期の下げ止まり（株価が5日線の上）"
-   ],
-   "cautions": [
-    {
-     "label": "市場全体が下落基調（地合い減点で総合点が下がっています）",
-     "level": "mid"
-    },
-    {
-     "label": "強みの一部は会社・アナリストの予想に基づく（外れることがあります）",
-     "level": "low"
-    }
-   ],
-   "explain": "高値から-10%まで調整。50日線付近で推移。出来高は縮小。最高益更新・上方修正・増配など業績・株主還元も良好。長期の上昇トレンドは継続。",
-   "legacy": {
-    "rank": 5,
-    "total": 44,
-    "base": 26,
-    "events_pts": 18,
-    "expected": 39.4,
-    "win_rate": 0.5274011760862464,
-    "win_known": true,
-    "liq": 0.85,
-    "trend": [
-     5,
-     50
-    ],
-    "demand": [
-     4,
-     25
-    ],
-    "earnings": [
-     15,
-     15
-    ],
-    "market": [
-     2,
-     10
-    ]
-   },
-   "rank_change": {
-    "kind": "up",
-    "prev": 2,
-    "delta": 1,
-    "main_delta": 7.599999999999994
-   },
-   "main_base": 76.8,
-   "lead": null,
-   "lead_pts": 0.0
-  },
-  {
-   "rank": 2,
    "code": "7970",
    "name": "信越ポリマー",
-   "main": 74.5,
+   "main": 75.2,
    "pb_total": 64.6,
    "td_score": 12,
    "penalty": 0,
@@ -239,28 +118,28 @@
     ]
    },
    "rank_change": {
-    "kind": "down",
+    "kind": "same",
     "prev": 1,
-    "delta": -1,
-    "main_delta": 1.2000000000000028
+    "delta": 0,
+    "main_delta": 1.9000000000000057
    },
    "main_base": 76.6,
    "lead": {
     "key": "chemical",
     "group": "化学",
-    "score": -4.2,
+    "score": -2.9,
     "items": [
      {
       "label": "S&P500",
-      "mark": "⚠",
-      "state": "bad",
-      "text": "S&P500下落（-1.0%）"
+      "mark": "➖",
+      "state": "flat",
+      "text": "S&P500横ばい（-0.2%）"
      },
      {
       "label": "WTI原油",
       "mark": "⚠",
       "state": "bad",
-      "text": "WTI原油下落（-3.0%）"
+      "text": "WTI原油下落（-4.8%）"
      }
     ],
     "verdict": "bad",
@@ -269,129 +148,13 @@
     "available": 2,
     "total": 2
    },
-   "lead_pts": -2.1
+   "lead_pts": -1.5
   },
   {
-   "rank": 3,
-   "code": "8159",
-   "name": "立花エレテック",
-   "main": 71.7,
-   "pb_total": 60.7,
-   "td_score": 11,
-   "penalty": 0,
-   "parts": {
-    "trend": [
-     15.0,
-     15
-    ],
-    "drawdown": [
-     13.0,
-     16
-    ],
-    "ma50": [
-     7.3,
-     8
-    ],
-    "volume": [
-     0.9,
-     5
-    ],
-    "strength": [
-     10.5,
-     12
-    ],
-    "hold": [
-     3.1,
-     6
-    ],
-    "quality": [
-     23.0,
-     28
-    ],
-    "market": [
-     -15.0,
-     10
-    ]
-   },
-   "label": "押し目良好",
-   "close": 4290.0,
-   "strengths": [
-    {
-     "label": "最高益更新（今期予想EPSが過去最高）",
-     "src": "予想"
-    },
-    {
-     "label": "上方修正（TDnet 11/09）",
-     "src": "TDnet"
-    },
-    {
-     "label": "自社株買いを実施（時価総額の3.1%）",
-     "src": "実績"
-    },
-    {
-     "label": "増配（TDnet 11/09）",
-     "src": "TDnet"
-    }
-   ],
-   "status": [
-    "長期上昇トレンド（50日線＞200日線）",
-    "高値から-15%（52週高値比）",
-    "50日線付近（乖離-1.6%）",
-    "相対力が強い（直近60日でTOPIXを+13.4%上回る）",
-    "短期の下げ止まり（株価が5日線の上）"
-   ],
-   "cautions": [
-    {
-     "label": "市場全体が下落基調（地合い減点で総合点が下がっています）",
-     "level": "mid"
-    },
-    {
-     "label": "強みの一部は会社・アナリストの予想に基づく（外れることがあります）",
-     "level": "low"
-    }
-   ],
-   "explain": "高値から-15%まで調整。50日線付近で推移。最高益更新・上方修正・増配など業績・株主還元も良好。長期の上昇トレンドは継続。",
-   "legacy": {
-    "rank": 8,
-    "total": 29,
-    "base": 17,
-    "events_pts": 12,
-    "expected": 26.0,
-    "win_rate": 0.5274011760862464,
-    "win_known": true,
-    "liq": 0.85,
-    "trend": [
-     0,
-     50
-    ],
-    "demand": [
-     0,
-     25
-    ],
-    "earnings": [
-     15,
-     15
-    ],
-    "market": [
-     2,
-     10
-    ]
-   },
-   "rank_change": {
-    "kind": "new",
-    "prev": null,
-    "delta": null,
-    "main_delta": null
-   },
-   "main_base": 71.7,
-   "lead": null,
-   "lead_pts": 0.0
-  },
-  {
-   "rank": 4,
+   "rank": 2,
    "code": "1939",
    "name": "四電工",
-   "main": 71.1,
+   "main": 72.2,
    "pb_total": 60.4,
    "td_score": 11,
    "penalty": 0,
@@ -493,28 +256,28 @@
     ]
    },
    "rank_change": {
-    "kind": "same",
+    "kind": "up",
     "prev": 4,
-    "delta": 0,
-    "main_delta": 2.3999999999999915
+    "delta": 2,
+    "main_delta": 3.5
    },
    "main_base": 71.4,
    "lead": {
     "key": "realestate",
     "group": "不動産・建設",
-    "score": -0.6,
+    "score": 1.5,
     "items": [
      {
       "label": "米10年債利回り",
-      "mark": "➖",
-      "state": "flat",
-      "text": "米10年債利回り横ばい（-2bp）"
+      "mark": "✅",
+      "state": "good",
+      "text": "米10年債利回り下落（-4bp）"
      },
      {
       "label": "VNQ（米不動産）",
-      "mark": "⚠",
-      "state": "bad",
-      "text": "VNQ（米不動産）下落（-1.4%）"
+      "mark": "➖",
+      "state": "flat",
+      "text": "VNQ（米不動産）横ばい（+0.3%）"
      }
     ],
     "verdict": "flat",
@@ -523,7 +286,244 @@
     "available": 2,
     "total": 2
    },
-   "lead_pts": -0.3
+   "lead_pts": 0.8
+  },
+  {
+   "rank": 3,
+   "code": "9824",
+   "name": "泉州電業",
+   "main": 71.8,
+   "pb_total": 63.1,
+   "td_score": 9,
+   "penalty": 5,
+   "parts": {
+    "trend": [
+     15.0,
+     15
+    ],
+    "drawdown": [
+     15.7,
+     16
+    ],
+    "ma50": [
+     6.5,
+     8
+    ],
+    "volume": [
+     5.0,
+     5
+    ],
+    "strength": [
+     11.1,
+     12
+    ],
+    "hold": [
+     1.8,
+     6
+    ],
+    "quality": [
+     28.0,
+     28
+    ],
+    "market": [
+     -15.0,
+     10
+    ]
+   },
+   "label": "押し目良好",
+   "close": 7590.0,
+   "strengths": [
+    {
+     "label": "最高益更新（今期予想EPSが過去最高）",
+     "src": "予想"
+    },
+    {
+     "label": "上方修正（TDnet 09/04）",
+     "src": "TDnet"
+    },
+    {
+     "label": "増配（TDnet 09/04）",
+     "src": "TDnet"
+    },
+    {
+     "label": "5年連続増配",
+     "src": "実績"
+    },
+    {
+     "label": "自社株買い（時価総額の0.4%）（TDnet 10/28）",
+     "src": "TDnet"
+    }
+   ],
+   "status": [
+    "長期上昇トレンド（50日線＞200日線）",
+    "高値から-10%（52週高値比）",
+    "50日線付近（乖離-3.3%）",
+    "出来高縮小（直近10日が50日平均の0.67倍）",
+    "相対力が強い（直近60日でTOPIXを+14.3%上回る）",
+    "短期の下げ止まり（株価が5日線の上）"
+   ],
+   "cautions": [
+    {
+     "label": "市場全体が下落基調（地合い減点で総合点が下がっています）",
+     "level": "mid"
+    },
+    {
+     "label": "強みの一部は会社・アナリストの予想に基づく（外れることがあります）",
+     "level": "low"
+    }
+   ],
+   "explain": "高値から-10%まで調整。50日線付近で推移。出来高は縮小。最高益更新・上方修正・増配など業績・株主還元も良好。長期の上昇トレンドは継続。",
+   "legacy": {
+    "rank": 5,
+    "total": 44,
+    "base": 26,
+    "events_pts": 18,
+    "expected": 39.4,
+    "win_rate": 0.5274011760862464,
+    "win_known": true,
+    "liq": 0.85,
+    "trend": [
+     5,
+     50
+    ],
+    "demand": [
+     4,
+     25
+    ],
+    "earnings": [
+     15,
+     15
+    ],
+    "market": [
+     2,
+     10
+    ]
+   },
+   "rank_change": {
+    "kind": "down",
+    "prev": 2,
+    "delta": -1,
+    "main_delta": 2.5999999999999943
+   },
+   "main_base": 71.8,
+   "lead": null,
+   "lead_pts": 0.0
+  },
+  {
+   "rank": 4,
+   "code": "8159",
+   "name": "立花エレテック",
+   "main": 71.7,
+   "pb_total": 60.7,
+   "td_score": 11,
+   "penalty": 0,
+   "parts": {
+    "trend": [
+     15.0,
+     15
+    ],
+    "drawdown": [
+     13.0,
+     16
+    ],
+    "ma50": [
+     7.3,
+     8
+    ],
+    "volume": [
+     0.9,
+     5
+    ],
+    "strength": [
+     10.5,
+     12
+    ],
+    "hold": [
+     3.1,
+     6
+    ],
+    "quality": [
+     23.0,
+     28
+    ],
+    "market": [
+     -15.0,
+     10
+    ]
+   },
+   "label": "押し目良好",
+   "close": 4290.0,
+   "strengths": [
+    {
+     "label": "最高益更新（今期予想EPSが過去最高）",
+     "src": "予想"
+    },
+    {
+     "label": "上方修正（TDnet 11/09）",
+     "src": "TDnet"
+    },
+    {
+     "label": "自社株買いを実施（時価総額の3.1%）",
+     "src": "実績"
+    },
+    {
+     "label": "増配（TDnet 11/09）",
+     "src": "TDnet"
+    }
+   ],
+   "status": [
+    "長期上昇トレンド（50日線＞200日線）",
+    "高値から-15%（52週高値比）",
+    "50日線付近（乖離-1.6%）",
+    "相対力が強い（直近60日でTOPIXを+13.4%上回る）",
+    "短期の下げ止まり（株価が5日線の上）"
+   ],
+   "cautions": [
+    {
+     "label": "市場全体が下落基調（地合い減点で総合点が下がっています）",
+     "level": "mid"
+    },
+    {
+     "label": "強みの一部は会社・アナリストの予想に基づく（外れることがあります）",
+     "level": "low"
+    }
+   ],
+   "explain": "高値から-15%まで調整。50日線付近で推移。最高益更新・上方修正・増配など業績・株主還元も良好。長期の上昇トレンドは継続。",
+   "legacy": {
+    "rank": 9,
+    "total": 29,
+    "base": 17,
+    "events_pts": 12,
+    "expected": 26.0,
+    "win_rate": 0.5274011760862464,
+    "win_known": true,
+    "liq": 0.85,
+    "trend": [
+     0,
+     50
+    ],
+    "demand": [
+     0,
+     25
+    ],
+    "earnings": [
+     15,
+     15
+    ],
+    "market": [
+     2,
+     10
+    ]
+   },
+   "rank_change": {
+    "kind": "new",
+    "prev": null,
+    "delta": null,
+    "main_delta": null
+   },
+   "main_base": 71.7,
+   "lead": null,
+   "lead_pts": 0.0
   },
   {
    "rank": 5,
@@ -648,7 +648,7 @@
    "rank": 6,
    "code": "1941",
    "name": "中電工",
-   "main": 69.2,
+   "main": 70.2,
    "pb_total": 61.5,
    "td_score": 8,
    "penalty": 0,
@@ -753,25 +753,25 @@
     "kind": "down",
     "prev": 3,
     "delta": -3,
-    "main_delta": 0.10000000000000853
+    "main_delta": 1.1000000000000085
    },
    "main_base": 69.5,
    "lead": {
     "key": "realestate",
     "group": "不動産・建設",
-    "score": -0.6,
+    "score": 1.5,
     "items": [
      {
       "label": "米10年債利回り",
-      "mark": "➖",
-      "state": "flat",
-      "text": "米10年債利回り横ばい（-2bp）"
+      "mark": "✅",
+      "state": "good",
+      "text": "米10年債利回り下落（-4bp）"
      },
      {
       "label": "VNQ（米不動産）",
-      "mark": "⚠",
-      "state": "bad",
-      "text": "VNQ（米不動産）下落（-1.4%）"
+      "mark": "➖",
+      "state": "flat",
+      "text": "VNQ（米不動産）横ばい（+0.3%）"
      }
     ],
     "verdict": "flat",
@@ -780,10 +780,149 @@
     "available": 2,
     "total": 2
    },
-   "lead_pts": -0.3
+   "lead_pts": 0.8
   },
   {
    "rank": 7,
+   "code": "6098",
+   "name": "リクルートホールディングス",
+   "main": 69.1,
+   "pb_total": 64.7,
+   "td_score": 4,
+   "penalty": 0,
+   "parts": {
+    "trend": [
+     15.0,
+     15
+    ],
+    "drawdown": [
+     15.0,
+     16
+    ],
+    "ma50": [
+     7.7,
+     8
+    ],
+    "volume": [
+     0.0,
+     5
+    ],
+    "strength": [
+     10.9,
+     12
+    ],
+    "hold": [
+     1.2,
+     6
+    ],
+    "quality": [
+     27.0,
+     28
+    ],
+    "market": [
+     -15.0,
+     10
+    ]
+   },
+   "label": "押し目候補",
+   "close": 17585.0,
+   "strengths": [
+    {
+     "label": "最高益更新（今期予想EPSが過去最高）",
+     "src": "予想"
+    },
+    {
+     "label": "増配（+2%）",
+     "src": "予想"
+    },
+    {
+     "label": "4年連続増配",
+     "src": "実績"
+    },
+    {
+     "label": "自社株買い（時価総額の3.4%）（TDnet 10/14）",
+     "src": "TDnet"
+    }
+   ],
+   "status": [
+    "長期上昇トレンド（50日線＞200日線）",
+    "高値から-8%（52週高値比）",
+    "50日線付近（乖離+0.9%）",
+    "相対力が強い（直近60日でTOPIXを+15.5%上回る）",
+    "短期の下げ止まり（株価が5日線の上）"
+   ],
+   "cautions": [
+    {
+     "label": "市場全体が下落基調（地合い減点で総合点が下がっています）",
+     "level": "mid"
+    },
+    {
+     "label": "強みの一部は会社・アナリストの予想に基づく（外れることがあります）",
+     "level": "low"
+    }
+   ],
+   "explain": "高値から-8%まで調整。50日線付近で推移。最高益更新・増配・自社株買いなど業績・株主還元も良好。長期の上昇トレンドは継続。",
+   "legacy": {
+    "rank": 7,
+    "total": 33,
+    "base": 21,
+    "events_pts": 12,
+    "expected": 34.8,
+    "win_rate": 0.5274011760862464,
+    "win_known": true,
+    "liq": 1.0,
+    "trend": [
+     0,
+     50
+    ],
+    "demand": [
+     4,
+     25
+    ],
+    "earnings": [
+     15,
+     15
+    ],
+    "market": [
+     2,
+     10
+    ]
+   },
+   "rank_change": {
+    "kind": "new",
+    "prev": 15,
+    "delta": null,
+    "main_delta": 5.499999999999993
+   },
+   "main_base": 68.2,
+   "lead": {
+    "key": "tech_service",
+    "group": "情報・ソフトウェア",
+    "score": 1.8,
+    "items": [
+     {
+      "label": "NASDAQ",
+      "mark": "➖",
+      "state": "flat",
+      "text": "NASDAQ横ばい（+0.4%）"
+     },
+     {
+      "label": "IGV（米ソフトウェア）",
+      "mark": "✅",
+      "state": "good",
+      "text": "IGV（米ソフトウェア）上昇（+1.3%）"
+     }
+    ],
+    "verdict": "good",
+    "headline": "情報・ソフトウェアに追い風",
+    "icon": "🟢",
+    "available": 2,
+    "total": 2
+   },
+   "lead_pts": 0.9
+  },
+  {
+   "rank": 8,
    "code": "8037",
    "name": "カメイ",
    "main": 68.4,
@@ -867,7 +1006,7 @@
    ],
    "explain": "高値から-9%まで調整。50日線付近で推移。出来高は縮小。最高益更新・増配など業績・株主還元も良好。長期の上昇トレンドは継続。",
    "legacy": {
-    "rank": 7,
+    "rank": 8,
     "total": 38,
     "base": 22,
     "events_pts": 16,
@@ -895,7 +1034,7 @@
    "rank_change": {
     "kind": "down",
     "prev": 6,
-    "delta": -1,
+    "delta": -2,
     "main_delta": 0.4000000000000057
    },
    "main_base": 68.4,
@@ -903,10 +1042,10 @@
    "lead_pts": 0.0
   },
   {
-   "rank": 8,
+   "rank": 9,
    "code": "6454",
    "name": "マックス",
-   "main": 67.9,
+   "main": 68.4,
    "pb_total": 61.2,
    "td_score": 7,
    "penalty": 0,
@@ -988,7 +1127,7 @@
    ],
    "explain": "高値から-8%まで調整。50日線付近で推移。出来高は縮小。最高益更新・上方修正・自社株買いなど業績・株主還元も良好。長期の上昇トレンドは継続。",
    "legacy": {
-    "rank": 9,
+    "rank": 10,
     "total": 25,
     "base": 7,
     "events_pts": 18,
@@ -1014,34 +1153,34 @@
     ]
    },
    "rank_change": {
-    "kind": "up",
+    "kind": "same",
     "prev": 9,
-    "delta": 1,
-    "main_delta": 1.2000000000000028
+    "delta": 0,
+    "main_delta": 1.7000000000000028
    },
    "main_base": 68.1,
    "lead": {
     "key": "electronics",
     "group": "電機・精密・機械",
-    "score": -0.5,
+    "score": 0.5,
     "items": [
      {
       "label": "SOX指数",
       "mark": "➖",
       "state": "flat",
-      "text": "SOX指数横ばい（+0.3%）"
+      "text": "SOX指数横ばい（+0.1%）"
      },
      {
       "label": "NASDAQ",
-      "mark": "⚠",
-      "state": "bad",
-      "text": "NASDAQ下落（-0.7%）"
+      "mark": "➖",
+      "state": "flat",
+      "text": "NASDAQ横ばい（+0.4%）"
      },
      {
       "label": "ドル円",
       "mark": "➖",
       "state": "flat",
-      "text": "ドル円横ばい（-0.0%）"
+      "text": "ドル円横ばい（+0.0%）"
      }
     ],
     "verdict": "flat",
@@ -1050,125 +1189,13 @@
     "available": 3,
     "total": 3
    },
-   "lead_pts": -0.2
-  },
-  {
-   "rank": 9,
-   "code": "2053",
-   "name": "中部飼料",
-   "main": 67.0,
-   "pb_total": 62.0,
-   "td_score": 5,
-   "penalty": 0,
-   "parts": {
-    "trend": [
-     14.1,
-     15
-    ],
-    "drawdown": [
-     13.9,
-     16
-    ],
-    "ma50": [
-     7.8,
-     8
-    ],
-    "volume": [
-     5.0,
-     5
-    ],
-    "strength": [
-     6.3,
-     12
-    ],
-    "hold": [
-     4.0,
-     6
-    ],
-    "quality": [
-     22.9,
-     28
-    ],
-    "market": [
-     -15.0,
-     10
-    ]
-   },
-   "label": "押し目候補",
-   "close": 1988.0,
-   "strengths": [
-    {
-     "label": "最高益更新（直近12か月の営業利益が過去最高）",
-     "src": "実績"
-    },
-    {
-     "label": "増配（+4%）",
-     "src": "予想"
-    },
-    {
-     "label": "自社株買い（時価総額の3.8%）（TDnet 10/30）",
-     "src": "TDnet"
-    }
-   ],
-   "status": [
-    "長期上昇トレンド（50日線＞200日線）",
-    "高値から-7%（52週高値比）",
-    "50日線付近（乖離-0.4%）",
-    "出来高縮小（直近10日が50日平均の0.62倍）",
-    "相対力が強い（直近60日でTOPIXを+4.7%上回る）"
-   ],
-   "cautions": [
-    {
-     "label": "市場全体が下落基調（地合い減点で総合点が下がっています）",
-     "level": "mid"
-    },
-    {
-     "label": "強みの一部は会社・アナリストの予想に基づく（外れることがあります）",
-     "level": "low"
-    }
-   ],
-   "explain": "高値から-7%まで調整。50日線付近で推移。出来高は縮小。最高益更新・増配・自社株買いなど業績・株主還元も良好。長期の上昇トレンドは継続。",
-   "legacy": {
-    "rank": 10,
-    "total": 30,
-    "base": 20,
-    "events_pts": 10,
-    "expected": 22.2,
-    "win_rate": 0.5274011760862464,
-    "win_known": true,
-    "liq": 0.7,
-    "trend": [
-     5,
-     50
-    ],
-    "demand": [
-     0,
-     25
-    ],
-    "earnings": [
-     11,
-     15
-    ],
-    "market": [
-     4,
-     10
-    ]
-   },
-   "rank_change": {
-    "kind": "down",
-    "prev": 8,
-    "delta": -1,
-    "main_delta": 0.20000000000000284
-   },
-   "main_base": 67.0,
-   "lead": null,
-   "lead_pts": 0.0
+   "lead_pts": 0.2
   },
   {
    "rank": 10,
    "code": "4220",
    "name": "リケンテクノス",
-   "main": 66.9,
+   "main": 67.5,
    "pb_total": 61.0,
    "td_score": 8,
    "penalty": 0,
@@ -1278,19 +1305,19 @@
    "lead": {
     "key": "chemical",
     "group": "化学",
-    "score": -4.2,
+    "score": -2.9,
     "items": [
      {
       "label": "S&P500",
-      "mark": "⚠",
-      "state": "bad",
-      "text": "S&P500下落（-1.0%）"
+      "mark": "➖",
+      "state": "flat",
+      "text": "S&P500横ばい（-0.2%）"
      },
      {
       "label": "WTI原油",
       "mark": "⚠",
       "state": "bad",
-      "text": "WTI原油下落（-3.0%）"
+      "text": "WTI原油下落（-4.8%）"
      }
     ],
     "verdict": "bad",
@@ -1299,7 +1326,7 @@
     "available": 2,
     "total": 2
    },
-   "lead_pts": -2.1
+   "lead_pts": -1.5
   }
  ]
 }
