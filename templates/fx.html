@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0f1a2b">
+<meta name="robots" content="noindex">
+<title>ドル円 市場参加者分析（東京・欧州・NY）</title>
+<link rel="stylesheet" href="../style.css">
+<script>
+(function(){try{var t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+</script>
+</head>
+<body class="fxpage">
+{% macro side(s) %}{{ 'buy' if s > 0 else 'sell' if s < 0 else 'neu' }}{% endmacro %}
+{% macro arrow(s) %}{{ '▲' if s > 0 else '▼' if s < 0 else '■' }}{% endmacro %}
+{% macro meter(v) %}
+  {% set pct = (v * 50)|abs|round(0) %}
+  <div class="meter" role="img" aria-label="売り←→買い">
+    <span class="mend">売り</span>
+    <span class="track"><i class="mid"></i>{% if v > 0 %}<b class="fill buy" style="left:50%;width:{{ pct }}%"></b>{% elif v < 0 %}<b class="fill sell" style="left:{{ 50 - pct }}%;width:{{ pct }}%"></b>{% endif %}</span>
+    <span class="mend">買い</span>
+  </div>
+{% endmacro %}
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-row">
+      <h1>💴 ドル円 市場参加者分析</h1>
+      <button id="themeBtn" class="icon-btn" type="button" aria-label="ライト／ダーク表示を切り替え">🌓</button>
+    </div>
+    <p class="meta"><span>最終更新：{{ generated }}</span>{% if bars_last %}<span>データ：{{ bars_last }}まで</span>{% endif %}</p>
+    <p class="meta"><a class="back" href="../index.html">← 株ランキングに戻る</a></p>
+  </div>
+</header>
+
+<main class="wrap">
+  {% if demo %}<div class="banner warn">⚠️ <b>デモ表示です。</b>架空のデータで、実際のドル円ではありません。</div>{% endif %}
+  {% if warn %}<div class="banner warn">⚠️ {{ warn }}</div>{% endif %}
+  {% if stale %}<div class="banner warn">⚠️ データが古い可能性があります（最後の足：{{ bars_last }}）。</div>{% endif %}
+
+  {% if not res.ok %}
+  <section class="card"><h2>まだ分析できません</h2><p class="hint">{{ res.reason }}</p></section>
+  {% else %}
+  {% set net = res.net %}
+  <section class="card fx-hero {{ side(net.side) }}">
+    <p class="fx-kicker">USD/JPY　直近{{ res.recent_days }}営業日の判定</p>
+    <h2 class="fx-headline"><span class="ar">{{ arrow(net.side) }}</span> {{ net.headline }}</h2>
+    <p class="fx-sub">{{ net.label }}（総合 {{ net.score }}）{% if res.leader %}／主導：<b>{{ res.leader.name }}勢（{{ res.leader.word }}）</b>{% else %}／主導役なし{% endif %}</p>
+    {{ meter(net.s) }}
+    <p class="fx-note">{{ res.note }}</p>
+  </section>
+
+  <section class="card">
+    <h2>市場勢力図</h2>
+    <p class="hint">時間帯ごとの参加者が、いま買い・売りのどちらに傾けているか（スコアは0〜100。大きいほど偏りが強い）。</p>
+    <div class="fx-grid">
+    {% for key in order %}{% set v = res.sessions[key] %}{% set w = v.windows.recent %}
+      <article class="fx-card {{ side(v.side) }}">
+        <header><h3>{{ v.name }}勢</h3><span class="tm">{{ {'tokyo':'09:00–15:30','europe':'15:30–22:00','ny':'22:00–翌06:00'}[key] }}</span></header>
+        {% if v.score.ok %}
+        <p class="fx-score"><span class="ar">{{ arrow(v.side) }}</span>
+          {% if v.side > 0 %}買いスコア{% elif v.side < 0 %}売りスコア{% else %}スコア{% endif %} <b>{{ v.score.score }}</b></p>
+        <p class="fx-label"><span class="chip {{ side(v.side) }} {{ v.strength }}">{{ v.label }}</span></p>
+        {{ meter(v.score.s) }}
+        {% else %}<p class="hint">{{ v.score.why }}</p>{% endif %}
+        <div class="fx-trend">
+          <p class="t1">直近{{ v.trend.k }}日：<b>{{ v.trend.line1 }}</b>　平均 <b class="{{ 'buy' if v.trend.avg > 0 else 'sell' }}">{{ v.trend.avg|pips }}pips</b></p>
+          <p class="t2">{{ v.trend.streak_txt }} → <b>{{ v.trend.verdict }}</b></p>
+        </div>
+        <div class="fx-bars">{{ bars_charts[key]|safe }}<small>直近{{ res.recent_days }}日の日ごとのpips（右が最新）</small></div>
+        <dl class="fx-facts">
+          <div><dt>前営業日（{{ v.last_day.date[5:].replace('-', '/') }}）</dt><dd class="{{ 'buy' if v.last_day.pips > 0 else 'sell' }}">{{ v.last_day.pips|pips }} pips</dd></div>
+          {% if v.live %}<div><dt>進行中（{{ v.live.date[5:].replace('-', '/') }}）</dt><dd class="{{ 'buy' if v.live.pips > 0 else 'sell' }}">{{ v.live.pips|pips }} pips</dd></div>{% endif %}
+          {% if w.clv is not none %}<div><dt>引けの位置</dt><dd>{{ (w.clv*100)|round|int }}%<small>{{ '（高値寄り＝買い圧力）' if w.clv >= 0.55 else '（安値寄り＝売り圧力）' if w.clv <= 0.45 else '（真ん中）' }}</small></dd></div>{% endif %}
+        </dl>
+      </article>
+    {% endfor %}
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>ランキング（いま相場を動かしている順）</h2>
+    <ol class="fx-rank">
+      {% for r in res.ranking %}<li class="{{ side(r.side) }}"><span class="no">{{ r.rank }}位</span><span class="nm">{{ r.name }}</span><span class="sd"><span class="ar">{{ arrow(r.side) }}</span>{{ r.word }}</span><span class="sc">{{ r.score }}</span><span class="lb">{{ r.label }}</span></li>{% endfor %}
+    </ol>
+    <p class="hint">順位は勝率だけでなく、平均pips・期待値・累積損益・連続記録を総合したスコアの大きさです。</p>
+  </section>
+
+  <section class="card">
+    <h2>累積pips（買い持ちした場合）</h2>
+    {{ cum_chart|safe }}
+    <p class="hint">直近{{ res.sessions[order[0]].cum_curve|length }}営業日。線が上がっている時間帯は買いが優勢（上昇が積み上がっている）、下がっている時間帯は売りが優勢です。</p>
+  </section>
+
+  <section class="card">
+    <h2>市場別の集計</h2>
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab on" data-w="recent">直近{{ res.recent_days }}日</button>
+      <button type="button" class="tab" data-w="mid">直近60日</button>
+      <button type="button" class="tab" data-w="all">全期間</button>
+    </div>
+    {% for wk in ('recent','mid','all') %}
+    <div class="table-wrap fx-win" data-w="{{ wk }}"{% if wk != 'recent' %} hidden{% endif %}>
+      <p class="hint">{{ res.sessions[order[0]].windows[wk].label }}{% if wk == 'all' %}（{{ res.sessions[order[0]].windows[wk].n }}営業日分）{% endif %}</p>
+      <table class="rbt fxt">
+        <thead><tr><th></th>{% for key in order %}<th>{{ res.sessions[key].name }}</th>{% endfor %}</tr></thead>
+        <tbody>
+          <tr><th>上昇日数</th>{% for key in order %}<td>{{ res.sessions[key].windows[wk].up }}</td>{% endfor %}</tr>
+          <tr><th>下落日数</th>{% for key in order %}<td>{{ res.sessions[key].windows[wk].down }}</td>{% endfor %}</tr>
+          <tr><th>勝率（買い）</th>{% for key in order %}{% set x = res.sessions[key].windows[wk] %}<td class="{{ 'buy' if x.win > 0.5 else 'sell' }}">{{ x.win|pct0 }}</td>{% endfor %}</tr>
+          <tr><th>平均変動幅</th>{% for key in order %}<td>{{ '%.1f'|format(res.sessions[key].windows[wk].avg_move) }}</td>{% endfor %}</tr>
+          <tr><th>累積損益</th>{% for key in order %}{% set x = res.sessions[key].windows[wk] %}<td class="{{ 'buy' if x.cum > 0 else 'sell' }}">{{ x.cum|pips(0) }}</td>{% endfor %}</tr>
+          <tr><th>期待値／日</th>{% for key in order %}{% set x = res.sessions[key].windows[wk] %}<td class="{{ 'buy' if x.exp > 0 else 'sell' }}">{{ x.exp|pips }}</td>{% endfor %}</tr>
+          <tr><th>現在の連続</th>{% for key in order %}{% set x = res.sessions[key].windows[wk] %}<td class="{{ 'buy' if x.streak > 0 else 'sell' if x.streak < 0 else '' }}">{% if x.streak > 0 %}{{ x.streak }}日上昇{% elif x.streak < 0 %}{{ -x.streak }}日下落{% else %}—{% endif %}</td>{% endfor %}</tr>
+          <tr><th>最長の連続上昇</th>{% for key in order %}<td>{{ res.sessions[key].windows[wk].max_up }}日</td>{% endfor %}</tr>
+          <tr><th>最長の連続下落</th>{% for key in order %}<td>{{ res.sessions[key].windows[wk].max_down }}日</td>{% endfor %}</tr>
+        </tbody>
+      </table>
+    </div>
+    {% endfor %}
+    <p class="hint">単位はpips（1pips＝1銭）。<b>勝率</b>＝その時間帯に上昇した日の割合（買い持ちの勝率。売りの勝率は100%から引いた値）。<b>平均変動幅</b>＝1日の動きの大きさ（上昇・下落を問わない平均）。<b>累積損益／期待値</b>＝その時間帯だけ買い持ちした場合の合計・1日あたり平均。マイナスは売りが有利だったという意味です。</p>
+  </section>
+
+  <section class="card">
+    <h2>曜日別（全期間）</h2>
+    <p class="hint">市場×曜日の傾向。NYは開始した曜日の記録です。◎は偶然とは言いにくい偏り（統計的に有意）、○は弱い偏りです。各曜日{{ res.sessions[order[0]].weekdays[0].n }}回前後のデータです（日がたつほど増えます）。</p>
+    {% for key in order %}{% set v = res.sessions[key] %}
+    <h3>{{ v.name }}</h3>
+    <div class="table-wrap"><table class="rbt fxt wd">
+      <thead><tr><th></th><th>勝率</th><th>平均<br>変動幅</th><th>期待値</th><th>傾向</th></tr></thead>
+      <tbody>{% for d in v.weekdays %}{% if d.n %}
+        <tr class="{{ 'today' if today_wd == loop.index0 else '' }}"><th>{{ d.weekday }}曜{{ v.name }}</th>
+          <td class="{{ 'buy' if d.win > 0.5 else 'sell' }}">{{ d.win|pct0 }}</td><td>{{ '%.1f'|format(d.avg_move) }}</td>
+          <td class="{{ 'buy' if d.exp > 0 else 'sell' }}">{{ d.exp|pips }}</td>
+          <td>{% if d.t >= 2 %}<span class="chip buy">◎買い</span>{% elif d.t <= -2 %}<span class="chip sell">◎売り</span>{% elif d.t >= 1 %}<span class="chip buy">○買い</span>{% elif d.t <= -1 %}<span class="chip sell">○売り</span>{% else %}—{% endif %}</td></tr>
+      {% endif %}{% endfor %}</tbody>
+    </table></div>
+    {% endfor %}
+  </section>
+
+  <section class="card">
+    <h2>見方・注意</h2>
+    <ul class="caveats">
+      <li><b>時間帯の区切り（日本時間）</b>：東京 09:00〜15:30／欧州 15:30〜22:00／NY 22:00〜翌06:00。各時間帯の「始値→終値」の動きを、その時間帯の参加者の買い・売りの結果として見ています。</li>
+      <li><b>スコア</b>：直近{{ res.recent_days }}営業日の<b>勝率・平均pips・期待値・累積損益・連続記録</b>を総合した指数です（それぞれ普段の動きの大きさで割って比べているので、単純な勝率順ではありません）。大きいほど片方に偏っています。<b>スコアが30未満は偶然の範囲</b>で「中立」、30〜50は「やや優勢」、50〜70は「優勢」、70以上は「強い優勢」です（値動きがまったくの偶然でも、20日の短い期間では50以上が2割ほど出ます。数日のうちに入れ替わることもあります）。</li>
+      <li><b>総合判定</b>：3つの市場の指数を、各市場の普段の動きの大きさで重みづけして合算しています。</li>
+      <li><b>データ</b>：Yahoo Finance（JPY=X）の1時間足。毎日の更新でためていくため、期間は日がたつほど長くなります（現在 {{ res.period.start }}〜{{ res.period.end }}、{{ res.n_days }}営業日）。1時間足のため、15:30は前後の足を補間した価格で代用しています。</li>
+      <li>スプレッド・スリッページは含みません。<b>過去の傾向は将来を保証しません。</b>投資判断はご自身で行ってください。</li>
+    </ul>
+  </section>
+  {% endif %}
+</main>
+<footer class="foot"><p>投資判断は自己責任でお願いします。</p></footer>
+<script>
+var btn=document.getElementById('themeBtn');
+function isDark(){var t=document.documentElement.getAttribute('data-theme');if(t)return t==='dark';return window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches;}
+btn.addEventListener('click',function(){var n=isDark()?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}});
+document.querySelectorAll('.tabs .tab').forEach(function(b){b.addEventListener('click',function(){
+  document.querySelectorAll('.tabs .tab').forEach(function(x){x.classList.toggle('on',x===b);});
+  document.querySelectorAll('.fx-win').forEach(function(w){w.hidden=(w.getAttribute('data-w')!==b.getAttribute('data-w'));});});});
+</script>
+</body>
+</html>

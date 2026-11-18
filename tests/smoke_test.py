@@ -769,6 +769,96 @@ def test_quality_first():
     print("ok  良い企業優先（減益除外・増益加点・高値突破・保有のしやすさ・配点合計100）")
 
 
+def test_fx():
+    """ドル円の市場参加者分析：セッション別の損益・統計・スコア・判定・ページ。"""
+    import copy
+    import tempfile
+    from datetime import datetime
+    from src import fx
+    from src.config import JST
+    cfg = load_config()
+    # ① 値動きが分かっている人工データ：東京+0.10円/h・欧州-0.20円/h・NY+0.05円/h（線形）
+    def linear(days: int = 12) -> pd.DataFrame:
+        idx = pd.date_range("2026-10-05 00:00", periods=days * 24, freq="h", tz=JST)
+        idx = idx[[not (t.weekday() >= 5) for t in idx]]
+        rows, px = [], 150.0
+        for t in idx:
+            hm = t.hour + t.minute / 60
+            d = 0.10 if 9 <= hm < 15.5 else (-0.20 if 15.5 <= hm < 22 else 0.05) if True else 0
+            if 15 <= hm < 16:                                   # 15:30をまたぐ足は半分ずつ
+                d = 0.5 * 0.10 + 0.5 * -0.20
+            rows.append((px, px + max(d, 0) + 0.01, px + min(d, 0) - 0.01, px + d)); px += d
+        return pd.DataFrame(rows, index=idx, columns=["Open", "High", "Low", "Close"])
+    b = linear()
+    ss = fx.build_sessions(b, cfg)
+    one = ss[(ss["date"] == pd.Timestamp("2026-10-07").date())].set_index("session")
+    # 15:30をまたぐ足（15:00〜16:00）は、始値→終値の中間で補間する（この足は全体で-0.05円 → 15:30時点は-0.025円）
+    assert abs(one.loc["tokyo", "pips"] - 57.5) < 0.5 and abs(one.loc["europe", "pips"] + 122.5) < 0.5, one["pips"].to_dict()
+    assert abs(one.loc["ny", "pips"] - 40.0) < 0.5, "NYは22:00〜翌06:00（8時間）"
+    assert one.loc["tokyo", "clv"] > 0.9 and one.loc["europe", "clv"] < 0.1, "上がり続ければ高値引け・下がり続ければ安値引け"
+    assert ss["weekday"].max() <= 4 and set(ss[~ss["complete"]]["date"]) <= {ss["date"].max()}, "終わっていないのは最終日だけ"
+    # 進行中のセッション（足が途中まで）は集計に入れない
+    part = fx.build_sessions(b[b.index <= pd.Timestamp("2026-10-08 23:00", tz=JST)], cfg)
+    assert (~part["complete"]).sum() >= 1 and part[~part["complete"]]["session"].iloc[-1] == "ny"
+    assert fx.price_at(b, pd.Timestamp("2026-10-07 15:30", tz=JST)) is not None and fx.price_at(b, pd.Timestamp("2026-10-10 12:00", tz=JST)) is None
+    # ② 連続・統計
+    assert fx.streak(pd.Series([-1, 2, 3, 4])) == 3 and fx.streak(pd.Series([1, -2, -3])) == -2 and fx.streak(pd.Series([1, 0])) == 0
+    assert fx.max_streaks(pd.Series([1, 1, -1, -1, -1, 1])) == (2, 3)
+    st = fx.stats(pd.Series([10.0, -20.0, 30.0, -10.0]))
+    assert st["up"] == 2 and st["down"] == 2 and st["win"] == 0.5 and st["cum"] == 10 and abs(st["exp"] - 2.5) < 1e-9 and st["avg_move"] == 17.5
+    assert abs(st["pf"] - 40 / 30) < 1e-9
+    # ③ スコア：偏りがあれば強く、偶然なら弱く。向きは符号で決まる
+    rng = np.random.default_rng(5)
+    base_s = pd.Series(rng.normal(0, 15, 400))
+    sell = pd.Series(-abs(rng.normal(12, 5, 20)))
+    buy = pd.Series(abs(rng.normal(12, 5, 20)))
+    ss_, sb_ = fx.score_session(sell, base_s, cfg), fx.score_session(buy, base_s, cfg)
+    assert ss_["s"] < -0.8 and sb_["s"] > 0.8 and fx.judge(ss_["s"], cfg)[0] == -1 and fx.judge(sb_["s"], cfg)[2] == "強い買い優勢"
+    assert fx.judge(0.1, cfg)[0] == 0 and fx.judge(0.4, cfg)[2] == "やや買い優勢" and fx.judge(-0.6, cfg)[2] == "売り優勢"
+    assert not fx.score_session(sell.iloc[:5], base_s, cfg)["ok"], "日数が少ないときは判定しない"
+    noise = [abs(fx.score_session(pd.Series(rng.normal(0, 15, 20)), base_s, cfg)["s"]) for _ in range(600)]
+    assert np.mean([x >= 0.7 for x in noise]) < 0.10 and np.mean([x < 0.3 for x in noise]) > 0.35, "偶然の値動きで『強い』を出しすぎない"
+    # 勝率だけでなく大きさも見る：同じ勝率でも、負け日が大きければ弱い
+    a = pd.Series([5.0] * 14 + [-5.0] * 6)
+    c_ = pd.Series([5.0] * 14 + [-60.0] * 6)
+    assert fx.score_session(a, base_s, cfg)["s"] > fx.score_session(c_, base_s, cfg)["s"] + 0.3
+    # ④ 全体の分析（デモの人工データ：東京買い・欧州売り・NY買い、直近は欧州が強い売り）
+    res = fx.analyze(fx.build_sessions(fx.demo_bars(), cfg), cfg)
+    assert res["ok"] and res["ranking"][0]["key"] == "europe" and res["ranking"][0]["side"] == -1 and res["ranking"][0]["score"] >= 70
+    assert [r["rank"] for r in res["ranking"]] == [1, 2, 3] and res["split"] and res["leader"]["name"] == "欧州"
+    eu = res["sessions"]["europe"]
+    assert eu["trend"]["verdict"] == "欧州勢売り優勢" and eu["trend"]["streak"] <= -5 and len(eu["weekdays"]) == 5 and all(w["n"] > 20 for w in eu["weekdays"])
+    assert eu["windows"]["all"]["n"] > eu["windows"]["mid"]["n"] > eu["windows"]["recent"]["n"] and res["net"]["headline"].startswith("いまは")
+    # ⑤ 蓄積と、取得失敗時の継続
+    with tempfile.TemporaryDirectory() as td:
+        c2 = copy.deepcopy(cfg)
+        c2["fx"]["store"] = str(Path(td) / "h.csv")
+        full = fx.demo_bars(60)
+        calls = []
+        def dl(tk, period):
+            calls.append(period)
+            return full.iloc[:600] if len(calls) == 1 else full.iloc[400:]
+        bars1, w1 = fx.update_store(c2, dl)
+        bars2, w2 = fx.update_store(c2, dl)
+        assert calls == [cfg["fx"]["first_period"], cfg["fx"]["update_period"]] and w1 is None and w2 is None
+        assert len(bars2) == len(full) and not bars2.index.has_duplicates, "足して重複を除く"
+        def boom(tk, period):
+            raise RuntimeError("接続できません")
+        bars3, w3 = fx.update_store(c2, boom)
+        assert len(bars3) == len(full) and "前回までのデータ" in w3
+        e_bars, e_w = fx.update_store(dict(c2, fx=dict(c2["fx"], store=str(Path(td) / "none.csv"))), boom)
+        assert e_bars.empty and e_w
+    # ⑥ ページ
+    with tempfile.TemporaryDirectory() as td:
+        ctx = fx.page_context(res, None, fx.demo_bars().index[-1], datetime(2026, 11, 18, 7, 15, tzinfo=JST), True)
+        html = fx.write_page(ctx, fx.build_sessions(fx.demo_bars(), cfg), Path(td) / "fx").read_text(encoding="utf-8")
+        for w in ("市場勢力図", "売りスコア", "買いスコア", "ランキング", "曜日別", "累積pips", "月曜欧州", "欧州勢売り優勢", "見方・注意", "デモ表示"):
+            assert w in html, w
+        bad = fx.page_context({"ok": False, "reason": "テスト"}, "取得失敗", None, datetime(2026, 11, 18, 7, 15, tzinfo=JST), False)
+        assert "まだ分析できません" in fx.write_page(bad, pd.DataFrame(), Path(td) / "fx2").read_text(encoding="utf-8")
+    print("ok  ドル円分析（セッション損益・統計・スコア・偶然の値動きでの誤判定・蓄積と失敗時の継続・ページ）")
+
+
 def test_tracking():
     import tempfile
     from pathlib import Path
@@ -889,6 +979,6 @@ def test_end_to_end():
 if __name__ == "__main__":
     for fn in (test_config_and_weights, test_momentum_points, test_no_lookahead, test_events,
                test_dividend_and_exclusion, test_expected_and_metrics, test_text, test_pullback, test_tdnet, test_accuracy_21, test_holdings,
-               test_excluded_csv, test_data_fixes, test_validation, test_stance, test_premarket, test_lead, test_tracking, test_rankband, test_quality_first, test_end_to_end):
+               test_excluded_csv, test_data_fixes, test_validation, test_stance, test_premarket, test_lead, test_tracking, test_rankband, test_quality_first, test_fx, test_end_to_end):
         fn()
     print("\nALL OK")

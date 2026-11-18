@@ -354,3 +354,33 @@ figure{margin:10px 0}figcaption{font-size:.82rem;color:var(--sub);margin-bottom:
 .barchart .ln{stroke:var(--accent)}.barchart .ln.s1{stroke:var(--green)}.barchart .ln.s2{stroke:var(--yellow)}.barchart .ln.s3{stroke:var(--red)}
 .legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.78rem;color:var(--sub)}.legend .lg::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;background:var(--accent)}
 .legend .lg.s1::before{background:var(--gray)}.legend .lg.s2::before{background:var(--yellow)}.legend .lg.s3::before{background:var(--red)}
+
+/* ドル円 市場参加者分析（fx/） */
+.fxpage .buy{--c:var(--green)}.fxpage .sell{--c:var(--red)}.fxpage .neu{--c:var(--gray)}
+.fxpage td.buy,.fxpage dd.buy,.fxpage b.buy{color:var(--green)}.fxpage td.sell,.fxpage dd.sell,.fxpage b.sell{color:var(--red)}
+.fx-hero{border-left:6px solid var(--c);text-align:center}
+.fx-kicker{margin:0;font-size:.8rem;color:var(--sub)}
+.fx-headline{margin:.2em 0;font-size:1.9rem;color:var(--c)}.fx-headline .ar{font-size:1.4rem}
+.fx-sub{margin:.2em 0;font-size:.95rem}.fx-note{margin:.6em 0 0;font-size:.9rem;color:var(--sub)}
+.meter{display:flex;align-items:center;gap:6px;margin:8px 0;font-size:.72rem;color:var(--sub)}
+.meter .track{position:relative;flex:1;height:12px;border-radius:6px;background:var(--line);overflow:hidden}
+.meter .mid{position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--sub);opacity:.6;z-index:2}
+.meter .fill{position:absolute;top:0;bottom:0}.meter .fill.buy{background:var(--green)}.meter .fill.sell{background:var(--red)}
+.fx-grid{display:grid;grid-template-columns:1fr;gap:12px}@media(min-width:760px){.fx-grid{grid-template-columns:repeat(3,1fr)}}
+.fx-card{border:1px solid var(--line);border-top:5px solid var(--c);border-radius:12px;padding:12px}
+.fx-card header{display:flex;justify-content:space-between;align-items:baseline}.fx-card h3{margin:0;font-size:1.05rem}.fx-card .tm{font-size:.72rem;color:var(--sub)}
+.fx-score{margin:.4em 0 0;font-size:1.05rem;color:var(--c)}.fx-score b{font-size:2rem;margin-left:.2em}
+.fx-label{margin:.1em 0}.chip{display:inline-block;padding:1px 10px;border-radius:999px;font-size:.78rem;font-weight:700;border:1px solid var(--c);color:var(--c)}
+.chip.strong{background:var(--c);color:#fff}
+.fx-trend{margin:.5em 0;padding:8px;border-radius:8px;background:var(--line)}.fx-trend p{margin:.1em 0;font-size:.88rem}.fx-trend .t2{font-weight:600}
+.fx-bars small{display:block;color:var(--sub);font-size:.7rem}
+.fxbars .zero,.fxcum .zero{stroke:var(--sub);stroke-width:1;opacity:.5}.fxbars rect.up{fill:var(--green)}.fxbars rect.dn{fill:var(--red)}
+.fxcum .tick{fill:var(--sub);font-size:9px}.fxcum .ln{stroke:var(--accent)}.fxcum .ln.s1{stroke:var(--red)}.fxcum .ln.s2{stroke:var(--green)}
+.fx-facts{margin:.5em 0 0;display:grid;gap:4px}.fx-facts div{display:flex;justify-content:space-between;font-size:.85rem}.fx-facts dt{color:var(--sub)}.fx-facts dd{margin:0;font-weight:700}.fx-facts small{font-weight:400;color:var(--sub)}
+.fx-rank{list-style:none;margin:0;padding:0}.fx-rank li{display:grid;grid-template-columns:2.6em 3.2em 4.5em 2.2em 1fr;gap:6px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--line)}
+.fx-rank .no{font-weight:700}.fx-rank .sd{color:var(--c);font-weight:700}.fx-rank .sc{font-weight:700;text-align:right}.fx-rank .lb{font-size:.78rem;color:var(--sub)}
+.tabs{display:flex;gap:6px;margin:6px 0}.tab{border:1px solid var(--line);background:transparent;color:inherit;border-radius:999px;padding:5px 12px;font-size:.85rem}.tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.fxt.wd tr.today th{box-shadow:inset 4px 0 0 var(--accent)}
+
+.fxpage .fxcum .ln.s0,.fxpage .legend .lg.s0::before{stroke:#2f6fed;background:#2f6fed}.fxpage .fxcum .ln.s1,.fxpage .legend .lg.s1::before{stroke:#e08a00;background:#e08a00}.fxpage .fxcum .ln.s2,.fxpage .legend .lg.s2::before{stroke:#8e44ad;background:#8e44ad}
+.fxt.wd{font-size:.88rem}.fxt.wd .chip{padding:0 7px;font-size:.72rem;white-space:nowrap}.fxt.wd th,.fxt.wd td{padding-left:4px;padding-right:4px}
