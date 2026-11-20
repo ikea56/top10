@@ -105,6 +105,29 @@
   </section>
   {% endif %}
 
+  {% set et = et %}
+  <section class="card" id="entrytime">
+    <h2>エントリー時刻別検証（いつ買うのが有利か）</h2>
+    {% if not et or not et.ok %}
+    <p class="hint">{{ (et.reason if et and et.reason else 'まだ結果がありません。') }}</p>
+    {% else %}
+    <p class="hint">同じ押し目トップ銘柄を、<b>買う時刻だけ変えて</b>比べます（売却は同じ日の終値）。コスト{{ cost_pct }}%込み。直近の5分足（Yahooは約60日分）で計算し、週次バックテストのたびに件数が増えます。</p>
+    <p><b>{{ et.conclusion }}</b></p>
+    <div class="table-wrap"><table class="rbt">
+      <thead><tr><th>買う時刻</th>{% for h in et.horizons %}<th>{{ h }}営業日後<br>平均</th><th>勝率</th>{% endfor %}</tr></thead>
+      <tbody>
+      {% for k, lab in (('prev','① 前日終値'),('open','② 当日寄付き'),('p1000','③ 10:00'),('pam','④ 前場引け')) %}
+      <tr><th scope="row">{{ lab }}{% for h in et.horizons %}{% set r = et.rows[h|string] %}{% if r and r.best == k %} ★{% endif %}{% endfor %}</th>
+        {% for h in et.horizons %}{% set r = et.rows[h|string] %}
+          {% if r %}{% set x = r.types[k] %}<td class="{{ 'pos' if x.mean > 0 else 'neg' }}">{{ (x.mean*100)|pct }}</td><td>{{ '%.0f'|format(x.win*100) }}%<small>（{{ x.n }}件{% if r.reference %}・参考{% endif %}）</small></td>{% else %}<td class="na">—</td><td class="na">—</td>{% endif %}
+        {% endfor %}</tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    <p class="hint">★＝平均騰落率が最も高い買い時刻。<b>① 前日終値は「前日の引けで買えていた」場合の理論値</b>で、実際には買えません（比較の基準です）。件数が少ない間は偶然に左右されるため、結論を急がず数週間ためてから判断してください。ランキングは技術点のみの再現で、画面の総合点とは一致しません。</p>
+    {% endif %}
+  </section>
+
   {% set lv = rb_live %}
   <section class="card">
     <h2>実運用の記録（実際に載った順位・総合点での結果）</h2>

@@ -294,6 +294,22 @@ def run_replay(panel: Panel, bench: dict[str, pd.DataFrame], sectors: pd.Series,
         log.warning("順位別・スコア帯別の分析に失敗しました: %s", e)
         summary["rankband"] = {"ok": False, "reason": f"分析の計算に失敗しました（{e}）"}
     del rb_recs
+    try:                                   # エントリー時刻別検証：直近の毎営業日の押し目トップを、5分足で「買う時刻」別に比べる
+        from . import entrytime
+        k = int(cfg["entrytime"]["recent_days"])
+        recent = []
+        for i in range(max(first, len(c) - 1 - k), len(c) - 1):
+            snap = snapshot(f, i)
+            s = snap[scoring.eligible_mask(snap, flt)]
+            if s.empty:
+                continue
+            pbr = pullback.score_technical(s, regime.iloc[i], bool(nikkei.iloc[i]), cfg, bool(below200.iloc[i]))
+            o2 = pd.DataFrame({"s": pbr["pb_tech_scaled"], "vr": s["vol_cont"]}).query("s > 0").sort_values(["s", "vr"], ascending=[False, True])
+            recent += [(c.index[i], code) for code in o2.index[:top_n]]
+        summary["entrytime"] = entrytime.analyze(recent, panel, cfg)
+    except Exception as e:  # noqa: BLE001
+        log.warning("エントリー時刻別検証に失敗しました: %s", e)
+        summary["entrytime"] = {"ok": False, "reason": f"計算に失敗しました（{e}）"}
     for r in records:           # メモリ解放
         r.pop("x", None)
     return summary

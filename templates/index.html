@@ -111,6 +111,8 @@
   <p class="hint">前回のランキングとの比較は、記録がたまる明日以降の更新から表示されます。</p>
   {% endif %}
 
+  <section class="e10-strip" id="e10Strip" data-ranking-date="{{ data_date_iso }}" hidden></section>
+
   {% for c in cards %}
   {% set rc = c.rank_change %}
   <article class="card stock {% if c.rank <= 3 %}top top{{ c.rank }}{% endif %}{% if rc and rc.kind == 'new' %} is-new{% endif %}" id="rank-{{ c.rank }}">
@@ -150,6 +152,7 @@
       {% if c.down_pen %}− 下方修正{{ c.down_pen }}{% endif %}
       {% if c.penalty %}<b>※急騰・決算接近などの減点 −{{ c.penalty }}点、地合い {{ '%+d'|format(c.market_pts) }}点を反映済み</b>{% elif c.market_pts < 0 %}<b>※地合いの減点 {{ c.market_pts }}点を反映済み</b>{% endif %}</p>
     {% if c.label_note %}<p class="note">※ {{ c.label_note }}</p>{% endif %}
+    <div class="e10" data-code="{{ c.code }}"><span class="e10-title">⏰ 10時判定</span> <span class="e10-body e10-wait">10:30までに自動で追記されます（順位は変わりません）</span></div>
 
     <div class="scores" aria-label="押し目スコアの内訳">
       {% for key, name in (('trend','長期トレンド'),('drawdown','高値からの調整'),('ma50','50日線に接近'),('volume','出来高の収縮'),('strength','相対力・反発'),('hold','保有のしやすさ'),('quality','業績・還元'),('market','地合い')) %}
@@ -441,6 +444,7 @@
   </section>
 
   <footer class="foot">
+<details class="timings" id="timings" hidden><summary>処理時間（前回の更新）</summary><div id="timingsBody"></div></details>
     <p>※ 本サイトは情報提供のみを目的とし、投資の勧誘・助言ではありません。株価の将来を予想するものではなく、過去のデータと企業の開示から「好材料があり、押し目の形が良い」銘柄を機械的に抽出しています。
       株価は下がることがあり、元本を失う可能性があります。最終的な売買は必ずご自身の判断で行ってください。データは無料の公開データ（Yahoo!ファイナンス等）で、遅延・誤りが含まれる場合があります。</p>
   </footer>
@@ -467,5 +471,6 @@ function toggleTV(b){
 </script>
 <script>window.HOLDINGS_CFG = {{ {'endpoint': hold.endpoint, 'statusUrl': 'holdings_status.enc.json', 'namesUrl': 'names.json'}|tojson }};</script>
 <script src="holdings.js" defer></script>
+<script src="entry.js" defer></script>
 </body>
 </html>

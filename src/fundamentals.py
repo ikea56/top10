@@ -178,6 +178,23 @@ def exclusion_reason(fund: Fund, fc: dict) -> str | None:
     return None
 
 
+def cache_valid(hit: dict[str, Any], today: date, cache_days: int, refresh_days: int = 5) -> bool:
+    """キャッシュを使ってよいか。ROE・財務・配当履歴・時価総額は日々は変わらないため cache_days（30日）まで使い回す。
+    ただし決算発表日を過ぎたら、新しい決算が反映されるまで（発表日の翌日〜refresh_days日後に1回）取り直す。"""
+    fetched = date.fromisoformat(hit["fetched"])
+    if (today - fetched).days > cache_days:
+        return False
+    ne = (hit.get("data") or {}).get("next_earnings")
+    if ne:
+        try:
+            nd = date.fromisoformat(str(ne)[:10])
+        except ValueError:
+            return True
+        if nd < today and fetched <= nd + timedelta(days=1):       # 決算発表より前に取った古いデータ
+            return False
+    return True
+
+
 class FundamentalsStore:
     """取得済みデータを data/fundamentals_cache.json に保存して、同じ銘柄を何度も取りに行かない。"""
 
@@ -194,7 +211,7 @@ class FundamentalsStore:
         today = date.today()
         hit = self.cache.get(code)
         if hit and hit["data"].get("v") == SCHEMA_VERSION:
-            if (today - date.fromisoformat(hit["fetched"])).days <= self.cfg["cache_days"]:
+            if cache_valid(hit, today, int(self.cfg["cache_days"]), int(self.cfg.get("earnings_refresh_days", 5))):
                 return hit["data"]
         try:
             data = fetch_one(code)
@@ -207,7 +224,7 @@ class FundamentalsStore:
         return data
 
     def save(self) -> None:
-        limit = date.today() - timedelta(days=30)
+        limit = date.today() - timedelta(days=int(self.cfg["cache_days"]) + 7)
         self.cache = {k: v for k, v in self.cache.items() if date.fromisoformat(v["fetched"]) >= limit}
         try:
             CACHE.write_text(json.dumps(self.cache, ensure_ascii=False), encoding="utf-8")

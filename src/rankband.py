@@ -278,4 +278,4 @@ def page_ctx(summary: dict | None, tracking_result: dict | None, cfg: Any) -> di
             ch[f"{key}_avg"] = bars_svg(names, [(f"{h}日後", [pc(g, h) for g in rows]) for h in hs])
             ch[f"{key}_win"] = bars_svg(names, [(f"{h}日後", [wn(g, h) for g in rows]) for h in hs], base=50.0)
         ch["equity"] = lines_svg([(g["name"], g["equity"]) for g in v["portfolios"]])
-    return {"rb_replay": v, "rb_live": live, "ch": ch, "rcfg": cfg["rankband"], "cost_pct": cfg["backtest"]["cost_pct"]}
+    return {"et": (summary or {}).get("entrytime"), "rb_replay": v, "rb_live": live, "ch": ch, "rcfg": cfg["rankband"], "cost_pct": cfg["backtest"]["cost_pct"]}

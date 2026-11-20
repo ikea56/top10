@@ -384,3 +384,21 @@ figure{margin:10px 0}figcaption{font-size:.82rem;color:var(--sub);margin-bottom:
 
 .fxpage .fxcum .ln.s0,.fxpage .legend .lg.s0::before{stroke:#2f6fed;background:#2f6fed}.fxpage .fxcum .ln.s1,.fxpage .legend .lg.s1::before{stroke:#e08a00;background:#e08a00}.fxpage .fxcum .ln.s2,.fxpage .legend .lg.s2::before{stroke:#8e44ad;background:#8e44ad}
 .fxt.wd{font-size:.88rem}.fxt.wd .chip{padding:0 7px;font-size:.72rem;white-space:nowrap}.fxt.wd th,.fxt.wd td{padding-left:4px;padding-right:4px}
+
+/* ---- 10時エントリー判定 ---- */
+.e10{margin:.7em 0;padding:.6em .8em;border-radius:10px;border:1px solid var(--line,#ddd);font-size:.92rem}
+.e10-title{font-weight:700}
+.e10-wait{color:var(--muted,#777);font-size:.85rem}
+.e10-badge{display:inline-block;margin-left:.4em;padding:.1em .7em;border-radius:999px;font-weight:700}
+.e10-badge.e10-go{background:var(--green-bg);color:var(--green);border:1px solid var(--green)}
+.e10-badge.e10-wait{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow)}
+.e10-badge.e10-skip{background:var(--red-bg);color:var(--red);border:1px solid var(--red)}
+.e10-badge.e10-na{border:1px solid var(--line,#ccc)}
+.e10-lines{display:flex;flex-wrap:wrap;gap:.2em 1em;margin-top:.4em}
+.e10-why{margin:.3em 0 0;padding-left:1.2em;font-size:.85rem}
+.e10-strip,.e10-strip .hint{font-size:.9rem}
+.e10-strip{margin:1em 0;padding:.8em 1em;border:2px solid var(--line,#ccc);border-radius:12px}
+.e10-counts{display:flex;flex-wrap:wrap;gap:.3em 1em;margin:.4em 0;font-weight:700}
+.e10-mis{display:flex;flex-wrap:wrap;gap:.3em .6em;margin-top:.3em}
+.e10-mi{padding:.1em .6em;border-radius:999px;border:1px solid var(--line,#ccc);font-size:.82rem}
+.e10-mi.weak{color:var(--red)}.e10-mi.strong{color:var(--green)}

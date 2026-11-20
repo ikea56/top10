@@ -32,6 +32,7 @@ def render_site(ctx: dict[str, Any], out_dir: Path | None = None) -> Path:
     shutil.copy(ROOT / "static" / "style.css", out / "style.css")
     shutil.copy(ROOT / "static" / "holdings.js", out / "holdings.js")
     shutil.copy(ROOT / "static" / "tracking.js", out / "tracking.js")
+    shutil.copy(ROOT / "static" / "entry.js", out / "entry.js")
     if ctx.get("tr") is not None:
         from . import tracking as T
         tr = ctx["tr"]

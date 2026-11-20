@@ -769,6 +769,100 @@ def test_quality_first():
     print("ok  良い企業優先（減益除外・増益加点・高値突破・保有のしやすさ・配点合計100）")
 
 
+def test_entry10():
+    """㉖ 10時判定・エントリー時刻別検証・業績キャッシュの規則。"""
+    from datetime import date, datetime, time as dtime
+    from src import entry10 as E, entrytime as ET, fundamentals as FU
+    cfg = load_config()
+    J = lambda g, r, v, m="neutral": E.judge(g, r, v, m, cfg)["key"]      # noqa: E731
+    assert J(0.4, 0.3, 1.2) == "go"
+    assert J(3.5, 0.0, 1.0) == "skip" and J(0.5, 3.2, 1.0) == "skip" and J(1.0, 1.5, 3.0) == "skip"
+    assert J(2.0, 2.8, 1.0) == "skip", "前日終値から+4.8%上昇済み"
+    assert J(0.2, -0.9, 0.5) == "wait" and J(0.2, 0.2, 0.3) == "wait" and J(-2.5, 0.0, 1.0) == "wait"
+    assert J(0.3, 0.2, 1.0, "weak") == "wait", "市場が弱いと🟢は🟡に下がる"
+    assert J(0.3, 0.2, 1.0, "weak") != "skip" and J(0.3, -3.0, 1.0) == "skip"
+    assert J(None, None, 1.0) == "na" and J(0.3, 0.2, None) == "wait"
+    # 5分足 → 指標
+    JST = E.JST
+
+    def bars(day, o, closes, vol):
+        idx = pd.date_range(f"{day} 09:00", periods=len(closes), freq="5min", tz=JST)
+        return pd.DataFrame({"Open": [o] + closes[:-1], "High": closes, "Low": closes, "Close": closes, "Volume": [vol] * len(closes)}, index=idx)
+    hist = pd.concat([bars(f"2026-11-{d:02d}", 100.0, [100.0] * 24, 1000) for d in (9, 10, 11, 12, 13, 16)])
+    today = bars("2026-11-20", 101.0, [101.0 + 0.05 * k for k in range(24)], 1500)
+    df = pd.concat([hist, today])
+    it = E.evaluate_stock("1234", df, date(2026, 11, 20), 100.0, "neutral", cfg)
+    assert abs(it["gap"] - 1.0) < 1e-6 and it["key"] in ("go", "wait"), it
+    assert abs(it["vr"] - 1.5) < 1e-6, it           # 12本×1500 ÷ 12本×1000
+    assert it["asof"] == "10:00" and it["complete"]
+    assert E.session_stats(df, date(2026, 11, 20))["p_cut"] == today["Close"].iloc[11], "10:00の値は9:55の足の終値"
+    assert E.evaluate_stock("1234", None, date(2026, 11, 20), 100.0, "neutral", cfg)["key"] == "na"
+    # 市場環境
+    weak = E.market_state([{"key": "a", "label": "x", "pct": -1.5, "futures": True}, {"key": "b", "label": "y", "pct": -1.0, "futures": False}], cfg)
+    assert weak["key"] == "weak" and E.market_state([], cfg)["key"] == "unknown"
+    # build / entry.json
+    latest = {"data_date": "2026-11-19", "picks": [{"rank": 1, "code": "1234", "close": 100.0}, {"rank": 2, "code": "5678", "close": 50.0}]}
+
+    def dl(tks, period):
+        out = {}
+        for t in tks:
+            if t == "1234.T":
+                out[t] = df
+            elif t in ("1306.T", "^N225", "2516.T"):
+                out[t] = pd.concat([bars("2026-11-19", 100.0, [100.0] * 24, 1), bars("2026-11-20", 100.0, [100.2] * 24, 1)])
+        return out
+    res = E.build(cfg, latest, datetime(2026, 11, 20, 10, 25, tzinfo=JST), dl, lambda tk, p, i: pd.Series(dtype=float))
+    assert res["status"] == "ok" and res["items"]["5678"]["key"] == "na" and res["items"]["1234"]["rank"] == 1
+    assert res["trade_date"] == "2026-11-20" and res["ranking_data_date"] == "2026-11-19" and res["market"]["key"] in ("neutral", "strong")
+    assert E.build(cfg, latest, datetime(2026, 11, 21, 10, 25, tzinfo=JST), lambda t, p: {}, lambda *a: pd.Series(dtype=float))["status"] == "no_data"
+    # ランキングの並びは判定で変わらない（items は順位をそのまま持つだけ）
+    assert [res["items"][c]["rank"] for c in ("1234", "5678")] == [1, 2]
+    # エントリー時刻別
+    idx = pd.bdate_range("2026-09-01", periods=60)
+    rng = np.random.default_rng(5)
+    close = pd.DataFrame({"1234.T": 100 * np.cumprod(1 + rng.normal(0.002, 0.01, 60))}, index=idx)
+    opn = close * 0.999
+    rec = pd.DataFrame([{"pick_date": idx[k].strftime("%Y-%m-%d"), "code": "1234.T", "prev_close": float(close.iloc[k, 0]),
+                         "open": float(opn.iloc[k + 1, 0]), "p1000": float(opn.iloc[k + 1, 0]) * 1.002,
+                         "pam": float(opn.iloc[k + 1, 0]) * 1.004} for k in range(5, 35)])
+    r = ET.compute(rec, close, [5, 20], 0.002, 30, 2.0)
+    assert r["ok"] and r["rows"]["5"]["n"] == 30 and not r["rows"]["5"]["reference"]
+    assert r["rows"]["5"]["types"]["pam"]["mean"] < r["rows"]["5"]["types"]["open"]["mean"], "後で買うほど（高く買うので）平均は下がる"
+    assert r["rows"]["5"]["best"] in ("prev", "open") and "最も高い" in r["conclusion"]
+    assert not ET.compute(pd.DataFrame(columns=ET.COLS), close, [5], 0.002, 30, 2.0)["ok"]
+    merged = ET.merge_store(rec.iloc[:10], rec.iloc[5:15])
+    assert len(merged) == 15
+    # 業績キャッシュ：30日まで使い回し、決算発表を過ぎたら取り直す
+    hit = lambda f, ne: {"fetched": f, "data": {"next_earnings": ne}}      # noqa: E731
+    t = date(2026, 11, 20)
+    assert FU.cache_valid(hit("2026-11-01", None), t, 30) and not FU.cache_valid(hit("2026-10-10", None), t, 30)
+    assert not FU.cache_valid(hit("2026-11-01", "2026-11-12"), t, 30), "決算発表前に取ったデータは決算後に取り直す"
+    assert FU.cache_valid(hit("2026-11-15", "2026-11-12"), t, 30), "決算後に取ったものは使い回す"
+    assert FU.cache_valid(hit("2026-11-01", "2026-12-01"), t, 30)
+    # 待機：期限（10:27）まで待ち、足がそろえば即終了、期限後に起動したら待たない
+    clock = [datetime(2026, 11, 20, 10, 5, tzinfo=JST)]
+    ready_at = datetime(2026, 11, 20, 10, 20, tzinfo=JST)
+
+    def dl_wait(tks, period):
+        return {tks[0]: df} if clock[0] >= ready_at else {}
+    def sl(sec):
+        clock[0] += pd.Timedelta(seconds=sec)
+    assert E.wait_for_bars(cfg, dl_wait, lambda: clock[0], sl) and clock[0] < datetime(2026, 11, 20, 10, 27, tzinfo=JST)
+    clock[0] = datetime(2026, 11, 20, 10, 5, tzinfo=JST)
+    assert not E.wait_for_bars(cfg, lambda t, p: {}, lambda: clock[0], sl) and clock[0].time() >= dtime(10, 27)
+    clock[0] = datetime(2026, 11, 20, 10, 40, tzinfo=JST)
+    assert not E.wait_for_bars(cfg, lambda t, p: {}, lambda: clock[0], sl) and clock[0] == datetime(2026, 11, 20, 10, 40, tzinfo=JST)
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        od = Path(td)
+        assert not E.already_done(od, "2026-11-20")
+        (od / "entry.json").write_text(json.dumps({"trade_date": "2026-11-20", "status": "ok", "items": {"1": {"key": "go", "complete": True}}}), encoding="utf-8")
+        assert E.already_done(od, "2026-11-20") and not E.already_done(od, "2026-11-21")
+        (od / "entry.json").write_text(json.dumps({"trade_date": "2026-11-20", "status": "ok", "items": {"1": {"key": "go", "complete": False}}}), encoding="utf-8")
+        assert not E.already_done(od, "2026-11-20"), "足が不完全なら再実行する"
+    print("ok  ㉖ 10時判定（判定規則・5分足の指標・市場環境・entry.json・時刻別検証・業績キャッシュ）")
+
+
 def test_fx():
     """ドル円の市場参加者分析：セッション別の損益・統計・スコア・判定・ページ。"""
     import copy
@@ -979,6 +1073,6 @@ def test_end_to_end():
 if __name__ == "__main__":
     for fn in (test_config_and_weights, test_momentum_points, test_no_lookahead, test_events,
                test_dividend_and_exclusion, test_expected_and_metrics, test_text, test_pullback, test_tdnet, test_accuracy_21, test_holdings,
-               test_excluded_csv, test_data_fixes, test_validation, test_stance, test_premarket, test_lead, test_tracking, test_rankband, test_quality_first, test_fx, test_end_to_end):
+               test_excluded_csv, test_data_fixes, test_validation, test_stance, test_premarket, test_lead, test_tracking, test_rankband, test_quality_first, test_fx, test_entry10, test_end_to_end):
         fn()
     print("\nALL OK")
