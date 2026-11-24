@@ -946,6 +946,31 @@ def test_negative():
         page = N.write_page(ctx, Path(td_) / "docs" / "negative").read_text(encoding="utf-8")
         assert "空売りの推奨ではありません" in page and "架空製作所" in page and "X（旧Twitter）" in page
     assert "売り" not in "".join(N.summarize("架空製作所", res["9001"]["parts"])), "要約に売買の推奨表現を入れない"
+    # 取引できない銘柄の除外（TOB決定・上場廃止決定・法的整理・取引停止）
+    U = lambda *ts: [r["reason"] for r in N.untradable_reasons("9001", [(t, ago(5), "TDnet") for t in ts])]      # noqa: E731
+    assert U("株式会社○○による当社株式に対する公開買付けに関する意見表明のお知らせ") == ["TOB・MBO・買収が決定"]
+    assert U("完全子会社化に関する株式交換契約締結のお知らせ") and U("MBOの実施及び応募の推奨に関するお知らせ")
+    assert not U("自己株式の公開買付けに関するお知らせ"), "自社株買いのTOBは対象外にしない"
+    assert U("上場廃止の決定に関するお知らせ") == ["上場廃止が決定"] and U("整理銘柄への指定について") == ["上場廃止が決定"]
+    assert U("破産手続開始の決定に関するお知らせ") and not U("上場廃止基準に該当するおそれのある事実の発生について") and not U("通期業績予想の下方修正に関するお知らせ")
+    assert not N.untradable_reasons("9001", [("上場廃止が決定", ago(1), "Googleニュース")]), "報道だけでは上場廃止を断定しない"
+    assert N.untradable_reasons("9001", [("TOBを発表", ago(1), "Googleニュース")]), "TOBは報道でも対象外"
+    idx_ = pd.bdate_range(end=pd.Timestamp(today), periods=8)
+    ok_df = pd.DataFrame({"Close": 100.0, "Volume": 1000.0}, index=idx_)
+    assert N.price_problem(ok_df, today) is None and N.price_problem(None, today) is None
+    assert "止まって" in N.price_problem(ok_df.iloc[:2], today) and "出来高" in N.price_problem(ok_df.assign(Volume=0.0), today)
+    rows_ = [{"code": c, "name": c, "score": 70} for c in ("9001", "9002", "9003", "9004")]
+    tdf = lambda code: [type("D", (), {"title": "公開買付けに関する意見表明", "date": ago(30)})()] if code == "9002" else []      # noqa: E731
+    pf = lambda codes: {c: (ok_df if c != "9003" else ok_df.iloc[:2]) for c in codes}                                      # noqa: E731
+    keep_, out_, st_ = N.filter_tradable(rows_, {}, today, cfg, tdf, pf, {"9004"})
+    assert [r["code"] for r in keep_] == ["9001"] and {x["code"] for x in out_} == {"9002", "9003", "9004"}
+    k2, o2, s2 = N.filter_tradable(rows_, {}, today, cfg, tdf, lambda codes: {}, set())
+    assert s2["price_skipped"] and [r["code"] for r in k2] == ["9001", "9003", "9004"], "株価が取れないときは価格で除外しない"
+    def tdfail(code):
+        raise RuntimeError("x")
+    k3, o3, s3 = N.filter_tradable(rows_, {}, today, cfg, tdfail, None, set())
+    assert len(k3) == 4 and s3["td_fail"] == 4, "TDnet履歴を取れなくても動く（確認不完全として表示）"
+    print("ok  ㉗ 売買できない銘柄の除外")
     print("ok  ㉗ 信用リスク監視（17分類・誤検出の除外・点数・社名結びつけ・RSS/TDnet解析・検出日・ページ）")
 
 

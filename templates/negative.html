@@ -28,6 +28,7 @@
   {% if demo %}<div class="banner warn">⚠️ <b>デモ表示です。</b>架空の会社・架空のニュースです。</div>{% endif %}
   <div class="banner neg-note"><b>このページは「信用リスクの監視」用です。空売りの推奨ではありません。</b>
     点数は売買の指示ではなく、<b>原文を確認する優先度</b>です。ニュースには誤報・古い情報・同名他社の混同が含まれることがあります。最終判断はご自身で。</div>
+  <div class="banner neg-note2">対象は<b>「いま普通に売買できる銘柄」</b>だけです（TOB・買収が決まった銘柄、上場廃止が決まった銘柄、取引が止まっている銘柄は除外）。{% if check and check.price_skipped %}<br>⚠️ 今回は株価を取得できなかったため、取引停止の確認はできていません。{% endif %}{% if check and check.td_fail %}<br>⚠️ {{ check.td_fail }}銘柄はTDnetの過去履歴を取得できず、TOB等の確認が不完全です。{% endif %}</div>
   {% if all_failed %}<div class="banner danger">⚠️ すべての情報源を取得できませんでした。「取得状況」を確認してください。</div>{% endif %}
 
   <section class="card">
@@ -67,6 +68,18 @@
     </details>
   </article>
   {% endfor %}
+
+  {% if excluded %}
+  <section class="card">
+    <details>
+      <summary><b>ランキングから外した銘柄（{{ excluded|length }}件）</b>　— 売買できない・TOB決定など</summary>
+      <p class="hint">TOB・買収が決まって株価が買付価格に張り付いている銘柄、上場廃止や法的整理が決まった銘柄、直近で取引が確認できない銘柄は、「まだ普通に売買できる銘柄」ではないため、ランキングに入れていません。</p>
+      <ul class="neg-ex">
+        {% for x in excluded %}<li><b>{{ x.name }}</b>（{{ x.code }}・{{ x.score }}点）<br>{% for r in x.reasons %}<small>・{{ r.reason }}{% if r.title %}：{{ r.title }}（{{ r.source }} {{ r.date }}）{% endif %}</small><br>{% endfor %}</li>{% endfor %}
+      </ul>
+    </details>
+  </section>
+  {% endif %}
 
   <section class="card">
     <h2>情報源と取得状況</h2>

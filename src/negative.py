@@ -484,7 +484,132 @@ def analyze(items: list[Item], info: dict[str, dict], pairs: list[tuple[str, str
     return res
 
 
-def build_rows(res: dict[str, dict[str, Any]], info: dict[str, dict], seen: dict[str, str], today: date, cfg: Config) -> list[dict[str, Any]]:
+# ---------------------------------------------------------------- 取引できない銘柄の除外
+# 「まだ普通に売買できる銘柄」だけをランキングする。TOB・買収が決まった銘柄（株価がTOB価格に張り付く）、上場廃止が決まった銘柄、
+# 法的整理に入った銘柄、直近で取引が確認できない銘柄は、ランキングから外して「対象外」欄に理由つきで出す。
+UNTRADABLE_RULES: list[tuple[str, Any]] = [
+    ("TOB・MBO・買収が決定", RX(r"公開買付|ＴＯＢ|TOB|ＭＢＯ|MBO|マネジメント・?バイアウト|完全子会社(化|となる|とする)|株式交換|スクイーズ|株式売渡請求|全部取得条項付|特別支配株主|非公開化")),
+    ("上場廃止が決定", RX(r"上場廃止(が|を|の)?(決定|承認|予定|見込み)|上場廃止日|整理銘柄|整理ポスト|最終売買日|株式併合.{0,20}上場廃止|上場廃止.{0,12}(見込み|予定)")),
+    ("法的整理（破産・再生・更生）に入った", RX(r"破産手続開始|民事再生手続開始|会社更生手続開始|特別清算開始|破産手続開始の申立|民事再生手続開始の申立|会社更生手続開始の申立")),
+]
+
+
+def untradable_reasons(code: str, titles: list[tuple[str, str, str]]) -> list[dict[str, str]]:
+    """titles: [(タイトル, 日付, 情報源)]＝その会社の過去180日のTDnetと、直近のニュース見出し。当てはまる理由を返す（理由ごとに最新の1件）。
+    自社株の公開買付け（自己株式の取得）は、TOBの対象ではないので除く。"""
+    found: dict[str, dict[str, str]] = {}
+    for title, day, src in titles:
+        t = norm(title)
+        for reason, rx in UNTRADABLE_RULES:
+            if not rx.search(t):
+                continue
+            if reason.startswith("TOB") and re.search(r"自己株式.{0,6}公開買付", t):
+                continue
+            if src != "TDnet" and reason != "TOB・MBO・買収が決定":       # 報道だけでは「上場廃止」「法的整理」は断定しない（TDnetの公式開示で判断）
+                continue
+            if reason not in found or day > found[reason]["date"]:
+                found[reason] = {"reason": reason, "title": title, "date": day, "source": src}
+    return sorted(found.values(), key=lambda x: x["date"], reverse=True)
+
+
+def price_problem(df: Any, today: date) -> str | None:
+    """日足（直近）から、売買できていない銘柄を見つける。取得できなかった場合は None（判定しない）。"""
+    if df is None:
+        return None
+    try:
+        d = df.dropna(subset=["Close"])
+    except Exception:  # noqa: BLE001
+        return None
+    if d.empty:
+        return "直近の株価がありません（上場廃止・取引停止の可能性）"
+    last = d.index[-1].date()
+    if (today - last).days > 6:
+        return f"最後の取引が{last:%m/%d}で止まっています（上場廃止・取引停止の可能性）"
+    vol = d["Volume"].tail(3) if "Volume" in d.columns else None
+    if vol is not None and len(vol) >= 3 and float(vol.sum()) == 0:
+        return "直近3日間、出来高がありません（取引停止の可能性）"
+    return None
+
+
+def filter_tradable(rows: list[dict[str, Any]], raw_by_code: dict[str, list[Item]], today: date, cfg: Config,
+                    td_fetch: Callable[[str], list[Any]] | None, price_fn: Callable[[list[str]], dict[str, Any]] | None,
+                    manual: set[str] | None = None) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+    """戻り値：(売買できる銘柄の行, 対象外にした銘柄, 確認の状況)。TDnet履歴・価格のどちらかが取得できなくても、他の確認で動く。"""
+    manual = manual or set()
+    keep, out = [], []
+    st = {"td_ok": 0, "td_fail": 0, "price_checked": 0, "price_skipped": False}
+    prices: dict[str, Any] = {}
+    if price_fn is not None and rows:
+        try:
+            prices = price_fn([r["code"] for r in rows])
+        except Exception as e:  # noqa: BLE001
+            log.warning("株価の確認に失敗しました（価格による除外は行いません）: %s", e)
+        st["price_checked"] = len(prices)
+        if len(prices) < max(1, len(rows) // 2):            # 半分以上取れないなら、取得障害とみなして価格では除外しない
+            st["price_skipped"] = True
+            prices = {}
+    for r in rows:
+        code = r["code"]
+        titles = [(i.title, i.date, i.source) for i in raw_by_code.get(code, [])]
+        if td_fetch is not None:
+            try:
+                titles += [(d.title, d.date, "TDnet") for d in td_fetch(code)]
+                st["td_ok"] += 1
+            except Exception:  # noqa: BLE001
+                st["td_fail"] += 1
+        reasons = untradable_reasons(code, titles)
+        if code in manual:
+            reasons.insert(0, {"reason": "手動の除外リスト（data/exclude_codes.txt）", "title": "", "date": "", "source": ""})
+        pp = price_problem(prices.get(code), today) if prices else None
+        if pp:
+            reasons.append({"reason": pp, "title": "", "date": "", "source": "株価"})
+        if reasons:
+            out.append({"code": code, "name": r["name"], "score": r["score"], "reasons": reasons[:3]})
+        else:
+            keep.append(r)
+    return keep, out, st
+
+
+def download_prices(codes: list[str]) -> dict[str, Any]:
+    import yfinance as yf
+
+    out: dict[str, Any] = {}
+    for i in range(0, len(codes), 60):
+        part = [c + ".T" for c in codes[i:i + 60]]
+        try:
+            raw = yf.download(part, period="15d", interval="1d", auto_adjust=False, progress=False, group_by="ticker", threads=True)
+        except Exception as e:  # noqa: BLE001
+            log.warning("株価の取得に失敗（%s…）: %s", part[0], e)
+            continue
+        for tk in part:
+            try:
+                df = raw[tk] if hasattr(raw.columns, "levels") else raw
+                out[tk[:-2]] = df.dropna(how="all")
+            except Exception:  # noqa: BLE001
+                continue
+    return out
+
+
+def group_items(items: list[Item], info: dict[str, dict], pairs: list[tuple[str, str]], today: date, span: int) -> dict[str, list[Item]]:
+    out: dict[str, list[Item]] = {}
+    for it in items:
+        if not it.date or (today - date.fromisoformat(it.date)).days > span or it.kind == "financial":
+            continue
+        code = it.code or match_code(it.title, pairs, info)
+        if code and code in info:
+            out.setdefault(code, []).append(it)
+    return out
+
+
+def load_manual_excludes() -> set[str]:
+    p = ROOT / "data" / "exclude_codes.txt"
+    try:
+        return {ln.split("#")[0].strip() for ln in p.read_text(encoding="utf-8").splitlines() if ln.split("#")[0].strip()}
+    except OSError:
+        return set()
+
+
+def build_rows(res: dict[str, dict[str, Any]], info: dict[str, dict], seen: dict[str, str], today: date, cfg: Config, limit: int | None = None) -> list[dict[str, Any]]:
     n = cfg["negative"]
     rows = []
     for code, r in res.items():
@@ -511,10 +636,11 @@ def build_rows(res: dict[str, dict[str, Any]], info: dict[str, dict], seen: dict
                      "official": any(d["kind"] == "official" for d in dedup),
                      "parts": [{"label": p["event"].label, "points": p["points"], "sources": p["sources"]} for p in r["parts"]]})
     rows.sort(key=lambda x: (-x["score"], -len(x["labels"]), x["code"]))
-    return rows[: int(n["max_rows"])]
+    return rows[: int(limit or n["max_rows"])]
 
 
-def page_context(rows: list[dict[str, Any]], status: list[dict[str, Any]], now: datetime, cfg: Config, demo: bool = False) -> dict[str, Any]:
+def page_context(rows: list[dict[str, Any]], status: list[dict[str, Any]], now: datetime, cfg: Config, demo: bool = False,
+                 excluded: list[dict[str, Any]] | None = None, check: dict[str, Any] | None = None) -> dict[str, Any]:
     n = cfg["negative"]
     counts = {lab: sum(1 for r in rows if lab in r["labels"]) for lab in CATEGORY_ORDER}
     bands = {b: sum(1 for r in rows if r["band"] == b) for b in ("critical", "warn", "caution", "minor")}
@@ -524,7 +650,7 @@ def page_context(rows: list[dict[str, Any]], status: list[dict[str, Any]], now: 
             "generated": f"{now:%Y-%m-%d %H:%M}", "generated_iso": now.isoformat(), "days": n["days"], "min_score": n["min_score"], "demo": demo,
             "points": {LABELS[k]: v for k, v in n["points"].items() if k not in ("going_concern",)} | {"継続赤字（継続企業の前提）": n["points"]["going_concern"]},
             "bands_cfg": n["bands"], "rel": n["reliability"], "rec": n["recency"], "corr": n["corroboration"], "sev": n["severe_words"],
-            "all_failed": not any(s["ok"] for s in status)}
+            "all_failed": not any(s["ok"] for s in status), "excluded": excluded or [], "check": check or {}}
 
 
 def write_page(ctx: dict[str, Any], out_dir: Path) -> Path:
@@ -589,11 +715,27 @@ def run(demo: bool = False, out_dir: Path | None = None) -> Path:
     res = analyze(items, info, pairs, today, cfg, pdf_dir)
     entries = [(event_key(code, e), e.item.date) for code, r in res.items() for e in r["events"]]
     seen = update_seen((ROOT / cfg["negative"]["seen_file"]) if not demo else (ROOT / "data" / "demo" / "negative_seen.json"), entries, today)
-    rows = build_rows(res, info, seen, today, cfg)
-    ctx = page_context(rows, status, now, cfg, demo)
+    cands = build_rows(res, info, seen, today, cfg, limit=int(cfg["negative"]["candidates"]))
+    raw = group_items(items, info, pairs, today, int(cfg["negative"]["days"]))
+    if demo:
+        rows, excluded, check = demo_filter(cands, raw, today, cfg)
+    else:
+        from . import tdnet
+        client = tdnet.make_client(cfg, False)
+        rows, excluded, check = filter_tradable(cands, raw, today, cfg, client.fetch if client else None, download_prices, load_manual_excludes())
+        if client is not None:
+            client.save()
+    rows = rows[: int(cfg["negative"]["max_rows"])]
+    log.info("売買できない等で対象外にした銘柄: %d件（残り %d銘柄）", len(excluded), len(rows))
+    ctx = page_context(rows, status, now, cfg, demo, excluded, check)
     path = write_page(ctx, (out_dir or ROOT / "docs") / "negative")
     log.info("信用リスク監視ページを出力しました: %d銘柄（%s）", len(rows), path)
     return path
+
+
+def demo_filter(cands, raw, today, cfg):
+    td = {"9005": [Item("TDnet", (today - timedelta(days=20)).isoformat(), "9005", "ダミー食品", "株式会社○○による当社株式に対する公開買付けに関する意見表明のお知らせ", "", "official")]}
+    return filter_tradable(cands, raw, today, cfg, lambda c: [type("D", (), {"title": i.title, "date": i.date})() for i in td.get(c, [])], None)
 
 
 # ---------------------------------------------------------------- デモ（架空）
