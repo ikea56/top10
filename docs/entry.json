@@ -1,0 +1,249 @@
+{
+ "generated_at": "2026-11-24T17:41+09:00",
+ "trade_date": "2026-11-24",
+ "ranking_data_date": "2026-11-20",
+ "cutoff": "10:00",
+ "status": "ok",
+ "items": {
+  "1939": {
+   "code": "1939",
+   "key": "skip",
+   "emoji": "🔴",
+   "label": "見送り",
+   "gap": -0.13,
+   "ret": 1.33,
+   "vr": 3.35,
+   "vol_label": "過熱",
+   "reasons": [
+    "出来高が普段の3.4倍で過熱感あり"
+   ],
+   "asof": "10:00",
+   "complete": true,
+   "price": 2288.0,
+   "open": 2258.0,
+   "rank": 1
+  },
+  "7366": {
+   "code": "7366",
+   "key": "wait",
+   "emoji": "🟡",
+   "label": "様子見",
+   "gap": -0.25,
+   "ret": -0.76,
+   "vr": 0.47,
+   "vol_label": "やや少ない",
+   "reasons": [
+    "出来高が少ない（普段の0.5倍）"
+   ],
+   "asof": "10:00",
+   "complete": true,
+   "price": 1956.0,
+   "open": 1971.0,
+   "rank": 2
+  },
+  "1941": {
+   "code": "1941",
+   "key": "go",
+   "emoji": "🟢",
+   "label": "エントリー可",
+   "gap": 0.8,
+   "ret": 1.19,
+   "vr": 1.11,
+   "vol_label": "良好",
+   "reasons": [
+    "ギャップ+0.8%・寄付き後+1.2%で落ち着き、出来高も良好"
+   ],
+   "asof": "10:00",
+   "complete": true,
+   "price": 5100.0,
+   "open": 5040.0,
+   "rank": 3
+  },
+  "7846": {
+   "code": "7846",
+   "key": "go",
+   "emoji": "🟢",
+   "label": "エントリー可",
+   "gap": -0.59,
+   "ret": -0.02,
+   "vr": 1.62,
+   "vol_label": "良好",
+   "reasons": [
+    "ギャップ-0.6%・寄付き後-0.0%で落ち着き、出来高も良好"
+   ],
+   "asof": "10:00",
+   "complete": true,
+   "price": 2123.5,
+   "open": 2124.0,
+   "rank": 4
+  },
+  "4206": {
+   "code": "4206",
+   "key": "go",
+   "emoji": "🟢",
+   "label": "エントリー可",
+   "gap": -0.22,
+   "ret": 0.59,
+   "vr": 1.16,
+   "vol_label": "良好",
+   "reasons": [
+    "ギャップ-0.2%・寄付き後+0.6%で落ち着き、出来高も良好"
+   ],
+   "asof": "10:00",
+   "complete": true,
+   "price": 4087.0,
+   "open": 4063.0,
+   "rank": 5
+  },
+  "8439": {
+   "code": "8439",
+   "key": "go",
+   "emoji": "🟢",
+   "label": "エントリー可",
+   "gap": 0.61,
+   "ret": 0.02,
+   "vr": 0.8,
+   "vol_label": "良好",
+   "reasons": [
+    "ギャップ+0.6%・寄付き後+0.0%で落ち着き、出来高も良好"
+   ],
+   "asof": "10:00",
+   "complete": true,
+   "price": 2560.0,
+   "open": 2559.5,
+   "rank": 6
+  },
+  "7942": {
+   "code": "7942",
+   "key": "go",
+   "emoji": "🟢",
+   "label": "エントリー可",
+   "gap": 1.21,
+   "ret": 0.99,
+   "vr": 0.86,
+   "vol_label": "良好",
+   "reasons": [
+    "ギャップ+1.2%・寄付き後+1.0%で落ち着き、出来高も良好"
+   ],
+   "asof": "10:00",
+   "complete": true,
+   "price": 2951.0,
+   "open": 2922.0,
+   "rank": 7
+  },
+  "7979": {
+   "code": "7979",
+   "key": "go",
+   "emoji": "🟢",
+   "label": "エントリー可",
+   "gap": 0.22,
+   "ret": -0.66,
+   "vr": 0.72,
+   "vol_label": "良好",
+   "reasons": [
+    "ギャップ+0.2%・寄付き後-0.7%で落ち着き、出来高も良好"
+   ],
+   "asof": "10:00",
+   "complete": true,
+   "price": 2248.0,
+   "open": 2263.0,
+   "rank": 8
+  },
+  "6306": {
+   "code": "6306",
+   "key": "go",
+   "emoji": "🟢",
+   "label": "エントリー可",
+   "gap": 0.11,
+   "ret": 0.52,
+   "vr": 0.73,
+   "vol_label": "良好",
+   "reasons": [
+    "ギャップ+0.1%・寄付き後+0.5%で落ち着き、出来高も良好"
+   ],
+   "asof": "10:00",
+   "complete": true,
+   "price": 958.0,
+   "open": 953.0,
+   "rank": 9
+  },
+  "9069": {
+   "code": "9069",
+   "key": "go",
+   "emoji": "🟢",
+   "label": "エントリー可",
+   "gap": 0.13,
+   "ret": 0.04,
+   "vr": 0.84,
+   "vol_label": "良好",
+   "reasons": [
+    "ギャップ+0.1%・寄付き後+0.0%で落ち着き、出来高も良好"
+   ],
+   "asof": "10:00",
+   "complete": true,
+   "price": 2326.0,
+   "open": 2325.0,
+   "rank": 10
+  }
+ },
+ "market": {
+  "key": "strong",
+  "label": "強い",
+  "score": 1.0,
+  "items": [
+   {
+    "key": "topix",
+    "label": "TOPIX",
+    "pct": 2.48,
+    "asof": "10:00",
+    "futures": false,
+    "status": "strong",
+    "status_label": "強い"
+   },
+   {
+    "key": "n225",
+    "label": "日経平均",
+    "pct": 4.2,
+    "asof": "10:00",
+    "futures": false,
+    "status": "strong",
+    "status_label": "強い"
+   },
+   {
+    "key": "growth",
+    "label": "グロース250",
+    "pct": 3.89,
+    "asof": "10:00",
+    "futures": false,
+    "status": "strong",
+    "status_label": "強い"
+   },
+   {
+    "key": "n225f",
+    "label": "日経225先物",
+    "pct": 4.8,
+    "asof": "11/24 10:00",
+    "futures": true,
+    "status": "strong",
+    "status_label": "強い"
+   },
+   {
+    "key": "topixf",
+    "label": "TOPIX先物",
+    "pct": null,
+    "asof": null,
+    "futures": true,
+    "status": "missing",
+    "status_label": "取得できず"
+   }
+  ]
+ },
+ "counts": {
+  "go": 8,
+  "wait": 1,
+  "skip": 1,
+  "na": 0
+ },
+ "asof": "10:00",
+ "seconds": 1.7
+}
