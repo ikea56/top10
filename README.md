@@ -379,7 +379,7 @@ GitHub の Actions → **reset-records** → Run workflow で、確認欄に `RE
 
 ## 🛡️ 信用リスク監視ページ（㉗）
 - 場所：`https://（サイト）/negative/`（株ランキングの上部リンク「🛡️ 信用リスク監視」から）。**空売り推奨ではなく、信用リスクの監視用**です。点数は「原文を確認する優先度」です。
-- 更新：GitHub Actions の **negative-watch** が平日の朝7:25と夕方17:30に自動実行（Run workflow で手動実行も可）。
+- 更新：GitHub Actions の **negative-watch** が1日1回、平日の朝7:30（日本時間）に自動実行（Run workflow で手動実行も可）。
 - 直近15日の、TDnet・JPX監理整理銘柄一覧・Googleニュース・Yahoo!ニュース・財務データから17分類のイベントを検出し、会社ごとに0〜100点で表示します。
 - X（旧Twitter）と各社IRページは未対応です（無料で安定して取得できないため）。要約は「AI」ではなく規則ベースの自動要約です。
 - 詳細（情報源・分類ルール・スコア計算）は `REPORT_37.md` と、ページ下部の「点数の見方」。設定は `config.yml` の `negative:`。
