@@ -2,8 +2,9 @@ name: daily-update
 
 on:
   schedule:
-    # 日本時間 月〜金の朝7:00（= UTC の日〜木 22:00）。混雑時は数十分遅れることがあります
-    - cron: "0 22 * * 0-4"
+    # 日本時間 月〜金の朝7:10（= UTC の日〜木 22:10）に開始。寄り付き前（9:00）までに完了する想定（所要は30分前後）。
+    # 実行の最後に、朝に動く情報（保有銘柄・先物・為替・米国株）を取得します。混雑時は数十分遅れることがあります
+    - cron: "10 22 * * 0-4"
   workflow_dispatch:      # 手動実行ボタン用
 
 permissions:
@@ -37,6 +38,6 @@ jobs:
             echo "変更なし"
           else
             git commit -m "daily update $(TZ=Asia/Tokyo date +%F)"
-            git pull --rebase origin "${GITHUB_REF_NAME}"
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
             git push
           fi
