@@ -402,3 +402,26 @@ figure{margin:10px 0}figcaption{font-size:.82rem;color:var(--sub);margin-bottom:
 .e10-mis{display:flex;flex-wrap:wrap;gap:.3em .6em;margin-top:.3em}
 .e10-mi{padding:.1em .6em;border-radius:999px;border:1px solid var(--line,#ccc);font-size:.82rem}
 .e10-mi.weak{color:var(--red)}.e10-mi.strong{color:var(--green)}
+
+/* ---- ㉗ 信用リスク監視 ---- */
+.neg-note{background:var(--yellow-bg);border:1px solid var(--yellow);color:var(--text)}
+.neg-bands{display:flex;flex-wrap:wrap;gap:.4em;margin:.5em 0}
+.nb{padding:.15em .8em;border-radius:999px;font-weight:700;font-size:.85rem;border:1px solid var(--line,#ccc)}
+.nb.critical,.neg-score.critical{background:var(--red-bg);color:var(--red);border-color:var(--red)}
+.nb.warn,.neg-score.warn{background:var(--yellow-bg);color:var(--yellow);border-color:var(--yellow)}
+.nb.caution,.neg-score.caution{border-color:var(--yellow)}
+.neg-chips{display:flex;flex-wrap:wrap;gap:.4em;margin-top:.6em}
+.neg-chips .chip{padding:.25em .8em;border-radius:999px;border:1px solid var(--line,#ccc);background:transparent;color:inherit;font-size:.82rem;cursor:pointer}
+.neg-chips .chip.on{background:var(--text,#222);color:var(--bg,#fff)}
+article.neg{border-left:6px solid var(--line,#ccc)}
+article.neg.critical{border-left-color:var(--red)}article.neg.warn{border-left-color:var(--yellow)}
+article.neg[hidden]{display:none}
+.neg-score{min-width:3.4em;padding:.3em .4em;border-radius:12px;border:2px solid var(--line,#ccc);text-align:center;line-height:1.1}
+.neg-score b{display:block;font-size:1.5rem}.neg-score small{font-size:.72rem}
+.neg-tags{display:flex;flex-wrap:wrap;gap:.3em;margin:.5em 0}
+.ntag{display:inline-block;padding:.05em .6em;border-radius:999px;border:1px solid var(--line,#bbb);font-size:.78rem;font-weight:700}
+.neg-sum{font-size:.9rem;line-height:1.6}
+.neg-dates{font-size:.8rem;color:var(--muted,#777)}
+.neg-un{color:var(--yellow);font-weight:700}
+.neg-ev{padding-left:1.1em;font-size:.85rem}.neg-ev li{margin:.35em 0}
+.neg-src{list-style:none;padding:0;margin:.5em 0}.neg-src li{padding:.5em 0;border-bottom:1px solid var(--line,#ddd);font-size:.9rem}.neg-src .dim{opacity:.65}

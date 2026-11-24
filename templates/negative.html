@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0f1a2b">
+<meta name="robots" content="noindex">
+<title>信用リスク監視（ネガティブイベント）</title>
+<link rel="stylesheet" href="../style.css">
+<script>
+(function(){try{var t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+</script>
+</head>
+<body class="negpage">
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-row">
+      <h1>🛡️ 信用リスク監視</h1>
+      <button id="themeBtn" class="icon-btn" type="button" aria-label="ライト／ダーク表示を切り替え">🌓</button>
+    </div>
+    <p class="meta"><span>最終更新：{{ generated }}</span><span>直近{{ days }}日のイベント</span></p>
+    <p class="meta"><a class="back" href="../index.html">← 株ランキングに戻る</a></p>
+  </div>
+</header>
+
+<main class="wrap">
+  {% if demo %}<div class="banner warn">⚠️ <b>デモ表示です。</b>架空の会社・架空のニュースです。</div>{% endif %}
+  <div class="banner neg-note"><b>このページは「信用リスクの監視」用です。空売りの推奨ではありません。</b>
+    点数は売買の指示ではなく、<b>原文を確認する優先度</b>です。ニュースには誤報・古い情報・同名他社の混同が含まれることがあります。最終判断はご自身で。</div>
+  {% if all_failed %}<div class="banner danger">⚠️ すべての情報源を取得できませんでした。「取得状況」を確認してください。</div>{% endif %}
+
+  <section class="card">
+    <h2>いま注意が必要な銘柄 <small>{{ rows|length }}銘柄（{{ min_score }}点以上）</small></h2>
+    <div class="neg-bands">
+      <span class="nb critical">重大 {{ bands.critical }}</span><span class="nb warn">警戒 {{ bands.warn }}</span>
+      <span class="nb caution">注意 {{ bands.caution }}</span><span class="nb minor">軽微 {{ bands.minor }}</span>
+    </div>
+    <div class="neg-chips" role="group" aria-label="イベントの種類で絞り込み">
+      <button type="button" class="chip on" data-cat="">すべて</button>
+      {% for c in categories %}{% if counts[c] %}<button type="button" class="chip" data-cat="{{ c }}">{{ c }} {{ counts[c] }}</button>{% endif %}{% endfor %}
+    </div>
+    {% if not rows %}<p class="hint">該当する銘柄はありません（情報源の取得状況は下の表で確認できます）。</p>{% endif %}
+  </section>
+
+  {% for r in rows %}
+  <article class="card neg {{ r.band }}" data-cats="{{ r.labels|join('|') }}">
+    <header class="stock-head">
+      <div class="neg-score {{ r.band }}"><b>{{ r.score }}</b><small>{{ r.band_label }}</small></div>
+      <div class="ident">
+        <h3>{{ r.name }}</h3>
+        <p class="sub">{{ r.code }} ・ {{ r.market }} ・ {{ r.sector }}</p>
+      </div>
+    </header>
+    <p class="neg-tags">{% for l in r.labels %}<span class="ntag">{{ l }}</span>{% endfor %}</p>
+    <p class="neg-sum"><b>要約</b>　{{ r.summary }}</p>
+    <p class="neg-dates">検出日 {{ r.detected }}　／　最新の公表日 {{ r.latest }}{% if not r.official %}　<span class="neg-un">※報道のみ（公式開示は未確認）</span>{% endif %}</p>
+    <details>
+      <summary>検出イベントの詳細（{{ r.n_events }}件）・点数の内訳</summary>
+      <ul class="neg-ev">
+        {% for e in r.events %}
+        <li><span class="ntag">{{ e.label }}</span> {% if e.url %}<a href="{{ e.url }}" target="_blank" rel="noopener noreferrer">{{ e.full_title }}</a>{% else %}{{ e.full_title }}{% endif %}
+          <small>（{{ e.source }}・公表 {{ e.date }}・検出 {{ e.detected }}）</small></li>
+        {% endfor %}
+      </ul>
+      <p class="hint">内訳：{% for p in r.parts %}{{ p.label }} {{ p.points }}点（{{ p.sources|join('・') }}）{% if not loop.last %}、{% endif %}{% endfor %}　→ 合成して {{ r.score }}点</p>
+    </details>
+  </article>
+  {% endfor %}
+
+  <section class="card">
+    <h2>情報源と取得状況</h2>
+    <ul class="neg-src">
+      {% for s in status %}<li><b>{{ s.name }}</b>　{{ '✅ 取得' if s.ok else '⚠️ 未取得' }}　{{ s.n }}件<br><small>{{ s.note }}</small></li>{% endfor %}
+      {% for s in unsupported %}<li class="dim"><b>{{ s.name }}</b>　— 未対応<br><small>{{ s.note }}</small></li>{% endfor %}
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>点数の見方（計算方法）</h2>
+    <ol class="concl">
+      <li><b>イベントの基本点</b>（0〜100）：{% for k, v in points.items() %}{{ k }} {{ v }}{% if not loop.last %}／{% endif %}{% endfor %}</li>
+      <li><b>新しさ</b>：{{ rec.full_days }}日以内は100％、{{ days }}日前に向けて{{ (rec.min_factor*100)|round|int }}％まで直線で下げる。</li>
+      <li><b>情報源の確からしさ</b>：TDnet・JPX公式 {{ (rel.official*100)|round|int }}％、報道 {{ (rel.news*100)|round|int }}％、財務データ {{ (rel.financial*100)|round|int }}％を掛ける。</li>
+      <li><b>重大な語</b>（隠蔽・逮捕・過去最大・大規模など）があれば +{{ sev.per_word }}点ずつ（最大+{{ sev.cap }}点）。</li>
+      <li><b>複数の情報源</b>が同じ種類のイベントを報じていれば、+{{ (corr.per_source*100)|round|int }}％ずつ（最大{{ corr.cap }}倍）。</li>
+      <li><b>会社の点数</b>：イベントの種類ごとに一番高い1件を取り、<code>100 × (1 − Π(1 − 各点数/100))</code> で合成します（種類が重なるほど100に近づきますが、100は超えません）。</li>
+      <li><b>区分</b>：重大 {{ bands_cfg.critical }}以上／警戒 {{ bands_cfg.warn }}以上／注意 {{ bands_cfg.caution }}以上／それ未満は軽微。</li>
+    </ol>
+    <p class="hint">要約は「AI」ではなく、決まった規則で見出しを整理した自動要約です。分類は見出し（タイトル）の語句で判定しているため、見落とし・誤分類があります。会社名の結びつけは見出しに社名が含まれる場合のみで、略称（例：「トヨタ」）は拾えないことがあります。「検出日」は、このシステムが初めて見つけた日です。</p>
+  </section>
+</main>
+<footer class="foot"><p>情報提供のみを目的とし、投資の勧誘・助言・空売りの推奨ではありません。投資判断は自己責任でお願いします。</p></footer>
+<script>
+var btn=document.getElementById('themeBtn');
+function isDark(){var t=document.documentElement.getAttribute('data-theme');if(t)return t==='dark';return window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches;}
+btn.addEventListener('click',function(){var n=isDark()?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}});
+document.querySelectorAll('.neg-chips .chip').forEach(function(b){b.addEventListener('click',function(){
+  var c=b.getAttribute('data-cat');
+  document.querySelectorAll('.neg-chips .chip').forEach(function(x){x.classList.toggle('on',x===b);});
+  document.querySelectorAll('article.neg').forEach(function(a){a.hidden=!!c&&(a.getAttribute('data-cats')||'').split('|').indexOf(c)<0;});});});
+</script>
+</body>
+</html>

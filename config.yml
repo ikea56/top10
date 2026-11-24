@@ -487,3 +487,64 @@ movers:
   show_top: 10                 # 「新規ランクイン/ランクアウト」の基準（表示している上位N）
   jump: 5                      # この順位以上の上昇・下降を「急上昇／急下降」とする
   limit: 5                     # 各欄の表示件数
+
+# ============================================================
+#  ㉗ 信用リスク監視ページ（negative/index.html）。企業の信用低下・継続的な株価下落につながりうるネガティブイベントを監視します
+#  ※ 空売り推奨のページではありません。売買の判断材料の一つとして、ご自身で原文を確認してください
+#  python -m src.negative / negative.yml が毎日（朝7:25と夕方17:30）更新します
+# ============================================================
+negative:
+  enabled: true
+  days: 15                     # 直近この日数のイベントを分析
+  min_score: 20                # この点数未満の銘柄は表示しない（0〜100）
+  max_rows: 120                # 表示する最大銘柄数
+  seen_file: data/negative/seen.json   # 「検出日」（初めてこのシステムが見つけた日）の記録
+  bands: {critical: 80, warn: 60, caution: 40}   # 重大／警戒／注意（これ未満は軽微）
+  # イベントごとの基本点（0〜100）。信用への影響の大きさ・株価への持続的な影響の大きさを目安に決めた値で、自由に変えられます
+  points:
+    delisting: 95              # 上場廃止関連（猶予期間入り・上場廃止決定・経営破綻）
+    seiri: 95                  # 整理銘柄
+    kanri: 80                  # 監理銘柄
+    window_dressing: 85        # 粉飾疑惑
+    going_concern: 75          # 継続企業の前提に関する注記（継続赤字に分類）
+    accounting: 70             # 会計問題（不適切会計・決算訂正・決算発表延期・監査意見不表明）
+    quality_fraud: 70          # 品質不正
+    inspection_fraud: 70       # 検査不正
+    admin_action: 60           # 行政処分
+    loss_turn: 55              # 赤字転落
+    continuing_loss: 50        # 継続赤字
+    data_leak: 45              # 情報漏洩
+    recall: 45                 # リコール
+    downward_revision: 45      # 下方修正
+    dividend_cut: 40           # 減配・無配
+    outage: 40                 # 大規模障害
+    litigation: 35             # 訴訟
+    deterioration: 30          # 業績悪化（減益・特別損失・債務超過・希望退職など）
+  reliability: {official: 1.0, news: 0.7, financial: 0.6}   # 情報源の確からしさ（TDnet・JPX公式＝1.0、報道＝0.7、財務データ＝0.6）
+  recency: {full_days: 3, min_factor: 0.55}   # 3日以内は100％、15日前に向けて55％まで直線で減らす
+  corroboration: {per_source: 0.10, cap: 1.25}  # 同じ種類のイベントを別の情報源も報じていたら +10%ずつ（最大1.25倍）
+  severe_words: {per_word: 5, cap: 15}          # 「重大・組織的・隠蔽・逮捕・過去最大…」などの語があれば +5点ずつ（最大+15）
+  tdnet:
+    day_url: "https://webapi.yanoshin.jp/webapi/tdnet/list/{start}-{end}.json"   # 日付範囲の全社開示（やのしんWebAPI）
+    limit: 3000
+    sleep: 0.5
+    timeout: 30
+  pdf_max: 40                  # 「業績予想の修正」で方向がタイトルから分からないとき、PDFを読む最大件数
+  news:
+    enabled: true
+    sleep: 1.0
+    timeout: 20
+    per_company_max: 30        # 個別銘柄の検索（ランキング上位・開示で検出済みの銘柄）の最大数
+    google_queries:            # Googleニュース（検索RSS）。全社を横断して検索し、見出しの会社名から銘柄に結びつける
+      - "下方修正 OR 減配 OR 無配 OR 赤字転落 OR 赤字"
+      - "不正会計 OR 不適切会計 OR 粉飾 OR 架空売上 OR 循環取引 OR 第三者委員会"
+      - "品質不正 OR 検査不正 OR データ改ざん OR 認証不正"
+      - "行政処分 OR 業務停止命令 OR 課徴金 OR 業務改善命令"
+      - "情報漏洩 OR 個人情報流出 OR ランサムウェア OR 不正アクセス"
+      - "システム障害 OR 大規模障害 OR 通信障害 OR 工場火災 OR 操業停止"
+      - "リコール OR 自主回収 OR 販売停止"
+      - "上場廃止 OR 監理銘柄 OR 整理銘柄 OR 民事再生 OR 倒産 OR 債務超過"
+      - "提訴 OR 訴訟 OR 損害賠償請求 株式会社"
+      - "業績悪化 OR 減益 OR 希望退職 OR 資金繰り OR 継続企業の前提"
+    yahoo_feeds:               # Yahoo!ニュースの公式RSS（経済）。見出しにネガティブ語と会社名があるものだけ使う
+      - "https://news.yahoo.co.jp/rss/topics/business.xml"

@@ -863,6 +863,92 @@ def test_entry10():
     print("ok  ㉖ 10時判定（判定規則・5分足の指標・市場環境・entry.json・時刻別検証・業績キャッシュ）")
 
 
+def test_negative():
+    """㉗ 信用リスク監視：分類規則・誤検出の除外・点数・社名の結びつけ・取得物の解析・検出日・ページ。"""
+    import tempfile
+    from datetime import date, datetime, timedelta
+    from src.config import JST
+    from src import negative as N
+    cfg = load_config()
+    today = date(2026, 11, 24)
+    ago = lambda d: (today - timedelta(days=d)).isoformat()      # noqa: E731
+    T = lambda title, kind="official", d=1: N.Item("TDnet" if kind == "official" else "Googleニュース", ago(d), "9001", "", title, "", kind)   # noqa: E731
+    keys = lambda title, kind="official": {e.key for e in N.classify(T(title, kind))}                                  # noqa: E731
+    assert "downward_revision" in keys("通期業績予想の下方修正に関するお知らせ")
+    assert "downward_revision" not in keys("通期業績予想の上方修正に関するお知らせ")
+    assert "dividend_cut" in keys("期末配当予想の修正（無配）に関するお知らせ") and "dividend_cut" not in keys("配当予想の修正（増配）に関するお知らせ")
+    assert "loss_turn" in keys("最終赤字に転落へ", "news") and "going_concern" in keys("継続企業の前提に関する注記の記載について")
+    assert "continuing_loss" in keys("3期連続の営業赤字")
+    assert "kanri" in keys("監理銘柄（確認中）への指定に関するお知らせ") and "kanri" not in keys("監理銘柄の指定解除について")
+    assert "seiri" in keys("整理銘柄への指定について")
+    assert "delisting" in keys("上場廃止基準に係る猶予期間入りに関するお知らせ") and "delisting" in keys("民事再生手続開始の申立てに関するお知らせ")
+    assert "delisting" not in keys("MBOの実施及び応募の推奨に関するお知らせ（上場廃止となる見込み）"), "TOB・MBOによる上場廃止は対象外"
+    assert "accounting" in keys("第三者委員会の調査報告書受領に関するお知らせ") and "accounting" in keys("決算発表の延期に関するお知らせ")
+    assert "window_dressing" in keys("架空売上の計上が判明", "news") and "quality_fraud" in keys("品質データの改ざんが発覚", "news")
+    assert "inspection_fraud" in keys("完成検査における不適切事案について") and "admin_action" in keys("金融庁から業務改善命令を受けました")
+    assert "data_leak" in keys("不正アクセスによる情報漏えいのお知らせ") and "recall" in keys("製品の自主回収（リコール）について")
+    assert "outage" in keys("システム障害の発生について") and "litigation" in keys("当社に対する訴訟の提起に関するお知らせ")
+    assert "litigation" not in keys("訴訟の和解に関するお知らせ") and not keys("第2四半期決算短信〔日本基準〕（連結）") and not keys("自己株式の取得に係る事項の決定に関するお知らせ")
+    assert "deterioration" in keys("希望退職者の募集に関するお知らせ") and "deterioration" not in keys("減益決算の通期見通し", "official"), "TDnetの『減益』は深刻語がなければ対象外"
+    assert "deterioration" in keys("減益決算", "news")
+    assert not keys("一部報道について（事実ではありません）"), "会社が否定した報道は対象外"
+    assert N.is_ambiguous_revision(T("業績予想の修正に関するお知らせ")) and not N.is_ambiguous_revision(T("業績予想の下方修正に関するお知らせ"))
+    assert any(e.key == "downward_revision" for e in N.classify(T("業績予想の修正に関するお知らせ"), "down"))
+    # 点数：新しいほど高い・報道は公式より低い・重なると上がる（100超えない）
+    pts = lambda title, kind, d: N.event_points(N.classify(T(title, kind, d))[0], today, cfg)                              # noqa: E731
+    assert pts("下方修正", "official", 1) > pts("下方修正", "official", 14) > 0 and pts("下方修正", "official", 1) > pts("下方修正", "news", 1)
+    one = N.company_score(N.classify(T("下方修正", "official")), today, cfg)["score"]
+    many = N.company_score(N.classify(T("下方修正", "official")) + N.classify(T("粉飾の疑い", "news")) + N.classify(T("最終赤字に転落", "news")), today, cfg)["score"]
+    assert 0 < one < many <= 100
+    two_src = N.company_score(N.classify(T("下方修正", "official")) + N.classify(T("下方修正を発表", "news")), today, cfg)["score"]
+    assert two_src > one, "同じ種類を別の情報源も報じていれば上がる"
+    same = N.company_score(N.classify(T("下方修正", "official")) * 3, today, cfg)["score"]
+    assert same == one, "同じ情報源の同じ種類の重複は数えない"
+    sev = N.company_score(N.classify(T("組織的な不正会計が発覚", "official")), today, cfg)["score"]
+    assert sev >= N.company_score(N.classify(T("不正会計が発覚", "official")), today, cfg)["score"]
+    assert N.band(85, cfg)[0] == "critical" and N.band(65, cfg)[0] == "warn" and N.band(45, cfg)[0] == "caution" and N.band(10, cfg)[0] == "minor"
+    # 社名の結びつけ
+    import pandas as pd
+    uni = pd.DataFrame({"code": ["9001", "9002", "9003"], "name": ["架空製作所", "サンプルホールディングス", "日本"], "market": ["プライム"] * 3, "sector": ["機械"] * 3})
+    info, pairs = N.build_name_index(uni)
+    assert N.match_code("架空製作所が下方修正", pairs, info) == "9001" and N.match_code("サンプルが不正会計", pairs, info) == "9002"
+    assert N.match_code("日本で訴訟が相次ぐ", pairs, info) is None, "一般語・短い名前は使わない"
+    assert N.match_code("某社（9001）が下方修正", pairs, info) == "9001" and N.match_code("ABC(1234)が訴訟", pairs, info) is None
+    # 取得物の解析
+    td = N.parse_tdnet_all({"items": [{"Tdnet": {"pubdate": "2026-11-20 15:00:00", "company_code": "90010", "company_name": "架空製作所", "title": "下方修正のお知らせ", "document_url": "http://x/a.pdf"}},
+                                       {"Tdnet": {"pubdate": "bad", "title": "x"}}]})
+    assert len(td) == 1 and td[0].code == "9001" and td[0].kind == "official" and td[0].date == "2026-11-20"
+    rss = """<?xml version="1.0"?><rss><channel><item><title>架空製作所が赤字転落 - 経済紙</title><link>http://n/1</link><pubDate>Fri, 20 Nov 2026 03:00:00 GMT</pubDate></item>
+      <item><title>古い記事</title><link>http://n/2</link><pubDate>Mon, 01 Jun 2026 03:00:00 GMT</pubDate></item></channel></rss>"""
+    nws = N.parse_rss(rss, "Googleニュース", today, 15)
+    assert len(nws) == 1 and nws[0].date == "2026-11-20" and nws[0].url == "http://n/1"
+    fin = N.financial_items({"9001": {"fetched": ago(3), "data": {"status": "ok", "op_ttm": -5.0, "op_annual": [-3.0, -2.0, 4.0]}},
+                             "9002": {"fetched": ago(3), "data": {"status": "ok", "op_ttm": -1.0, "op_annual": [2.0, 3.0]}},
+                             "9003": {"fetched": ago(40), "data": {"status": "ok", "op_ttm": -1.0, "op_annual": [-2.0, -3.0]}}}, today, cfg)
+    assert {(f.code, "継続" in f.title) for f in fin} == {("9001", True), ("9002", False)}, "古い取得分は対象外"
+    # 全体：会社ごとにまとめる・対象外の銘柄（ETF等）を除く・失敗した情報源があっても動く
+    items = [N.Item("TDnet", ago(2), "9001", "架空製作所", "通期業績予想の下方修正に関するお知らせ", "", "official"),
+             N.Item("Googleニュース", ago(1), None, "", "架空製作所、不正会計の疑い 検察が家宅捜索 - 経済紙", "", "news"),
+             N.Item("TDnet", ago(1), "1306", "TOPIX ETF", "訴訟の提起", "", "official"),
+             N.Item("TDnet", ago(30), "9002", "サンプルHD", "不正会計の疑い", "", "official")]
+    res = N.analyze(items, info, pairs, today, cfg)
+    assert set(res) == {"9001"} and res["9001"]["score"] >= 60
+    with tempfile.TemporaryDirectory() as td_:
+        sp = Path(td_) / "seen.json"
+        ev = res["9001"]["events"][0]
+        k = N.event_key("9001", ev)
+        s1 = N.update_seen(sp, [(k, ev.item.date)], today)
+        s2 = N.update_seen(sp, [(k, ev.item.date)], today + timedelta(days=3))
+        assert s1[k] == s2[k] == today.isoformat(), "検出日は最初に見つけた日のまま"
+        rows = N.build_rows(res, info, s2, today + timedelta(days=3), cfg)
+        assert rows[0]["detected"] == today.isoformat() and rows[0]["labels"] and "下方修正" in rows[0]["summary"]
+        ctx = N.page_context(rows, [{"name": "TDnet", "ok": True, "n": 1, "note": ""}], datetime(2026, 11, 24, 12, 0, tzinfo=JST), cfg)
+        page = N.write_page(ctx, Path(td_) / "docs" / "negative").read_text(encoding="utf-8")
+        assert "空売りの推奨ではありません" in page and "架空製作所" in page and "X（旧Twitter）" in page
+    assert "売り" not in "".join(N.summarize("架空製作所", res["9001"]["parts"])), "要約に売買の推奨表現を入れない"
+    print("ok  ㉗ 信用リスク監視（17分類・誤検出の除外・点数・社名結びつけ・RSS/TDnet解析・検出日・ページ）")
+
+
 def test_fx():
     """ドル円の市場参加者分析：セッション別の損益・統計・スコア・判定・ページ。"""
     import copy
@@ -1073,6 +1159,6 @@ def test_end_to_end():
 if __name__ == "__main__":
     for fn in (test_config_and_weights, test_momentum_points, test_no_lookahead, test_events,
                test_dividend_and_exclusion, test_expected_and_metrics, test_text, test_pullback, test_tdnet, test_accuracy_21, test_holdings,
-               test_excluded_csv, test_data_fixes, test_validation, test_stance, test_premarket, test_lead, test_tracking, test_rankband, test_quality_first, test_fx, test_entry10, test_end_to_end):
+               test_excluded_csv, test_data_fixes, test_validation, test_stance, test_premarket, test_lead, test_tracking, test_rankband, test_quality_first, test_fx, test_negative, test_entry10, test_end_to_end):
         fn()
     print("\nALL OK")
