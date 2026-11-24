@@ -36,6 +36,6 @@ jobs:
             echo "変更なし"
           else
             git commit -m "fx update $(TZ=Asia/Tokyo date +%F)"
-            git pull --rebase origin "${GITHUB_REF_NAME}"
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
             git push
           fi
