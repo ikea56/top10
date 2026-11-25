@@ -498,6 +498,18 @@ negative:
   days: 15                     # 直近この日数のイベントを分析
   min_score: 20                # この点数未満の銘柄は表示しない（0〜100）
   max_rows: 120                # 表示する最大銘柄数
+  # 出たばかりのイベントを上位にする：順位づけ用の点 = 点数 + 新着ボーナス（最新のイベントからの日数）
+  fresh: {d1: 20, d3: 12, d7: 5}
+  # 「チャートが動いていない銘柄」を除外：売買代金が少ない／直近の値幅がほとんど無い（TOB価格に張り付き等）
+  activity: {min_turnover_yen: 50000000, pinned_days: 10, pinned_range_pct: 2.0}
+  # 規模が小さすぎる会社を除外（押し目ランキングと同様に規模を基準に。小さい会社は個人による相場操縦・インサイダー的な値動きが混ざりやすい）
+  size: {min_revenue_yen: 10000000000, min_market_cap_yen: 30000000000, cache_days: 30, sleep: 0.3}   # 売上高100億円以上・時価総額300億円以上
+  # 信用売りできる状態の銘柄だけをランキング（貸借銘柄・停止中でない）。取得できないときは除外せず「不明」と表示
+  short:
+    enabled: true
+    margin_page: "https://www.jpx.co.jp/listing/others/margin/index.html"          # 制度信用・貸借銘柄一覧（毎月第1営業日更新のExcel）
+    regulation_page: "https://www.jpx.co.jp/markets/equities/margin-reg/index.html"  # 信用取引規制中の銘柄（増担保など）
+    jsf_page: "http://www.taisyaku.jp/brand/"                                        # 日本証券金融：貸借取引の停止・注意喚起（形式未確認）
   candidates: 250              # 売買できるかの確認（TDnet履歴180日・株価）をする候補数（点数の高い順）
   seen_file: data/negative/seen.json   # 「検出日」（初めてこのシステムが見つけた日）の記録
   bands: {critical: 80, warn: 60, caution: 40}   # 重大／警戒／注意（これ未満は軽微）
@@ -522,7 +534,7 @@ negative:
     litigation: 35             # 訴訟
     deterioration: 30          # 業績悪化（減益・特別損失・債務超過・希望退職など）
   reliability: {official: 1.0, news: 0.7, financial: 0.6}   # 情報源の確からしさ（TDnet・JPX公式＝1.0、報道＝0.7、財務データ＝0.6）
-  recency: {full_days: 3, min_factor: 0.55}   # 3日以内は100％、15日前に向けて55％まで直線で減らす
+  recency: {full_days: 2, min_factor: 0.35}   # 2日以内は100％、15日前に向けて35％まで直線で減らす（出たばかりの不祥事を上位に）
   corroboration: {per_source: 0.10, cap: 1.25}  # 同じ種類のイベントを別の情報源も報じていたら +10%ずつ（最大1.25倍）
   severe_words: {per_word: 5, cap: 15}          # 「重大・組織的・隠蔽・逮捕・過去最大…」などの語があれば +5点ずつ（最大+15）
   tdnet:

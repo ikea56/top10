@@ -1,0 +1,43 @@
+name: daily-update
+
+on:
+  schedule:
+    # 日本時間 月〜金の朝7:10（= UTC の日〜木 22:10）に開始。寄り付き前（9:00）までに完了する想定（所要は30分前後）。
+    # 実行の最後に、朝に動く情報（保有銘柄・先物・為替・米国株）を取得します。混雑時は数十分遅れることがあります
+    - cron: "10 22 * * 0-4"
+  workflow_dispatch:      # 手動実行ボタン用
+
+permissions:
+  contents: write         # 結果（docs/・data/）をリポジトリに保存するため
+
+concurrency:
+  group: site-update      # 週次バックテストと同時に走らないようにする
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: ランキング生成
+        env:
+          HOLDINGS_KEY: ${{ secrets.HOLDINGS_KEY }}      # 保有銘柄の合言葉（Secrets。未設定なら保有銘柄の監視だけ省略）
+        run: python -m src.main
+      - name: 結果を保存（コミット）
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs data
+          if git diff --cached --quiet; then
+            echo "変更なし"
+          else
+            git commit -m "daily update $(TZ=Asia/Tokyo date +%F)"
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+            git push
+          fi

@@ -28,7 +28,7 @@
   {% if demo %}<div class="banner warn">⚠️ <b>デモ表示です。</b>架空の会社・架空のニュースです。</div>{% endif %}
   <div class="banner neg-note"><b>このページは「信用リスクの監視」用です。空売りの推奨ではありません。</b>
     点数は売買の指示ではなく、<b>原文を確認する優先度</b>です。ニュースには誤報・古い情報・同名他社の混同が含まれることがあります。最終判断はご自身で。</div>
-  <div class="banner neg-note2">対象は<b>「いま普通に売買できる銘柄」</b>だけです（TOB・買収が決まった銘柄、上場廃止が決まった銘柄、取引が止まっている銘柄は除外）。{% if check and check.price_skipped %}<br>⚠️ 今回は株価を取得できなかったため、取引停止の確認はできていません。{% endif %}{% if check and check.td_fail %}<br>⚠️ {{ check.td_fail }}銘柄はTDnetの過去履歴を取得できず、TOB等の確認が不完全です。{% endif %}</div>
+  <div class="banner neg-note2">対象は<b>「いま普通に売買でき、信用売りができる状態の銘柄」</b>だけです。次の銘柄は除外しています：TOB・買収が決まった銘柄／上場廃止・法的整理が決まった銘柄／チャートが動いていない銘柄（売買代金が少ない・値幅がほぼ無い）／売上高・時価総額が小さすぎる銘柄／貸借銘柄でない（制度信用で売れない）銘柄・貸借取引停止の銘柄。<br><b>並び順</b>：点数に「新着ボーナス」を加えた順です（最新のイベントが1日以内＋{{ fresh.d1 }}、3日以内＋{{ fresh.d3 }}、7日以内＋{{ fresh.d7 }}）。出たばかりの不祥事ほど上に来ます。{% if check and check.short is not defined and check.size_known is not defined %}{% endif %}{% if check and check.short and not check.short.lists %}<br>⚠️ 貸借銘柄の一覧を取得・解読できなかったため、貸借かどうかは確認できていません（除外していません）。{% endif %}{% if check and check.price_skipped %}<br>⚠️ 今回は株価を取得できなかったため、取引停止の確認はできていません。{% endif %}{% if check and check.td_fail %}<br>⚠️ {{ check.td_fail }}銘柄はTDnetの過去履歴を取得できず、TOB等の確認が不完全です。{% endif %}</div>
   {% if all_failed %}<div class="banner danger">⚠️ すべての情報源を取得できませんでした。「取得状況」を確認してください。</div>{% endif %}
 
   <section class="card">
@@ -49,10 +49,12 @@
     <header class="stock-head">
       <div class="neg-score {{ r.band }}"><b>{{ r.score }}</b><small>{{ r.band_label }}</small></div>
       <div class="ident">
-        <h3>{{ r.name }}</h3>
+        <h3>{{ r.name }}{% if r.is_new %} <span class="ntag new">🆕 新着</span>{% endif %}</h3>
         <p class="sub">{{ r.code }} ・ {{ r.market }} ・ {{ r.sector }}</p>
       </div>
     </header>
+    <p class="neg-short {{ r.short.key if r.short else 'unknown' }}">🏦 信用取引：<b>{{ r.short.label if r.short else '不明' }}</b>{% if r.short and r.short.notes %}<br><small>{{ r.short.notes|join(' ／ ') }}</small>{% endif %}</p>
+    {% if r.stats or r.size %}<p class="neg-stats">{% if r.stats %}直近5日 {{ '%+.1f'|format(r.stats.ret5) if r.stats.ret5 is not none else '—' }}%　出来高 {{ r.stats.vol_ratio if r.stats.vol_ratio else '—' }}倍（直近3日÷その前）　売買代金 約{{ ((r.stats.turnover or 0)/1e8)|round(1) }}億円/日　{% endif %}{% if r.size %}時価総額 {{ ((r.size.market_cap or 0)/1e8)|round|int if r.size.market_cap else '不明' }}億円　売上高 {{ ((r.size.revenue or 0)/1e8)|round|int if r.size.revenue else '不明' }}億円{% endif %}</p>{% endif %}
     <p class="neg-tags">{% for l in r.labels %}<span class="ntag">{{ l }}</span>{% endfor %}</p>
     <p class="neg-sum"><b>要約</b>　{{ r.summary }}</p>
     <p class="neg-dates">検出日 {{ r.detected }}　／　最新の公表日 {{ r.latest }}{% if not r.official %}　<span class="neg-un">※報道のみ（公式開示は未確認）</span>{% endif %}</p>
@@ -91,6 +93,7 @@
 
   <section class="card">
     <h2>点数の見方（計算方法）</h2>
+    <p class="hint">下の1〜7が「点数」、並び順は点数＋新着ボーナスです。</p>
     <ol class="concl">
       <li><b>イベントの基本点</b>（0〜100）：{% for k, v in points.items() %}{{ k }} {{ v }}{% if not loop.last %}／{% endif %}{% endfor %}</li>
       <li><b>新しさ</b>：{{ rec.full_days }}日以内は100％、{{ days }}日前に向けて{{ (rec.min_factor*100)|round|int }}％まで直線で下げる。</li>

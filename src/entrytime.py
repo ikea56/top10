@@ -110,12 +110,21 @@ def compute(rec: pd.DataFrame, panel_close: pd.DataFrame, horizons: list[int], c
 
 
 def analyze(picks: list[tuple[pd.Timestamp, str]], panel: dict[str, pd.DataFrame], cfg: Config,
-            download: Callable[[list[str], str], dict[str, pd.DataFrame]] | None = None, store_path: Path | None = None) -> dict[str, Any]:
+            download: Callable[[list[str], str], dict[str, pd.DataFrame]] | None = None,
+            prev_store: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    """prev_store＝前回までにためた記録（data/backtest_summary.json の entrytime_store）。結果の "store" を、次回に引き継ぐ。
+    ※別ファイルに書くとGitHub Actionsの保存で取りこぼすため、summaryのJSONの中に入れてためる。"""
     ec = cfg["entrytime"]
     if not ec.get("enabled", True):
         return {"ok": False, "reason": "設定で無効になっています"}
-    sp = store_path or ROOT / ec["store"]
-    old = pd.read_csv(sp, dtype={"code": str}) if sp.exists() else pd.DataFrame(columns=COLS)
+    old = pd.DataFrame(prev_store or [], columns=COLS)
+    if old.empty:                                         # 旧版（CSV保存）からの引き継ぎ（読むだけ）
+        legacy = ROOT / ec["store"]
+        if legacy.exists():
+            try:
+                old = pd.read_csv(legacy, dtype={"code": str})[COLS]
+            except Exception:  # noqa: BLE001
+                old = pd.DataFrame(columns=COLS)
     tickers = sorted({(c if c.endswith(".T") else c + ".T") for _, c in picks})
     new = pd.DataFrame(columns=COLS)
     if tickers:
@@ -126,8 +135,7 @@ def analyze(picks: list[tuple[pd.Timestamp, str]], panel: dict[str, pd.DataFrame
         except Exception as e:  # noqa: BLE001
             log.warning("5分足の取得・計算に失敗（保存済みの分だけで検証します）: %s", e)
     rec = merge_store(old, new)
-    sp.parent.mkdir(parents=True, exist_ok=True)
-    rec.to_csv(sp, index=False)
     res = compute(rec, panel["close"], [int(h) for h in ec["horizons"]], cfg["backtest"]["cost_pct"] / 100, int(ec["min_n"]), float(ec["t_good"]))
     res["period"] = (rec["pick_date"].min(), rec["pick_date"].max()) if len(rec) else None
+    res["store"] = [{k: (None if (isinstance(v, float) and v != v) else v) for k, v in r.items()} for r in rec.round(4).to_dict("records")]
     return res

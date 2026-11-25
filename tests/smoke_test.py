@@ -830,6 +830,13 @@ def test_entry10():
     assert r["rows"]["5"]["types"]["pam"]["mean"] < r["rows"]["5"]["types"]["open"]["mean"], "後で買うほど（高く買うので）平均は下がる"
     assert r["rows"]["5"]["best"] in ("prev", "open") and "最も高い" in r["conclusion"]
     assert not ET.compute(pd.DataFrame(columns=ET.COLS), close, [5], 0.002, 30, 2.0)["ok"]
+    # 記録は別ファイルではなく summary(JSON) の中に引き継ぐ（Actionsの保存で取りこぼさない）
+    import json as _j, tempfile as _t
+    with _t.TemporaryDirectory() as _d:
+        ET.ROOT = Path(_d)                                   # 旧CSVの読み込み先を空にして、ファイルを書かないことも確認
+        r2 = ET.analyze([], {"close": close, "open": opn}, cfg, lambda t, p: {}, rec.to_dict("records"))
+        assert len(r2["store"]) == 30 and r2["ok"] and not list(Path(_d).rglob("*")), "新規ファイルを作らない"
+        _j.dumps(r2)                                         # JSONにできる（NaNなし）
     merged = ET.merge_store(rec.iloc[:10], rec.iloc[5:15])
     assert len(merged) == 15
     # 業績キャッシュ：30日まで使い回し、決算発表を過ぎたら取り直す
@@ -956,7 +963,7 @@ def test_negative():
     assert not N.untradable_reasons("9001", [("上場廃止が決定", ago(1), "Googleニュース")]), "報道だけでは上場廃止を断定しない"
     assert N.untradable_reasons("9001", [("TOBを発表", ago(1), "Googleニュース")]), "TOBは報道でも対象外"
     idx_ = pd.bdate_range(end=pd.Timestamp(today), periods=8)
-    ok_df = pd.DataFrame({"Close": 100.0, "Volume": 1000.0}, index=idx_)
+    ok_df = pd.DataFrame({"Close": 100.0, "Volume": 5000000.0}, index=idx_)
     assert N.price_problem(ok_df, today) is None and N.price_problem(None, today) is None
     assert "止まって" in N.price_problem(ok_df.iloc[:2], today) and "出来高" in N.price_problem(ok_df.assign(Volume=0.0), today)
     rows_ = [{"code": c, "name": c, "score": 70} for c in ("9001", "9002", "9003", "9004")]
@@ -970,7 +977,64 @@ def test_negative():
         raise RuntimeError("x")
     k3, o3, s3 = N.filter_tradable(rows_, {}, today, cfg, tdfail, None, set())
     assert len(k3) == 4 and s3["td_fail"] == 4, "TDnet履歴を取れなくても動く（確認不完全として表示）"
-    print("ok  ㉗ 売買できない銘柄の除外")
+    # ㉗追補：信用売りできる状態・動いていない銘柄・規模・新着順
+    from src import margin as MG
+    import io as _io
+    lists = ({"1111", "2222", "3333"}, {"1111", "2222"})
+    assert MG.short_status("1111", lists, {}, {})["key"] == "ok" and MG.short_status("3333", lists, {}, {})["key"] == "no_lending"
+    assert MG.short_status("9999", lists, {}, {})["key"] == "no_margin" and MG.short_status("1111", lists, {}, {"1111": "stop"})["key"] == "stop"
+    w = MG.short_status("1111", lists, {"1111": "新規売りの委託保証金率50%以上"}, {"1111": "caution"})
+    assert w["key"] == "ok_warn" and w["can_short"] is True and len(w["notes"]) == 2
+    assert MG.short_status("1111", None, {}, {})["key"] == "unknown" and MG.short_status("1111", None, {}, {})["can_short"] is None
+    rg = MG.parse_regulated("<table><tr><th>銘柄名</th><th>コード</th><th>実施日</th><th>規制の内容</th></tr><tr><td>A</td><td>1111</td><td>2026/11/20</td><td>新規売りの委託保証金率引上げ</td></tr></table>"
+                            "<table><tr><th>銘柄名</th><th>コード</th><th>解除日</th><th>規制の内容</th></tr><tr><td>B</td><td>2222</td><td>2026/11/19</td><td>x</td></tr></table>")
+    assert set(rg) == {"1111"}, "解除済みは含めない"
+    assert MG.parse_jsf("<table><tr><td>1111</td><td>貸借取引停止</td></tr><tr><td>2222</td><td>注意喚起</td></tr></table>") == {"1111": "stop", "2222": "caution"}
+    df_x = pd.DataFrame([["区分", "銘柄名", "コード"], ["貸借", "A", "1111"], ["制度信用", "B", "3333"]])
+    bio = _io.BytesIO()
+    df_x.to_excel(bio, header=False, index=False)
+    assert MG.parse_margin_xlsx(bio.getvalue()) == ({"1111", "3333"}, {"1111"}) and MG.parse_margin_xlsx(b"broken") is None
+    assert MG.find_list_url('<a href="/a/20261102_list.xlsx">', "https://www.jpx.co.jp/x/index.html") == "https://www.jpx.co.jp/a/20261102_list.xlsx"
+    rows_ = [{"code": c, "name": c, "score": 70} for c in ("1111", "3333", "9999")]
+    kp, ex = N.apply_short(rows_, lists, {}, {})
+    assert [r["code"] for r in kp] == ["1111"] and len(ex) == 2
+    kp2, ex2 = N.apply_short(rows_, None, {}, {})
+    assert len(kp2) == 3 and not ex2, "貸借一覧を取れないときは除外しない"
+    # 動いていない銘柄
+    idx_ = pd.bdate_range(end=pd.Timestamp(today), periods=25)
+    mk = lambda c, hi, lo, vol: pd.DataFrame({"Close": c, "High": hi, "Low": lo, "Volume": vol}, index=idx_)       # noqa: E731
+    active = mk(np.linspace(1000, 1100, 25), np.linspace(1010, 1110, 25), np.linspace(990, 1090, 25), 500000.0)
+    pinned = mk(1000.0, 1002.0, 999.0, 500000.0)
+    thin = mk(np.linspace(100, 110, 25), np.linspace(101, 111, 25), np.linspace(99, 109, 25), 1000.0)
+    assert N.inactive_reason(N.price_stats(active, cfg), cfg) is None
+    assert "動いていません" in N.inactive_reason(N.price_stats(pinned, cfg), cfg) and "売買代金" in N.inactive_reason(N.price_stats(thin, cfg), cfg)
+    kp3, ex3, _ = N.filter_tradable([{"code": c, "name": c, "score": 70} for c in ("1111", "2222", "3333")], {}, today, cfg, None,
+                                    lambda codes: {"1111": active, "2222": pinned, "3333": thin}, set())
+    assert [r["code"] for r in kp3] == ["1111"] and kp3[0]["stats"]["ret5"] is not None
+    # 規模
+    z = cfg["negative"]["size"]
+    assert N.size_reason({"revenue": 5e9, "market_cap": 1e11}, cfg) and N.size_reason({"revenue": 5e10, "market_cap": 1e9}, cfg)
+    assert N.size_reason({"revenue": 5e10, "market_cap": 1e11}, cfg) is None and N.size_reason({"revenue": None, "market_cap": None}, cfg) is None and N.size_reason(None, cfg) is None
+    with tempfile.TemporaryDirectory() as td2:
+        cp = Path(td2) / "size.json"
+        calls = []
+        def getter(c):
+            calls.append(c)
+            return {"revenue": 5e10, "market_cap": 1e11}
+        a1 = N.fetch_size(["1111"], cp, today, cfg, getter)
+        a2 = N.fetch_size(["1111"], cp, today + timedelta(days=5), cfg, getter)
+        assert a1 == a2 and calls == ["1111"], "30日はキャッシュを使う"
+    # 新着順：出たばかりのイベントが上に来る
+    def mkres(day_ago):
+        it_ = N.Item("TDnet", ago(day_ago), "9001", "架空製作所", "不適切な会計処理に関するお知らせ", "", "official")
+        return {"9001": {"score": 70, "parts": N.company_score(N.classify(it_), today, cfg)["parts"], "events": N.classify(it_)}}
+    old_r = N.build_rows(mkres(9), info, {}, today, cfg)[0]
+    new_r = N.build_rows(mkres(0), info, {}, today, cfg)[0]
+    assert new_r["is_new"] and not old_r["is_new"] and new_r["rank_score"] > old_r["rank_score"] + 10
+    both = {"9001": mkres(0)["9001"], "9002": {**mkres(9)["9001"]}}
+    two = N.build_rows(both, info, {}, today, cfg)
+    assert two[0]["code"] == "9001", "新しい不祥事が上位"
+    print("ok  ㉗ 売買できない銘柄の除外・信用売り可否・動いていない銘柄・規模・新着順")
     print("ok  ㉗ 信用リスク監視（17分類・誤検出の除外・点数・社名結びつけ・RSS/TDnet解析・検出日・ページ）")
 
 

@@ -1,0 +1,41 @@
+name: fx-update
+
+# ドル円アノマリー分析ページ（docs/fx/）の毎日の更新。株のランキング（daily-update）とは別の仕組みです。
+on:
+  schedule:
+    # 日本時間 火〜土の朝7:15（= UTC の月〜金 22:15）。NY時間（〜翌6:00）が終わった直後に、前日分までを集計します
+    - cron: "15 22 * * 1-5"
+  workflow_dispatch:      # 手動実行（Run workflow）
+
+permissions:
+  contents: write
+
+concurrency:
+  group: site-update      # 株の更新・週次バックテストと同時にコミットしないようにする
+  cancel-in-progress: false
+
+jobs:
+  fx:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: ドル円の分析ページを生成
+        run: python -m src.fx
+      - name: 結果を保存（コミット）
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs data
+          if git diff --cached --quiet; then
+            echo "変更なし"
+          else
+            git commit -m "fx update $(TZ=Asia/Tokyo date +%F)"
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+            git push
+          fi

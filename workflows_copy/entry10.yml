@@ -1,0 +1,49 @@
+name: entry10
+
+# 10時エントリー判定。朝のランキングは変えず、寄り付き後（〜10:00）の値動きで 🟢🟡🔴 を付けて docs/entry.json に出します。
+on:
+  schedule:
+    # GitHubの自動実行は数分〜十数分遅れることがあるため、早めに複数回起動します（10:30までに必ず終わらせるため）。
+    # 日本時間 月〜金の 9:55 / 10:05 / 10:12（= UTC の月〜金 00:55 / 01:05 / 01:12）。2回目以降は、完了済みなら何もしません。
+    - cron: "55 0 * * 1-5"
+    - cron: "5 1 * * 1-5"
+    - cron: "12 1 * * 1-5"
+  workflow_dispatch:      # 手動実行（Run workflow）。10:00より前に押した場合は10:00まで待ちます
+
+permissions:
+  contents: write
+
+concurrency:
+  group: site-update
+  cancel-in-progress: false
+
+jobs:
+  entry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: 10時エントリー判定
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            python -m src.entry10 --skip-if-done
+          else
+            python -m src.entry10
+          fi
+      - name: 結果を保存（コミット）
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs data
+          if git diff --cached --quiet; then
+            echo "変更なし"
+          else
+            git commit -m "entry10 $(TZ=Asia/Tokyo date +%F)"
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+            git push
+          fi

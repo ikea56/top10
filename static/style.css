@@ -426,3 +426,4 @@ article.neg[hidden]{display:none}
 .neg-ev{padding-left:1.1em;font-size:.85rem}.neg-ev li{margin:.35em 0}
 .neg-src{list-style:none;padding:0;margin:.5em 0}.neg-src li{padding:.5em 0;border-bottom:1px solid var(--line,#ddd);font-size:.9rem}.neg-src .dim{opacity:.65}
 .neg-note2{background:var(--card,transparent);border:1px solid var(--line,#ccc)}.neg-ex{padding-left:1.1em;font-size:.88rem}.neg-ex li{margin:.5em 0}
+.ntag.new{background:var(--red-bg);color:var(--red);border-color:var(--red)}.neg-short{margin:.4em 0;font-size:.88rem}.neg-short.ok b{color:var(--green)}.neg-short.ok_warn b,.neg-short.unknown b{color:var(--yellow)}.neg-stats{font-size:.8rem;color:var(--muted,#777)}

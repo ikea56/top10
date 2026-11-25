@@ -1,0 +1,44 @@
+name: reset-records
+
+# 「これまでの記録を消して、今日から記録をとり直す」ための手動ボタンです。
+# 消すもの：毎日のランキング履歴（data/history）、追跡の台帳（data/tracking_ledger.json）、追跡ページ・CSV
+# 消さないもの：週次バックテストの結果、業績データのキャッシュ、設定
+# 実行後に daily-update を実行すると、その日から新しく記録が始まります。
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "消してよいなら RESET と入力（元に戻せません。コミット履歴には残ります）"
+        required: true
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: site-update
+  cancel-in-progress: false
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 確認
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "RESET" ]; then
+            echo "確認欄に RESET と入力していないため、何も消さずに終了します。"
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+      - name: 記録を削除してコミット
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -r -q --ignore-unmatch data/history data/tracking_ledger.json docs/tracking.html docs/tracking_daily.csv docs/analysis.html
+          if git diff --cached --quiet; then
+            echo "消す記録がありませんでした"
+          else
+            git commit -m "reset records $(TZ=Asia/Tokyo date +%F)"
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+            git push
+          fi

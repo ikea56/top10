@@ -531,6 +531,41 @@ def price_problem(df: Any, today: date) -> str | None:
     return None
 
 
+def price_stats(df: Any, cfg: Config) -> dict[str, Any] | None:
+    """日足から、直近の『動き』の指標：売買代金（20日平均）・直近の値幅・5日騰落率・出来高倍率（直近3日÷その前）。"""
+    try:
+        d = df.dropna(subset=["Close"]).tail(20)
+    except Exception:  # noqa: BLE001
+        return None
+    if len(d) < 5:
+        return None
+    n = int(cfg["negative"]["activity"]["pinned_days"])
+    w = d.tail(n)
+    mean_c = float(w["Close"].mean())
+    out: dict[str, Any] = {"close": round(float(d["Close"].iloc[-1]), 1), "days": len(d),
+                           "turnover": float((d["Close"] * d["Volume"]).mean()) if "Volume" in d.columns else None,
+                           "range_pct": round(float((w["High"].max() - w["Low"].min()) / mean_c * 100), 2) if mean_c > 0 and "High" in w.columns else None,
+                           "ret5": round(float(d["Close"].iloc[-1] / d["Close"].iloc[-6] * 100 - 100), 1) if len(d) >= 6 else None,
+                           "vol_ratio": None}
+    if "Volume" in d.columns and len(d) >= 8:
+        base = float(d["Volume"].iloc[:-3].mean())
+        if base > 0:
+            out["vol_ratio"] = round(float(d["Volume"].tail(3).mean() / base), 2)
+    return out
+
+
+def inactive_reason(st: dict[str, Any] | None, cfg: Config) -> str | None:
+    """「チャートが動いていない」銘柄の理由。指標が取れなければ None（判定しない）。"""
+    if not st:
+        return None
+    a = cfg["negative"]["activity"]
+    if st.get("turnover") is not None and st["turnover"] < float(a["min_turnover_yen"]):
+        return f"売買代金が少なすぎます（1日平均 約{st['turnover'] / 1e6:.0f}百万円）。信用売りの約定や買い戻しが難しい銘柄です"
+    if st.get("range_pct") is not None and st["days"] >= int(a["pinned_days"]) and st["range_pct"] < float(a["pinned_range_pct"]):
+        return f"株価がほとんど動いていません（直近{a['pinned_days']}日の値幅 {st['range_pct']}%）。TOB価格への張り付き等の可能性があります"
+    return None
+
+
 def filter_tradable(rows: list[dict[str, Any]], raw_by_code: dict[str, list[Item]], today: date, cfg: Config,
                     td_fetch: Callable[[str], list[Any]] | None, price_fn: Callable[[list[str]], dict[str, Any]] | None,
                     manual: set[str] | None = None) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
@@ -563,11 +598,114 @@ def filter_tradable(rows: list[dict[str, Any]], raw_by_code: dict[str, list[Item
         pp = price_problem(prices.get(code), today) if prices else None
         if pp:
             reasons.append({"reason": pp, "title": "", "date": "", "source": "株価"})
+        elif prices:
+            r["stats"] = price_stats(prices.get(code), cfg)
+            ir = inactive_reason(r["stats"], cfg)
+            if ir:
+                reasons.append({"reason": ir, "title": "", "date": "", "source": "株価"})
         if reasons:
             out.append({"code": code, "name": r["name"], "score": r["score"], "reasons": reasons[:3]})
         else:
             keep.append(r)
     return keep, out, st
+
+
+def apply_short(rows: list[dict[str, Any]], lists: Any, regulated: dict[str, str] | None, jsf: dict[str, str] | None,
+                require: bool = True) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """各銘柄に信用売りの状態（r["short"]）を付け、売りできない状態（貸借でない・停止中）をランキングから外す。不明は残す。"""
+    from .margin import short_status
+
+    keep, out = [], []
+    for r in rows:
+        st = short_status(r["code"], lists, regulated, jsf)
+        r["short"] = st
+        if require and st["can_short"] is False:
+            out.append({"code": r["code"], "name": r["name"], "score": r["score"],
+                        "reasons": [{"reason": "信用売りできない状態：" + st["label"], "title": "；".join(st["notes"]), "date": "", "source": "JPX・日証金"}]})
+        else:
+            keep.append(r)
+    return keep, out
+
+
+# ---------------------------------------------------------------- 規模（売上高・時価総額）で小さすぎる会社を除く
+def size_reason(info: dict[str, Any] | None, cfg: Config) -> str | None:
+    """売上高・時価総額が小さすぎる会社の理由。値が取れていなければ None（判定しない＝残して「不明」と表示）。
+    小さすぎる会社は、少数の個人による相場操縦・インサイダー的な値動きや、情報の信頼性の低さが混ざりやすいため除く。"""
+    if not info:
+        return None
+    z = cfg["negative"]["size"]
+    rev, cap = info.get("revenue"), info.get("market_cap")
+    if rev is not None and rev < float(z["min_revenue_yen"]):
+        return f"売上高が小さすぎます（約{rev / 1e8:.0f}億円。基準は{float(z['min_revenue_yen']) / 1e8:.0f}億円以上）"
+    if cap is not None and cap < float(z["min_market_cap_yen"]):
+        return f"時価総額が小さすぎます（約{cap / 1e8:.0f}億円。基準は{float(z['min_market_cap_yen']) / 1e8:.0f}億円以上）"
+    return None
+
+
+def fetch_size(codes: list[str], cache_path: Path, today: date, cfg: Config, getter: Callable[[str], dict[str, Any]] | None = None) -> dict[str, dict[str, Any]]:
+    """売上高（直近の通期）と時価総額をYahoo Financeから取得。30日キャッシュ（data/negative/size_cache.json）。"""
+    z = cfg["negative"]["size"]
+    cache: dict[str, Any] = {}
+    if cache_path.exists():
+        try:
+            cache = json.loads(cache_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            cache = {}
+    getter = getter or _yf_size
+    out: dict[str, dict[str, Any]] = {}
+    for c in codes:
+        hit = cache.get(c)
+        if hit and (today - date.fromisoformat(hit["fetched"])).days <= int(z["cache_days"]) and not (hit["data"].get("revenue") is None and hit["data"].get("market_cap") is None):
+            out[c] = hit["data"]
+            continue
+        try:
+            d = getter(c)
+        except Exception as e:  # noqa: BLE001
+            log.warning("規模データを取得できません（%s）: %s", c, e)
+            continue
+        cache[c] = {"fetched": today.isoformat(), "data": d}
+        out[c] = d
+        _time.sleep(float(z["sleep"]))
+    lim = (today - timedelta(days=int(z["cache_days"]) + 7)).isoformat()
+    cache = {k: v for k, v in cache.items() if v.get("fetched", "") >= lim}
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    cache_path.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
+    return out
+
+
+def _yf_size(code: str) -> dict[str, Any]:
+    import yfinance as yf
+
+    t = yf.Ticker(code + ".T")
+    cap = rev = None
+    try:
+        cap = float(t.fast_info["market_cap"])
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        inc = t.income_stmt
+        for label in ("Total Revenue", "Operating Revenue", "Revenue"):
+            if inc is not None and label in inc.index:
+                v = inc.loc[label].dropna()
+                if len(v):
+                    rev = float(v.iloc[0])
+                    break
+    except Exception:  # noqa: BLE001
+        pass
+    return {"market_cap": cap if cap and cap > 0 else None, "revenue": rev if rev and rev > 0 else None}
+
+
+def apply_size(rows: list[dict[str, Any]], sizes: dict[str, dict[str, Any]], cfg: Config) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    keep, out = [], []
+    for r in rows:
+        info = sizes.get(r["code"])
+        r["size"] = info
+        why = size_reason(info, cfg)
+        if why:
+            out.append({"code": r["code"], "name": r["name"], "score": r["score"], "reasons": [{"reason": why, "title": "規模の小さい会社は、少数の個人による相場操縦・インサイダー的な値動きが混ざりやすいため除外", "date": "", "source": "Yahoo Finance"}]})
+        else:
+            keep.append(r)
+    return keep, out
 
 
 def download_prices(codes: list[str]) -> dict[str, Any]:
@@ -577,7 +715,7 @@ def download_prices(codes: list[str]) -> dict[str, Any]:
     for i in range(0, len(codes), 60):
         part = [c + ".T" for c in codes[i:i + 60]]
         try:
-            raw = yf.download(part, period="15d", interval="1d", auto_adjust=False, progress=False, group_by="ticker", threads=True)
+            raw = yf.download(part, period="40d", interval="1d", auto_adjust=False, progress=False, group_by="ticker", threads=True)
         except Exception as e:  # noqa: BLE001
             log.warning("株価の取得に失敗（%s…）: %s", part[0], e)
             continue
@@ -627,15 +765,26 @@ def build_rows(res: dict[str, dict[str, Any]], info: dict[str, dict], seen: dict
                           "full_title": e.item.title, "url": e.item.url, "kind": e.item.kind,
                           "detected": seen.get(event_key(code, e), today.isoformat())})
         labels = sorted({p["event"].label for p in r["parts"]}, key=CATEGORY_ORDER.index)
+        fr = n["fresh"]
+        ages = []
+        for e in evs:
+            if e.item.source in ("JPX公式", "財務データ"):          # 公式一覧・財務データは「出た日」ではなく、初めて見つけた日で新しさを測る
+                dd = seen.get(event_key(code, e), today.isoformat())
+            else:
+                dd = e.item.date
+            ages.append(max(0, (today - date.fromisoformat(dd)).days))
+        fresh_age = min(ages) if ages else 99
+        bonus = fr["d1"] if fresh_age <= 1 else fr["d3"] if fresh_age <= 3 else fr["d7"] if fresh_age <= 7 else 0
         rows.append({"code": code, "name": info[code]["name"], "market": info[code]["market"], "sector": info[code]["sector"],
                      "score": r["score"], "band": cls, "band_label": blabel, "labels": labels,
+                     "fresh_age": fresh_age, "rank_score": r["score"] + bonus, "is_new": fresh_age <= 1,
                      "summary": summarize(info[code]["name"], r["parts"]),
                      "events": dedup[:8], "n_events": len(dedup),
                      "detected": min((d["detected"] for d in dedup), default=today.isoformat()),
                      "latest": max((d["date"] for d in dedup), default=None),
                      "official": any(d["kind"] == "official" for d in dedup),
                      "parts": [{"label": p["event"].label, "points": p["points"], "sources": p["sources"]} for p in r["parts"]]})
-    rows.sort(key=lambda x: (-x["score"], -len(x["labels"]), x["code"]))
+    rows.sort(key=lambda x: (-x["rank_score"], -x["score"], x["fresh_age"], x["code"]))
     return rows[: int(limit or n["max_rows"])]
 
 
@@ -650,7 +799,7 @@ def page_context(rows: list[dict[str, Any]], status: list[dict[str, Any]], now: 
             "generated": f"{now:%Y-%m-%d %H:%M}", "generated_iso": now.isoformat(), "days": n["days"], "min_score": n["min_score"], "demo": demo,
             "points": {LABELS[k]: v for k, v in n["points"].items() if k not in ("going_concern",)} | {"継続赤字（継続企業の前提）": n["points"]["going_concern"]},
             "bands_cfg": n["bands"], "rel": n["reliability"], "rec": n["recency"], "corr": n["corroboration"], "sev": n["severe_words"],
-            "all_failed": not any(s["ok"] for s in status), "excluded": excluded or [], "check": check or {}}
+            "all_failed": not any(s["ok"] for s in status), "excluded": excluded or [], "check": check or {}, "fresh": n["fresh"]}
 
 
 def write_page(ctx: dict[str, Any], out_dir: Path) -> Path:
@@ -717,14 +866,29 @@ def run(demo: bool = False, out_dir: Path | None = None) -> Path:
     seen = update_seen((ROOT / cfg["negative"]["seen_file"]) if not demo else (ROOT / "data" / "demo" / "negative_seen.json"), entries, today)
     cands = build_rows(res, info, seen, today, cfg, limit=int(cfg["negative"]["candidates"]))
     raw = group_items(items, info, pairs, today, int(cfg["negative"]["days"]))
+    sc = cfg["negative"]["short"]
     if demo:
         rows, excluded, check = demo_filter(cands, raw, today, cfg)
     else:
-        from . import tdnet
+        from . import margin, tdnet
         client = tdnet.make_client(cfg, False)
         rows, excluded, check = filter_tradable(cands, raw, today, cfg, client.fetch if client else None, download_prices, load_manual_excludes())
         if client is not None:
             client.save()
+        if sc["enabled"]:
+            lists = margin.fetch_margin_lists(sc["margin_page"])
+            regulated = margin.fetch_regulated(sc["regulation_page"])
+            jsf = margin.fetch_jsf(sc["jsf_page"])
+            rows, ex2 = apply_short(rows, lists, regulated, jsf)
+            excluded += ex2
+            check["short"] = {"lists": lists is not None, "regulated": regulated is not None, "jsf": jsf is not None}
+            status += [{"name": "JPX 制度信用・貸借銘柄一覧", "ok": lists is not None, "n": len(lists[1]) if lists else 0, "note": "貸借銘柄数（毎月第1営業日更新のExcel）" if lists else "取得・解読できませんでした。貸借かどうかは「不明」として除外していません"},
+                       {"name": "JPX 信用取引規制（規制中銘柄）", "ok": regulated is not None, "n": len(regulated or {}), "note": "増担保などの規制中銘柄"},
+                       {"name": "日本証券金融 銘柄別制限措置", "ok": jsf is not None, "n": len(jsf or {}), "note": "貸借取引の停止・注意喚起（ページ形式が未確認のため参考）"}]
+        sizes = fetch_size([r["code"] for r in rows], ROOT / "data" / "negative" / "size_cache.json", today, cfg)
+        rows, ex3 = apply_size(rows, sizes, cfg)
+        excluded += ex3
+        check["size_known"] = len(sizes)
     rows = rows[: int(cfg["negative"]["max_rows"])]
     log.info("売買できない等で対象外にした銘柄: %d件（残り %d銘柄）", len(excluded), len(rows))
     ctx = page_context(rows, status, now, cfg, demo, excluded, check)
@@ -735,7 +899,12 @@ def run(demo: bool = False, out_dir: Path | None = None) -> Path:
 
 def demo_filter(cands, raw, today, cfg):
     td = {"9005": [Item("TDnet", (today - timedelta(days=20)).isoformat(), "9005", "ダミー食品", "株式会社○○による当社株式に対する公開買付けに関する意見表明のお知らせ", "", "official")]}
-    return filter_tradable(cands, raw, today, cfg, lambda c: [type("D", (), {"title": i.title, "date": i.date})() for i in td.get(c, [])], None)
+    rows, ex, st = filter_tradable(cands, raw, today, cfg, lambda c: [type("D", (), {"title": i.title, "date": i.date})() for i in td.get(c, [])], None)
+    rows, ex2 = apply_short(rows, ({"9001", "9002", "9003", "9004", "9006"}, {"9001", "9002", "9004"}), {"9002": "新規売り・新規買いの委託保証金率50%以上"}, None)
+    for r in rows:
+        r["size"] = {"market_cap": 8.0e10, "revenue": 5.2e10}
+        r["stats"] = {"close": 1000.0, "turnover": 3.2e8, "range_pct": 8.4, "ret5": -12.5 if r["code"] == "9001" else -3.1, "vol_ratio": 3.4 if r["code"] == "9001" else 1.2, "days": 20}
+    return rows, ex + ex2, st
 
 
 # ---------------------------------------------------------------- デモ（架空）

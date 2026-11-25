@@ -195,7 +195,7 @@ def _simulate_stop(carr: np.ndarray, cols: pd.Index, i: int, h: int, picks: list
     return {"ns": ns, "st": st, "hit": hit} if ns else None
 
 
-def run_replay(panel: Panel, bench: dict[str, pd.DataFrame], sectors: pd.Series, cfg: Config) -> dict[str, Any]:
+def run_replay(panel: Panel, bench: dict[str, pd.DataFrame], sectors: pd.Series, cfg: Config, prev_store: list | None = None) -> dict[str, Any]:
     bt, sc, flt = cfg["backtest"], cfg["scoring"], cfg["filters"]
     horizons: dict[str, int] = bt["horizons"]
     cost, top_n, tmax = bt["cost_pct"] / 100, cfg["top_n"], scoring.tech_max(cfg)
@@ -306,10 +306,13 @@ def run_replay(panel: Panel, bench: dict[str, pd.DataFrame], sectors: pd.Series,
             pbr = pullback.score_technical(s, regime.iloc[i], bool(nikkei.iloc[i]), cfg, bool(below200.iloc[i]))
             o2 = pd.DataFrame({"s": pbr["pb_tech_scaled"], "vr": s["vol_cont"]}).query("s > 0").sort_values(["s", "vr"], ascending=[False, True])
             recent += [(c.index[i], code) for code in o2.index[:top_n]]
-        summary["entrytime"] = entrytime.analyze(recent, panel, cfg)
+        et = entrytime.analyze(recent, panel, cfg, None, prev_store)
+        summary["entrytime_store"] = et.pop("store", prev_store or [])      # 次回に引き継ぐ記録（このJSONの中に保存する）
+        summary["entrytime"] = et
     except Exception as e:  # noqa: BLE001
         log.warning("エントリー時刻別検証に失敗しました: %s", e)
         summary["entrytime"] = {"ok": False, "reason": f"計算に失敗しました（{e}）"}
+        summary["entrytime_store"] = prev_store or []
     for r in records:           # メモリ解放
         r.pop("x", None)
     return summary
@@ -455,7 +458,12 @@ def main() -> None:
                                 min_success_ratio=d["min_success_ratio"], start=start)
         bench = download_benchmarks(start=start)
 
-    summary = run_replay(panel, bench, uni.set_index("ticker")["sector"], cfg)
+    prev_store = None
+    try:
+        prev_store = json.loads(summary_path.read_text(encoding="utf-8")).get("entrytime_store") if summary_path.exists() else None
+    except (OSError, ValueError):
+        prev_store = None
+    summary = run_replay(panel, bench, uni.set_index("ticker")["sector"], cfg, prev_store)
     summary_path.write_text(json.dumps(summary, ensure_ascii=False, indent=1), encoding="utf-8")
     log.info("保存しました: %s", summary_path)
     for k, p in summary["periods"].items():           # 押し目トップ10（メイン）
