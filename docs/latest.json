@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-26T08:03+09:00",
+ "generated_at": "2026-11-26T14:50+09:00",
  "data_date": "2026-11-25",
  "demo": false,
  "stance": {
@@ -93,8 +93,8 @@
     "total": 33,
     "base": 22,
     "events_pts": 11,
-    "expected": 29.4,
-    "win_rate": 0.5238735159921004,
+    "expected": 29.5,
+    "win_rate": 0.5265622096422566,
     "win_known": true,
     "liq": 0.85,
     "trend": [
@@ -233,8 +233,8 @@
     "total": 57,
     "base": 41,
     "events_pts": 16,
-    "expected": 50.8,
-    "win_rate": 0.5238735159921004,
+    "expected": 51.0,
+    "win_rate": 0.5265622096422566,
     "win_known": true,
     "liq": 0.85,
     "trend": [
@@ -291,7 +291,7 @@
    "rank": 3,
    "code": "4202",
    "name": "ダイセル",
-   "main": 75.7,
+   "main": 75.3,
    "pb_total": 60.9,
    "td_score": 14,
    "penalty": 0,
@@ -375,8 +375,8 @@
     "total": 41,
     "base": 26,
     "events_pts": 15,
-    "expected": 40.8,
-    "win_rate": 0.5238735159921004,
+    "expected": 41.0,
+    "win_rate": 0.5265622096422566,
     "win_known": true,
     "liq": 0.95,
     "trend": [
@@ -400,13 +400,13 @@
     "kind": "up",
     "prev": 4,
     "delta": 1,
-    "main_delta": 0.7999999999999972
+    "main_delta": 0.3999999999999915
    },
    "main_base": 74.9,
    "lead": {
     "key": "chemical",
     "group": "化学",
-    "score": 1.7,
+    "score": 0.8,
     "items": [
      {
       "label": "S&P500",
@@ -418,16 +418,16 @@
       "label": "WTI原油",
       "mark": "✅",
       "state": "good",
-      "text": "WTI原油上昇（+2.6%）"
+      "text": "WTI原油上昇（+1.4%）"
      }
     ],
-    "verdict": "good",
-    "headline": "化学に追い風",
-    "icon": "🟢",
+    "verdict": "flat",
+    "headline": "化学への影響は小さめ",
+    "icon": "🟡",
     "available": 2,
     "total": 2
    },
-   "lead_pts": 0.8
+   "lead_pts": 0.4
   },
   {
    "rank": 4,
@@ -510,8 +510,8 @@
     "total": 33,
     "base": 18,
     "events_pts": 15,
-    "expected": 24.2,
-    "win_rate": 0.5238735159921004,
+    "expected": 24.3,
+    "win_rate": 0.5265622096422566,
     "win_known": true,
     "liq": 0.7,
     "trend": [
@@ -568,7 +568,7 @@
    "rank": 5,
    "code": "4206",
    "name": "アイカ工業",
-   "main": 72.3,
+   "main": 71.8,
    "pb_total": 63.4,
    "td_score": 8,
    "penalty": 0,
@@ -653,8 +653,8 @@
     "total": 38,
     "base": 22,
     "events_pts": 16,
-    "expected": 37.8,
-    "win_rate": 0.5238735159921004,
+    "expected": 38.0,
+    "win_rate": 0.5265622096422566,
     "win_known": true,
     "liq": 0.95,
     "trend": [
@@ -678,13 +678,13 @@
     "kind": "up",
     "prev": 6,
     "delta": 1,
-    "main_delta": 1.3999999999999915
+    "main_delta": 0.8999999999999915
    },
    "main_base": 71.4,
    "lead": {
     "key": "chemical",
     "group": "化学",
-    "score": 1.7,
+    "score": 0.8,
     "items": [
      {
       "label": "S&P500",
@@ -696,22 +696,22 @@
       "label": "WTI原油",
       "mark": "✅",
       "state": "good",
-      "text": "WTI原油上昇（+2.6%）"
+      "text": "WTI原油上昇（+1.4%）"
      }
     ],
-    "verdict": "good",
-    "headline": "化学に追い風",
-    "icon": "🟢",
+    "verdict": "flat",
+    "headline": "化学への影響は小さめ",
+    "icon": "🟡",
     "available": 2,
     "total": 2
    },
-   "lead_pts": 0.8
+   "lead_pts": 0.4
   },
   {
    "rank": 6,
    "code": "7942",
    "name": "ＪＳＰ",
-   "main": 71.5,
+   "main": 71.1,
    "pb_total": 60.9,
    "td_score": 10,
    "penalty": 0,
@@ -788,8 +788,8 @@
     "total": 37,
     "base": 22,
     "events_pts": 15,
-    "expected": 27.1,
-    "win_rate": 0.5238735159921004,
+    "expected": 27.3,
+    "win_rate": 0.5265622096422566,
     "win_known": true,
     "liq": 0.7,
     "trend": [
@@ -813,13 +813,13 @@
     "kind": "up",
     "prev": 7,
     "delta": 1,
-    "main_delta": 1.2000000000000028
+    "main_delta": 0.7999999999999972
    },
    "main_base": 70.7,
    "lead": {
     "key": "chemical",
     "group": "化学",
-    "score": 1.7,
+    "score": 0.8,
     "items": [
      {
       "label": "S&P500",
@@ -831,16 +831,16 @@
       "label": "WTI原油",
       "mark": "✅",
       "state": "good",
-      "text": "WTI原油上昇（+2.6%）"
+      "text": "WTI原油上昇（+1.4%）"
      }
     ],
-    "verdict": "good",
-    "headline": "化学に追い風",
-    "icon": "🟢",
+    "verdict": "flat",
+    "headline": "化学への影響は小さめ",
+    "icon": "🟡",
     "available": 2,
     "total": 2
    },
-   "lead_pts": 0.8
+   "lead_pts": 0.4
   },
   {
    "rank": 7,
@@ -928,8 +928,8 @@
     "total": 34,
     "base": 24,
     "events_pts": 10,
-    "expected": 24.9,
-    "win_rate": 0.5238735159921004,
+    "expected": 25.1,
+    "win_rate": 0.5265622096422566,
     "win_known": true,
     "liq": 0.7,
     "trend": [
@@ -1043,8 +1043,8 @@
     "total": 46,
     "base": 31,
     "events_pts": 15,
-    "expected": 45.8,
-    "win_rate": 0.5238735159921004,
+    "expected": 46.0,
+    "win_rate": 0.5265622096422566,
     "win_known": true,
     "liq": 0.95,
     "trend": [
@@ -1183,8 +1183,8 @@
     "total": 30,
     "base": 20,
     "events_pts": 10,
-    "expected": 22.0,
-    "win_rate": 0.5238735159921004,
+    "expected": 22.1,
+    "win_rate": 0.5265622096422566,
     "win_known": true,
     "liq": 0.7,
     "trend": [
@@ -1304,8 +1304,8 @@
     "total": 37,
     "base": 19,
     "events_pts": 18,
-    "expected": 33.0,
-    "win_rate": 0.5238735159921004,
+    "expected": 33.1,
+    "win_rate": 0.5265622096422566,
     "win_known": true,
     "liq": 0.85,
     "trend": [
