@@ -48,6 +48,8 @@ class Item:
     title: str
     url: str = ""
     kind: str = "news"          # official（TDnet・JPX）/ news / financial
+    publisher: str = ""         # 記事を出した媒体（Googleニュースの <source>）。社名の照合では「媒体名」を除く
+    hint: str | None = None     # 個別検索で見つけた記事の、検索対象の銘柄コード（見出しで本当にその会社か確認する）
 
 
 @dataclass
@@ -58,6 +60,197 @@ class Event:
     base: float
     severe: int = 0             # 「重大・隠蔽…」などの語の数
     direction: str | None = None
+
+
+# ---------------------------------------------------------------- 分類ルール
+# (key, 分類名, 当てはまる正規表現, 除外する正規表現)。タイトル（見出し）だけで判定する。1つの見出しが複数に当てはまってもよい。
+LABELS = {
+    "downward_revision": "下方修正", "dividend_cut": "減配", "loss_turn": "赤字転落", "continuing_loss": "継続赤字",
+    "going_concern": "継続赤字", "kanri": "監理銘柄", "seiri": "整理銘柄", "admin_action": "行政処分",
+    "quality_fraud": "品質不正", "inspection_fraud": "検査不正", "accounting": "会計問題", "window_dressing": "粉飾疑惑",
+    "data_leak": "情報漏洩", "outage": "大規模障害", "recall": "リコール", "litigation": "訴訟",
+    "deterioration": "業績悪化", "delisting": "上場廃止関連",
+}
+CATEGORY_ORDER = ["上場廃止関連", "整理銘柄", "監理銘柄", "粉飾疑惑", "会計問題", "品質不正", "検査不正", "行政処分", "赤字転落", "継続赤字",
+                  "下方修正", "減配", "情報漏洩", "リコール", "大規模障害", "訴訟", "業績悪化"]
+RX = re.compile
+RULES: list[tuple[str, Any, Any]] = [
+    ("delisting", RX(r"上場廃止(?!.*(公開買付|ＭＢＯ|MBO|非公開化|完全子会社|株式交換|株式併合.{0,10}スクイーズ))|猶予期間|特別注意銘柄|特設注意市場|上場維持|"
+                     r"上場契約違約|破産|民事再生|会社更生|事業再生ＡＤＲ|事業再生ADR|特別清算|不渡り|債務不履行|デフォルト|倒産"), None),
+    ("seiri", RX(r"整理銘柄"), RX(r"指定解除|解除")),
+    ("kanri", RX(r"監理銘柄|監理ポスト"), RX(r"指定解除|解除")),
+    ("window_dressing", RX(r"粉飾|架空(売上|取引|計上|在庫)|循環取引|水増し|不正会計|不正経理|虚偽記載|横領|不正流用"), None),
+    ("accounting", RX(r"不適切(な)?(会計|経理|処理|取引)|会計不正|過年度.{0,6}(訂正|修正)|(決算|財務諸表|有価証券報告書).{0,6}訂正|訂正(有価証券|報告書|決算短信)|"
+                     r"決算発表.{0,6}(延期|遅延)|(有価証券報告書|四半期報告書|半期報告書).{0,10}(提出遅延|提出期限|延長)|意見不表明|不適正意見|限定付適正|"
+                     r"開示すべき重要な不備|特別調査委員会|第三者委員会|調査委員会"), None),
+    ("quality_fraud", RX(r"品質(不正|偽装|不適切|問題|不祥事)|(データ|数値)(の)?(改ざん|改竄|偽装|不正)|認証(不正|取得.{0,4}不正)|性能.{0,4}偽装|品質保証.{0,6}(問題|不備)"), None),
+    ("inspection_fraud", RX(r"(検査|試験|測定|点検).{0,6}(不正|不適切|偽装|改ざん|改竄|不備)|無資格.{0,4}(検査|作業)|完成検査"), None),
+    ("admin_action", RX(r"行政処分|業務停止|業務改善命令|課徴金|排除措置命令|措置命令|立入検査|是正勧告|是正命令|改善命令|登録取消|許可取消|認可取消|"
+                       r"業務改善勧告|公正取引委員会.{0,6}(調査|審査|処分)|景品表示法違反|金融庁.{0,6}処分"), RX(r"解除|終了")),
+    ("going_concern", RX(r"継続企業の前提|重要事象等|重要な疑義|ゴーイングコンサーン"), None),
+    ("continuing_loss", RX(r"継続赤字|連続(の)?赤字|[2-9２-９]期連続.{0,6}(赤字|損失|営業損失|最終損失)|営業損失.{0,6}(継続|連続)"), None),
+    ("loss_turn", RX(r"赤字転落|赤字に転落|赤字(となる|になる|見込|予想)|営業赤字|経常赤字|最終赤字|損失に転落|損失(となる|を計上する)見込|"
+                     r"(営業|経常|当期純|親会社株主に帰属する当期純)損失.{0,4}(計上|見込|の見通し)"), None),
+    ("downward_revision", RX(r"下方修正|下方に修正|業績予想.{0,8}(減額|引き下げ|引下げ)|予想.{0,6}(減額|引き下げ|引下げ)|通期.{0,6}(減額|引下げ)"), None),
+    ("dividend_cut", RX(r"減配|無配|配当.{0,8}(減額|引き下げ|引下げ|取りやめ|見送り|廃止|ゼロ)|(期末|中間|年間)配当.{0,6}(未定|なし)"), RX(r"増配|増額")),
+    ("data_leak", RX(r"情報漏(えい|洩)|(個人|顧客|取引先).{0,4}(情報|データ).{0,6}(流出|漏えい|漏洩)|不正アクセス|ランサムウェア|ランサムウエア|サイバー攻撃|"
+                    r"ウイルス感染|不正ログイン"), None),
+    ("outage", RX(r"システム障害|大規模(な)?障害|通信障害|サービス(の)?(停止|障害)|(運航|運行|操業|生産|稼働)(の)?停止|工場.{0,4}(火災|爆発)|爆発事故|火災.{0,6}(発生|被害)|"
+                  r"出荷停止|ネットワーク障害"), RX(r"再開")),
+    ("recall", RX(r"リコール|自主回収|無償(回収|交換|修理)|回収・?交換|販売停止|改善対策"), None),
+    ("litigation", RX(r"訴訟|提訴|訴えを提起|訴え提起|損害賠償(請求|を求め)|集団訴訟|差止(請求|め)|控訴|仲裁(申立|請求)|調停申立"),
+     RX(r"和解|(訴訟|裁判).{0,8}(解決|終結|取下|勝訴|棄却)|勝訴|判決.{0,6}(当社の主張|請求棄却)")),
+    ("deterioration", RX(r"業績悪化|減収減益|大幅(な)?(減益|減少|悪化)|最終減益|(営業|経常|純)利益.{0,6}(減少|悪化|急減)|特別損失|減損損失|のれん.{0,4}減損|"
+                         r"在庫評価損|事業(撤退|縮小|譲渡の中止)|リストラ|希望退職|早期退職|工場閉鎖|資金繰り|債務超過|財務制限条項|格下げ|格付.{0,6}(引き下げ|引下げ|下方)|"
+                         r"減益"), None),
+]
+# 「業績予想の修正」「配当予想の修正」の方向がタイトルから分からないもの（PDFを読む）
+REV_AMBIG = RX(r"業績予想.{0,4}の?修正|通期.{0,6}業績予想.{0,4}の?修正|業績予想及び|業績予想並びに|業績予想.{0,6}に関する(お知らせ|開示)")
+SEVERE = RX(r"重大|多額|過去最大|大規模|複数|組織的|常態化|隠蔽|隠ぺい|逮捕|家宅捜索|捜索|特捜|告発|刑事|検察|不正.{0,3}発覚|巨額|大幅|急落|ストップ安|経営破綻")
+GLOBAL_EXCLUDE = RX(r"(疑い|事実).{0,6}(なし|認められ|ありません)|報道.{0,10}(否定|事実ではありません|事実はありません)|(再開|復旧|解消).{0,4}(の)?お知らせ$")
+TOB_LIKE = RX(r"公開買付|ＭＢＯ|MBO|非公開化|完全子会社|株式交換|スクイーズアウト")
+
+
+# ---------------------------------------------------------------- 文字の正規化・社名の結びつけ
+def norm(s: str) -> str:
+    return unicodedata.normalize("NFKC", s or "").replace("　", " ").strip()
+
+
+SUFFIX = RX(r"(ホールディングス|グループホールディングス|グループ|ＨＤ|HD|コーポレーション|カンパニー)$")
+PREFIX = RX(r"^(株式会社|㈱|\(株\))|(株式会社|㈱|\(株\))$")
+STOP_NAMES = {"日本", "東京", "大阪", "三菱", "三井", "住友", "ジャパン", "アジア", "グローバル", "ネクスト", "ホーム", "システム", "サービス", "テクノ", "ニッポン"}
+
+
+def stems(name: str) -> list[str]:
+    """見出しの中で探す社名（正式名称と、末尾の「ホールディングス」「グループ」等を除いた短い名前）。一般語・1文字は使わない。
+    2〜3文字の短い名前も候補に入れるが、照合では『株式会社○○』『○○(株)』『証券コード』などの印がないと採用しない。"""
+    n = PREFIX.sub("", norm(name)).strip()
+    out = {n}
+    s = SUFFIX.sub("", n).strip()
+    if s:
+        out.add(s)
+    return [x for x in out if len(x) >= 2 and x not in STOP_NAMES]
+
+
+def build_name_index(uni: Any) -> tuple[dict[str, dict], list[tuple[str, str]]]:
+    info, pairs, owners = {}, [], {}
+    for r in uni.itertuples(index=False):
+        code = str(r.code)
+        info[code] = {"name": str(r.name), "market": str(getattr(r, "market", "")), "sector": str(getattr(r, "sector", ""))}
+        for s in stems(str(r.name)):
+            owners.setdefault(s, set()).add(code)
+    for s, codes in owners.items():
+        if len(codes) == 1:                                   # 複数の会社が同じ名前になるものは使わない（どの会社か決められない）
+            pairs.append((s, next(iter(codes))))
+    pairs.sort(key=lambda p: -len(p[0]))                     # 長い名前を優先（「ソフトバンクグループ」と「ソフトバンク」）
+    return info, pairs
+
+
+CODE_IN_TITLE = RX(r"[（(【\[]\s*(\d{4})\s*[）)】\]]|証券コード[:：]?\s*(\d{4})|東証[^\d]{0,6}(\d{4})")
+# 芸能・スポーツ・番組などの話題（社名と同じ名前の人物・グループ・番組と混同しやすい）。印（コード・株式会社）がなければ会社のニュースとして扱わない
+NONCORP = RX(r"ジャニーズ|アイドル|ドラマ|映画|歌手|俳優|女優|芸能|ライブ|コンサート|ツアー|アルバム|シングル|試合|優勝|五輪|オリンピック|ワールドカップ|Ｗ杯|W杯|選手|"
+             r"番組|バラエティ|アニメ|声優|タレント|芸人|お笑い|グラビア|ファン|推し|出演|主演|紅白|歌番組|ＭＶ|MV|大相撲|プロ野球|Jリーグ|ゴルフ|競馬|"
+             r"結婚|熱愛|離婚|不倫|炎上|ＳＮＳ|SNS|YouTube|ユーチューバー|配信者|スキャンダル")
+MEDIA_NAME = RX(r"(新聞|放送|テレビ|ニュース|通信社|NHK|ＮＨＫ|ＴＢＳ|TBS|スポーツ|ウェブ|WEB|オンライン|マガジン|週刊|ネット$)")
+
+
+def _script(ch: str) -> str:
+    o = ord(ch)
+    if 0x4E00 <= o <= 0x9FFF or ch == "々":
+        return "kanji"
+    if 0x30A0 <= o <= 0x30FF:
+        return "kata"
+    if 0x3040 <= o <= 0x309F:
+        return "hira"
+    if ch.isascii() and ch.isalnum():
+        return "latin"
+    return "other"
+
+
+AFTER_OK = set("社側株製系")
+
+
+def _find_bounded(t: str, name: str) -> list[int]:
+    """name が t の中に『独立した語』として現れる位置。前後が同じ文字種でつながっている場合（例：「ジャニーズ」＋「エイト」）は別の語の一部とみなして除く。"""
+    hits, start = [], 0
+    while True:
+        i = t.find(name, start)
+        if i < 0:
+            return hits
+        start = i + 1
+        before = t[i - 1] if i > 0 else ""
+        after = t[i + len(name)] if i + len(name) < len(t) else ""
+        sc = _script(name[0])
+        if before and sc in ("kanji", "kata", "latin") and _script(before) == sc:
+            continue
+        ec = _script(name[-1])
+        if after and ec in ("kanji", "kata", "latin") and _script(after) == ec and after not in AFTER_OK:
+            continue
+        hits.append(i)
+
+
+def _has_marker(t: str, name: str) -> bool:
+    n = re.escape(name)
+    return bool(re.search(rf"株式会社\s*{n}|{n}\s*(株式会社|\(株\))|{n}\s*[（(]\s*(東証|証券コード|\d{{4}})", t))
+
+
+def match_company(title: str, pairs: list[tuple[str, str]], info: dict[str, dict], publisher: str = "", min_len: int = 4,
+                  allow_noncorp: bool = False) -> str | None:
+    """見出しがどの会社のことかを、できるだけ厳密に決める。迷ったら None（＝どの会社にも結びつけない）。
+      ・証券コードが見出しにあれば、それを採用
+      ・社名は『独立した語』として現れた場合だけ採用（他の語の一部は除く）
+      ・社名が短い（min_len未満）ときは『株式会社○○』『○○(株)』などの印が必要
+      ・社名が媒体名（記事を出した新聞社・テレビ局）と同じ・含まれる場合は採用しない
+      ・芸能・スポーツ・番組などの話題は、印がなければ会社のニュースとして扱わない
+      ・複数の会社名が出てくる見出しは、どの会社の話か決められないので None"""
+    t = norm(title)
+    m = CODE_IN_TITLE.search(t)
+    if m:
+        c = next(g for g in m.groups() if g)
+        return c if c in info else None
+    pub = norm(publisher)
+    found: dict[str, str] = {}
+    marked = False
+    for s, code in pairs:
+        if s not in t:
+            continue
+        if pub and (s in pub or (len(pub) >= 3 and pub in s)):
+            continue
+        if MEDIA_NAME.search(s) and pub and MEDIA_NAME.search(pub) and (s[:2] in pub):
+            continue
+        pos = _find_bounded(t, s)
+        if not pos:
+            continue
+        mk = _has_marker(t, s)
+        if len(s) < min_len and not mk:
+            continue
+        if code in found:
+            continue
+        # すでに採用した、より長い名前の中に含まれる位置はスキップ（例：「ソフトバンク」は「ソフトバンクグループ」の一部）
+        if any(s in longer and longer != s for longer in found.values() if longer in t):
+            continue
+        found[code] = s
+        marked = marked or mk
+    if len(found) != 1:
+        return None
+    if NONCORP.search(t) and not marked and not allow_noncorp:
+        return None
+    return next(iter(found))
+
+
+def resolve_code(it: "Item", pairs: list[tuple[str, str]], info: dict[str, dict], min_len: int = 4) -> str | None:
+    """記事・開示の会社を決める。TDnet・JPX・財務データは銘柄コードが付いているのでそのまま。ニュースは見出しから厳密に照合し、
+    個別検索の記事は、見出しでも検索対象の会社と一致した場合だけ採用する。"""
+    if it.code:
+        return it.code
+    c = match_company(it.title, pairs, info, it.publisher, min_len)
+    if it.hint and c != it.hint:
+        return None
+    return c
+
+
+def match_code(title: str, pairs: list[tuple[str, str]], info: dict[str, dict]) -> str | None:     # 旧名称（互換）
+    return match_company(title, pairs, info)
 
 
 # ---------------------------------------------------------------- 分類ルール
@@ -309,6 +502,20 @@ def fetch_tdnet(cfg: Config, today: date, get: Callable[..., Any] | None = None)
 
 
 # ---------------------------------------------------------------- 取得：ニュース
+def strip_publisher(title: str, publisher: str) -> str:
+    """Googleニュースの見出し末尾の「 - 媒体名」、Yahoo!ニュースの末尾の「（媒体名）」を取り除く（媒体名を社名と取り違えないため）。"""
+    t = title.strip()
+    if publisher:
+        for sep in (" - ", " – ", " － ", " | ", "｜"):
+            if t.endswith(sep + publisher):
+                return t[: -(len(sep) + len(publisher))].strip()
+    m = re.search(r"\s[-–－|｜]\s([^-–－|｜]{2,30})$", t)
+    if m and (publisher or MEDIA_NAME.search(m.group(1)) or len(m.group(1)) <= 12):
+        return t[: m.start()].strip()
+    t2 = re.sub(r"[（(][^（）()]{2,25}[）)]$", lambda mm: "" if MEDIA_NAME.search(mm.group(0)) else mm.group(0), t).strip()
+    return t2
+
+
 def parse_rss(xml_text: str, source: str, today: date, days: int) -> list[Item]:
     root = ET.fromstring(xml_text)
     out = []
@@ -322,7 +529,8 @@ def parse_rss(xml_text: str, source: str, today: date, days: int) -> list[Item]:
             dt = None
         if not title or dt is None or (today - dt).days > days or dt > today:
             continue
-        out.append(Item(source, dt.isoformat(), None, "", title, link, "news"))
+        pub_name = html.unescape((it.findtext("source") or "").strip())
+        out.append(Item(source, dt.isoformat(), None, "", strip_publisher(title, pub_name), link, "news", pub_name))
     return out
 
 
@@ -360,7 +568,7 @@ def fetch_news(cfg: Config, today: date, watch: list[tuple[str, str]], get: Call
         q = f'"{PREFIX.sub("", norm(name))}" ({kw})'
         try:
             for it in grab(google_url(q, days), "Googleニュース"):
-                it.code = code
+                it.hint = code                     # 検索対象の銘柄。見出しで本当にその会社か、あとで確認する
                 g_items.append(it)
             w_ok += 1
         except Exception as e:  # noqa: BLE001
@@ -457,7 +665,7 @@ def analyze(items: list[Item], info: dict[str, dict], pairs: list[tuple[str, str
     for it in items:
         if not it.date or (today - date.fromisoformat(it.date)).days > span or date.fromisoformat(it.date) > today:
             continue
-        code = it.code or match_code(it.title, pairs, info)
+        code = resolve_code(it, pairs, info, int(n["match"]["min_name_len"]))
         if not code or code not in info:
             continue
         sig = (code, it.source, norm(it.title))
@@ -728,12 +936,12 @@ def download_prices(codes: list[str]) -> dict[str, Any]:
     return out
 
 
-def group_items(items: list[Item], info: dict[str, dict], pairs: list[tuple[str, str]], today: date, span: int) -> dict[str, list[Item]]:
+def group_items(items: list[Item], info: dict[str, dict], pairs: list[tuple[str, str]], today: date, span: int, min_len: int = 4) -> dict[str, list[Item]]:
     out: dict[str, list[Item]] = {}
     for it in items:
         if not it.date or (today - date.fromisoformat(it.date)).days > span or it.kind == "financial":
             continue
-        code = it.code or match_code(it.title, pairs, info)
+        code = resolve_code(it, pairs, info, min_len)
         if code and code in info:
             out.setdefault(code, []).append(it)
     return out
@@ -865,7 +1073,7 @@ def run(demo: bool = False, out_dir: Path | None = None) -> Path:
     entries = [(event_key(code, e), e.item.date) for code, r in res.items() for e in r["events"]]
     seen = update_seen((ROOT / cfg["negative"]["seen_file"]) if not demo else (ROOT / "data" / "demo" / "negative_seen.json"), entries, today)
     cands = build_rows(res, info, seen, today, cfg, limit=int(cfg["negative"]["candidates"]))
-    raw = group_items(items, info, pairs, today, int(cfg["negative"]["days"]))
+    raw = group_items(items, info, pairs, today, int(cfg["negative"]["days"]), int(cfg["negative"]["match"]["min_name_len"]))
     sc = cfg["negative"]["short"]
     if demo:
         rows, excluded, check = demo_filter(cands, raw, today, cfg)

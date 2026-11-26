@@ -1034,6 +1034,39 @@ def test_negative():
     both = {"9001": mkres(0)["9001"], "9002": {**mkres(9)["9001"]}}
     two = N.build_rows(both, info, {}, today, cfg)
     assert two[0]["code"] == "9001", "新しい不祥事が上位"
+    # ㉗追補：関係のないニュースを別の会社に結びつけない
+    uni2 = pd.DataFrame({"code": ["1111", "2222", "3333", "4444", "5555", "6666"],
+                         "name": ["エイト", "朝日放送グループホールディングス", "朝日ホールディングス", "トヨタ自動車", "サンプル製作所", "ジャパンデモ"],
+                         "market": ["P"] * 6, "sector": ["x"] * 6})
+    info2, pairs2 = N.build_name_index(uni2)
+    MC = lambda t, pub="", **k: N.match_company(t, pairs2, info2, pub, **k)                                       # noqa: E731
+    assert MC("関ジャニ∞（エイト）がライブで新曲を披露") is None, "短い名前＋芸能の話題は結びつけない"
+    assert MC("エイト、下方修正を発表") is None, "3文字以下の社名は、印（株式会社・(株)・コード）がないと採用しない"
+    assert MC("株式会社エイトが下方修正") == "1111" and MC("エイト(株)が下方修正") == "1111" and MC("エイト（東証3333）が下方修正") == "3333"
+    assert MC("県内の事故を報道", "朝日放送") is None and MC("朝日放送グループが不適切会計", "朝日放送") is None, "媒体名（記事を出した放送局・新聞社）は会社として扱わない"
+    assert MC("テレビ朝日の番組が不正を報じる", "朝日ホールディングス") is None
+    assert MC("トヨタ自動車がリコール") == "4444" and MC("サンプル製作所が下方修正") == "5555"
+    assert MC("サンプル製作所の主演ドラマが話題") is None, "芸能・番組の話題は会社のニュースにしない"
+    assert MC("トヨタ自動車とサンプル製作所が訴訟") is None, "複数の会社が出る見出しはどの会社か決めない"
+    assert MC("ジャパンデモ株式会社が提訴", "") == "6666" and MC("ジャパンデモ社が提訴") == "6666"
+    pe = pd.DataFrame({"code": ["7001", "7002"], "name": ["同名商事", "同名商事"], "market": ["P"] * 2, "sector": ["x"] * 2})
+    i3, p3 = N.build_name_index(pe)
+    assert N.match_company("同名商事が下方修正", p3, i3) is None, "同じ名前の会社が複数あれば使わない"
+    inner = pd.DataFrame({"code": ["8001", "8002"], "name": ["ソフトデモ", "ソフトデモグループ"], "market": ["P"] * 2, "sector": ["x"] * 2})
+    i4, p4 = N.build_name_index(inner)
+    assert N.match_company("ソフトデモグループが下方修正", p4, i4) == "8002", "長い名前を優先（短い名前は別の語の一部）"
+    assert N.match_company("ソフトデモが下方修正", p4, i4) is None, "「ソフトデモ」は2社の略称になりうるので結びつけない"
+    assert N.strip_publisher("A社が下方修正 - 日経電子版", "日経電子版") == "A社が下方修正" and N.strip_publisher("B社が不正（読売新聞オンライン）", "") == "B社が不正"
+    xml = ("<rss><channel><item><title>サンプル製作所が下方修正 - 朝日放送</title><link>http://n</link><pubDate>Fri, 20 Nov 2026 03:00:00 GMT</pubDate>"
+           "<source url='x'>朝日放送</source></item></channel></rss>")
+    rs = N.parse_rss(xml, "Googleニュース", today, 15)
+    assert rs[0].title == "サンプル製作所が下方修正" and rs[0].publisher == "朝日放送"
+    # 個別検索の記事は、見出しでも検索対象と一致しなければ採用しない
+    it_ok = N.Item("Googleニュース", ago(1), None, "", "サンプル製作所が下方修正", "", "news", "経済紙", hint="5555")
+    it_ng = N.Item("Googleニュース", ago(1), None, "", "サンプル製作所の主演ドラマ", "", "news", "経済紙", hint="5555")
+    it_other = N.Item("Googleニュース", ago(1), None, "", "トヨタ自動車がリコール", "", "news", "経済紙", hint="5555")
+    assert N.resolve_code(it_ok, pairs2, info2) == "5555" and N.resolve_code(it_ng, pairs2, info2) is None and N.resolve_code(it_other, pairs2, info2) is None
+    assert N.resolve_code(N.Item("TDnet", ago(1), "1111", "エイト", "下方修正", "", "official"), pairs2, info2) == "1111", "TDnetは銘柄コードが付いているのでそのまま"
     print("ok  ㉗ 売買できない銘柄の除外・信用売り可否・動いていない銘柄・規模・新着順")
     print("ok  ㉗ 信用リスク監視（17分類・誤検出の除外・点数・社名結びつけ・RSS/TDnet解析・検出日・ページ）")
 
