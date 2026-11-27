@@ -1,27 +1,46 @@
 {
- "generated_at": "2026-11-26T11:07+09:00",
- "trade_date": "2026-11-26",
- "ranking_data_date": "2026-11-25",
+ "generated_at": "2026-11-27T11:11+09:00",
+ "trade_date": "2026-11-27",
+ "ranking_data_date": "2026-11-26",
  "cutoff": "10:00",
  "status": "ok",
  "items": {
   "1939": {
    "code": "1939",
-   "key": "wait",
-   "emoji": "🟡",
-   "label": "様子見",
+   "key": "skip",
+   "emoji": "🔴",
+   "label": "見送り",
    "gap": 0.0,
-   "ret": 1.78,
-   "vr": 0.81,
+   "ret": 4.5,
+   "vr": 1.91,
    "vol_label": "良好",
    "reasons": [
-    "寄り付き後の上昇が大きい（+1.8%）。押しを待つ"
+    "寄り付き直後の急騰（+4.5%）"
    ],
    "asof": "10:00",
    "complete": true,
-   "price": 2349.0,
-   "open": 2308.0,
+   "price": 2415.0,
+   "open": 2311.0,
    "rank": 1
+  },
+  "4202": {
+   "code": "4202",
+   "key": "wait",
+   "emoji": "🟡",
+   "label": "様子見",
+   "gap": 1.6,
+   "ret": -0.26,
+   "vr": 0.56,
+   "vol_label": "やや少ない",
+   "reasons": [
+    "ギャップアップがやや大きい（+1.6%）",
+    "出来高が少ない（普段の0.6倍）"
+   ],
+   "asof": "10:00",
+   "complete": true,
+   "price": 1516.5,
+   "open": 1520.5,
+   "rank": 2
   },
   "1941": {
    "code": "1941",
@@ -29,71 +48,17 @@
    "emoji": "🟡",
    "label": "様子見",
    "gap": 0.0,
-   "ret": 0.0,
-   "vr": 4.26,
-   "vol_label": "過熱",
-   "reasons": [
-    "出来高が多すぎる（普段の4.3倍）"
-   ],
-   "asof": "10:00",
-   "complete": true,
-   "price": 5170.0,
-   "open": 5170.0,
-   "rank": 2
-  },
-  "4202": {
-   "code": "4202",
-   "key": "wait",
-   "emoji": "🟡",
-   "label": "様子見",
-   "gap": 1.14,
-   "ret": -0.03,
-   "vr": 0.31,
-   "vol_label": "少ない",
-   "reasons": [
-    "出来高が少ない（普段の0.3倍）"
-   ],
-   "asof": "10:00",
-   "complete": true,
-   "price": 1512.0,
-   "open": 1512.5,
-   "rank": 3
-  },
-  "7366": {
-   "code": "7366",
-   "key": "wait",
-   "emoji": "🟡",
-   "label": "様子見",
-   "gap": 0.0,
-   "ret": -0.55,
-   "vr": 0.57,
-   "vol_label": "やや少ない",
-   "reasons": [
-    "出来高が少ない（普段の0.6倍）"
-   ],
-   "asof": "10:00",
-   "complete": true,
-   "price": 1989.0,
-   "open": 2000.0,
-   "rank": 4
-  },
-  "4206": {
-   "code": "4206",
-   "key": "go",
-   "emoji": "🟢",
-   "label": "エントリー可",
-   "gap": 0.55,
-   "ret": -0.05,
-   "vr": 0.95,
+   "ret": 1.97,
+   "vr": 1.9,
    "vol_label": "良好",
    "reasons": [
-    "ギャップ+0.6%・寄付き後-0.0%で落ち着き、出来高も良好"
+    "寄り付き後の上昇が大きい（+2.0%）。押しを待つ"
    ],
    "asof": "10:00",
    "complete": true,
-   "price": 4198.0,
-   "open": 4200.0,
-   "rank": 5
+   "price": 5180.0,
+   "open": 5080.0,
+   "rank": 3
   },
   "7942": {
    "code": "7942",
@@ -101,101 +66,138 @@
    "emoji": "🟡",
    "label": "様子見",
    "gap": 0.0,
-   "ret": 1.67,
-   "vr": 0.25,
-   "vol_label": "少ない",
-   "reasons": [
-    "寄り付き後の上昇が大きい（+1.7%）。押しを待つ",
-    "出来高が少ない（普段の0.2倍）"
-   ],
-   "asof": "09:55",
-   "complete": true,
-   "price": 2976.0,
-   "open": 2927.0,
-   "rank": 6
-  },
-  "5192": {
-   "code": "5192",
-   "key": "wait",
-   "emoji": "🟡",
-   "label": "様子見",
-   "gap": 0.0,
-   "ret": 0.48,
-   "vr": 0.66,
-   "vol_label": "やや少ない",
-   "reasons": [
-    "出来高が少ない（普段の0.7倍）"
-   ],
-   "asof": "10:00",
-   "complete": true,
-   "price": 4205.0,
-   "open": 4185.0,
-   "rank": 7
-  },
-  "8439": {
-   "code": "8439",
-   "key": "wait",
-   "emoji": "🟡",
-   "label": "様子見",
-   "gap": 1.33,
-   "ret": -0.69,
-   "vr": 0.41,
+   "ret": 1.2,
+   "vr": 0.42,
    "vol_label": "やや少ない",
    "reasons": [
     "出来高が少ない（普段の0.4倍）"
    ],
    "asof": "10:00",
    "complete": true,
-   "price": 2576.5,
-   "open": 2594.5,
+   "price": 3025.0,
+   "open": 2989.0,
+   "rank": 4
+  },
+  "7366": {
+   "code": "7366",
+   "key": "go",
+   "emoji": "🟢",
+   "label": "エントリー可",
+   "gap": 0.0,
+   "ret": 0.5,
+   "vr": 0.84,
+   "vol_label": "良好",
+   "reasons": [
+    "ギャップ+0.0%・寄付き後+0.5%で落ち着き、出来高も良好"
+   ],
+   "asof": "09:55",
+   "complete": true,
+   "price": 2008.0,
+   "open": 1998.0,
+   "rank": 5
+  },
+  "2384": {
+   "code": "2384",
+   "key": "wait",
+   "emoji": "🟡",
+   "label": "様子見",
+   "gap": 0.0,
+   "ret": 1.66,
+   "vr": 0.8,
+   "vol_label": "良好",
+   "reasons": [
+    "寄り付き後の上昇が大きい（+1.7%）。押しを待つ"
+   ],
+   "asof": "10:00",
+   "complete": true,
+   "price": 5520.0,
+   "open": 5430.0,
+   "rank": 6
+  },
+  "4220": {
+   "code": "4220",
+   "key": "wait",
+   "emoji": "🟡",
+   "label": "様子見",
+   "gap": 0.0,
+   "ret": 2.03,
+   "vr": 0.27,
+   "vol_label": "少ない",
+   "reasons": [
+    "寄り付き後の上昇が大きい（+2.0%）。押しを待つ",
+    "出来高が少ない（普段の0.3倍）"
+   ],
+   "asof": "10:00",
+   "complete": true,
+   "price": 2417.0,
+   "open": 2369.0,
+   "rank": 7
+  },
+  "4180": {
+   "code": "4180",
+   "key": "wait",
+   "emoji": "🟡",
+   "label": "様子見",
+   "gap": 0.62,
+   "ret": -1.92,
+   "vr": 0.3,
+   "vol_label": "少ない",
+   "reasons": [
+    "寄り付き後に下げている（-1.9%）。方向が定まらない",
+    "出来高が少ない（普段の0.3倍）"
+   ],
+   "asof": "10:00",
+   "complete": true,
+   "price": 1432.0,
+   "open": 1460.0,
    "rank": 8
   },
-  "2053": {
-   "code": "2053",
-   "key": "go",
-   "emoji": "🟢",
-   "label": "エントリー可",
-   "gap": 0.0,
-   "ret": -0.71,
-   "vr": 1.01,
-   "vol_label": "良好",
+  "8439": {
+   "code": "8439",
+   "key": "wait",
+   "emoji": "🟡",
+   "label": "様子見",
+   "gap": 1.29,
+   "ret": 0.02,
+   "vr": 0.57,
+   "vol_label": "やや少ない",
    "reasons": [
-    "ギャップ+0.0%・寄付き後-0.7%で落ち着き、出来高も良好"
+    "出来高が少ない（普段の0.6倍）"
    ],
    "asof": "10:00",
    "complete": true,
-   "price": 1962.0,
-   "open": 1976.0,
+   "price": 2591.0,
+   "open": 2590.5,
    "rank": 9
   },
-  "6454": {
-   "code": "6454",
-   "key": "go",
-   "emoji": "🟢",
-   "label": "エントリー可",
-   "gap": 0.0,
-   "ret": 0.71,
-   "vr": 1.76,
-   "vol_label": "良好",
+  "4206": {
+   "code": "4206",
+   "key": "wait",
+   "emoji": "🟡",
+   "label": "様子見",
+   "gap": 0.48,
+   "ret": -0.02,
+   "vr": 0.47,
+   "vol_label": "やや少ない",
    "reasons": [
-    "ギャップ+0.0%・寄付き後+0.7%で落ち着き、出来高も良好"
+    "出来高が少ない（普段の0.5倍）"
    ],
    "asof": "10:00",
    "complete": true,
-   "price": 1833.0,
-   "open": 1820.0,
+   "price": 4200.0,
+   "open": 4201.0,
    "rank": 10
   }
  },
  "market": {
   "key": "strong",
   "label": "強い",
-  "score": 1.0,
+  "score": 0.6666666666666666,
   "items": [
    {
     "key": "topix",
     "label": "TOPIX",
-    "pct": 0.81,
+    "pct": 0.91,
     "asof": "10:00",
     "futures": false,
     "status": "strong",
@@ -204,16 +206,16 @@
    {
     "key": "n225",
     "label": "日経平均",
-    "pct": 1.53,
+    "pct": 0.18,
     "asof": "10:00",
     "futures": false,
-    "status": "strong",
-    "status_label": "強い"
+    "status": "neutral",
+    "status_label": "横ばい"
    },
    {
     "key": "growth",
     "label": "グロース250",
-    "pct": 1.82,
+    "pct": 2.17,
     "asof": "10:00",
     "futures": false,
     "status": "strong",
@@ -222,11 +224,11 @@
    {
     "key": "n225f",
     "label": "日経225先物",
-    "pct": 1.84,
-    "asof": "11/26 10:00",
+    "pct": null,
+    "asof": null,
     "futures": true,
-    "status": "strong",
-    "status_label": "強い"
+    "status": "missing",
+    "status_label": "取得できず"
    },
    {
     "key": "topixf",
@@ -240,11 +242,11 @@
   ]
  },
  "counts": {
-  "go": 3,
-  "wait": 7,
-  "skip": 0,
+  "go": 1,
+  "wait": 8,
+  "skip": 1,
   "na": 0
  },
  "asof": "10:00",
- "seconds": 2.3
+ "seconds": 2.5
 }
